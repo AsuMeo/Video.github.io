@@ -1,69 +1,586 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#08080c">
-<title>DRIFT CUT — шаблоны TikTok-эдитов</title>
-<style>
-:root{--bg:#08080c;--panel:#111119;--panel2:#191923;--line:#2a2a37;--text:#f7f7fb;--muted:#9696a7;--lime:#d2ff36;--pink:#ff367f;--blue:#4f7cff}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;min-height:100vh;background:radial-gradient(circle at 8% 0,rgba(210,255,54,.1),transparent 28%),radial-gradient(circle at 100% 20%,rgba(255,54,127,.1),transparent 30%),var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}button,input,select{font:inherit}button{color:inherit}.noise{position:fixed;inset:0;pointer-events:none;opacity:.035;z-index:50;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}header{height:68px;padding:0 max(16px,calc((100vw - 1400px)/2));display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.07);background:rgba(8,8,12,.82);backdrop-filter:blur(18px);position:sticky;top:0;z-index:20}.logo{font-size:20px;font-weight:1000;letter-spacing:-.05em;display:flex;align-items:center;gap:10px}.logo b{width:34px;height:34px;border-radius:10px;background:var(--lime);color:#08080c;display:grid;place-items:center;transform:rotate(-7deg);box-shadow:0 0 25px rgba(210,255,54,.28)}.badge{font-size:10px;font-weight:900;color:var(--lime);border:1px solid #3b451f;padding:7px 10px;border-radius:99px}main{max-width:1400px;margin:auto;padding:32px 18px 70px}.hero{display:flex;align-items:end;justify-content:space-between;gap:25px;margin-bottom:24px}.hero h1{font-size:clamp(35px,5.2vw,72px);line-height:.9;letter-spacing:-.065em;margin:0}.hero h1 i{font-style:normal;color:var(--lime)}.hero p{color:var(--muted);max-width:390px;margin:0;line-height:1.5;font-size:14px}.app{display:grid;grid-template-columns:minmax(0,1fr) 375px;gap:20px;align-items:start}.panel{background:linear-gradient(145deg,rgba(24,24,34,.96),rgba(14,14,21,.97));border:1px solid var(--line);border-radius:22px;box-shadow:0 24px 75px rgba(0,0,0,.38)}.box{padding:19px;margin-bottom:18px}.head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}.head h2{font-size:16px;margin:0}.head span{color:var(--muted);font-size:10px}.templates{display:grid;grid-template-columns:repeat(5,minmax(125px,1fr));gap:10px}.tpl{height:164px;border:1px solid var(--line);border-radius:15px;position:relative;overflow:hidden;text-align:left;padding:0;cursor:pointer;background:#15151e;transition:.2s}.tpl:hover{transform:translateY(-3px);border-color:#555566}.tpl.active{border:2px solid var(--lime);box-shadow:0 0 0 3px rgba(210,255,54,.1)}.tpl-bg{position:absolute;inset:0;background:linear-gradient(145deg,var(--a),var(--b));opacity:.65}.tpl-bg:before{content:"";position:absolute;width:90px;height:220px;background:rgba(255,255,255,.15);transform:rotate(28deg);left:45%;top:-30px;filter:blur(7px)}.tpl-bg:after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0 8px,rgba(0,0,0,.14) 9px)}.tpl-num{position:absolute;right:9px;top:9px;font-size:8px;font-weight:1000}.hot{position:absolute;top:8px;left:8px;background:#09090d;color:var(--lime);font-size:7px;font-weight:1000;padding:5px 6px;border-radius:6px}.tpl-info{position:absolute;left:10px;right:8px;bottom:10px}.tpl-info b{display:block;font-size:11px;line-height:1.05}.tpl-info small{display:block;font-size:8px;opacity:.68;margin-top:5px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field label{display:block;color:#c4c4cf;font-size:10px;font-weight:800;margin-bottom:7px}.input{width:100%;background:#0c0c12;color:#fff;border:1px solid var(--line);border-radius:11px;padding:12px;outline:0}.input:focus{border-color:var(--lime);box-shadow:0 0 0 3px rgba(210,255,54,.08)}.drop{margin-top:14px;border:1px dashed #454555;background:#0d0d13;border-radius:14px;padding:16px;display:flex;align-items:center;justify-content:space-between;gap:12px;transition:.2s}.drop.drag{border-color:var(--lime);background:rgba(210,255,54,.05)}.drop strong{font-size:13px}.drop small{display:block;color:var(--muted);font-size:9px;margin-top:5px;line-height:1.4}.btn{border:0;border-radius:11px;padding:11px 14px;font-size:11px;font-weight:950;cursor:pointer;transition:.17s;white-space:nowrap}.btn:hover{transform:translateY(-2px)}.btn:active{transform:scale(.98)}.btn.gray{background:#272733}.btn.lime{background:var(--lime);color:#08090b}.btn.pink{background:var(--pink)}.btn:disabled{opacity:.35;cursor:not-allowed;transform:none}.slots{display:grid;grid-template-columns:repeat(8,1fr);gap:8px;margin-top:13px}.slot{aspect-ratio:3/4;background:#0c0c12;border:1px dashed #3c3c4a;border-radius:10px;position:relative;overflow:hidden;display:grid;place-items:center;color:#5e5e6d;font-size:18px;cursor:pointer}.slot img{width:100%;height:100%;object-fit:cover}.slot .n{position:absolute;left:4px;top:4px;background:rgba(0,0,0,.75);border-radius:5px;width:18px;height:18px;display:grid;place-items:center;color:#fff;font-size:8px;font-weight:900}.slot .x{display:none;position:absolute;right:4px;top:4px;width:19px;height:19px;border:0;border-radius:5px;background:#ff385d;color:#fff;padding:0;cursor:pointer}.slot:hover .x{display:block}.slot:first-child:after{content:"ИНТРО";position:absolute;right:4px;bottom:4px;background:var(--lime);color:#090a0d;border-radius:4px;padding:3px 4px;font-size:6px;font-weight:1000}.status{display:flex;align-items:center;justify-content:space-between;margin-top:11px;color:var(--muted);font-size:9px}.status b{color:var(--lime)}.preview{position:sticky;top:88px;padding:16px}.preview-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.preview-head b{font-size:14px}.live{font-size:9px;color:var(--muted);display:flex;align-items:center;gap:6px}.live:before{content:"";width:6px;height:6px;background:#ff315f;border-radius:50%;box-shadow:0 0 10px #ff315f}.phone{height:min(64vh,565px);aspect-ratio:9/16;margin:auto;border:7px solid #292934;border-radius:30px;overflow:hidden;background:#000;position:relative;box-shadow:0 30px 70px #000}.phone:before{content:"";position:absolute;top:6px;left:50%;transform:translateX(-50%);width:72px;height:18px;border-radius:15px;background:#09090c;z-index:6}.phone canvas{width:100%;height:100%;display:block}.empty{position:absolute;inset:0;display:grid;place-items:center;text-align:center;color:#777789;font-size:10px;pointer-events:none}.empty b{display:block;color:var(--lime);font-size:35px;margin-bottom:8px}.tiktok{position:absolute;right:9px;bottom:54px;display:flex;flex-direction:column;gap:11px;pointer-events:none}.tiktok i{font-style:normal;width:28px;height:28px;border-radius:50%;background:rgba(0,0,0,.4);display:grid;place-items:center;font-size:11px}.bar{height:4px;background:#292934;border-radius:9px;overflow:hidden;margin:13px 3px 0}.bar i{display:block;width:0;height:100%;background:var(--lime)}.times{display:flex;justify-content:space-between;color:var(--muted);font-size:9px;margin:6px 3px 11px}.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.actions .main-btn{grid-column:span 2;padding:14px}.tip{text-align:center;color:#686879;font-size:9px;line-height:1.45;margin:10px 4px 0}.toast{position:fixed;z-index:100;left:50%;bottom:20px;transform:translate(-50%,15px);opacity:0;background:#f7f7fa;color:#09090d;border-radius:11px;padding:11px 15px;font-size:11px;font-weight:900;pointer-events:none;transition:.22s}.toast.show{opacity:1;transform:translate(-50%,0)}.recording{animation:rec .8s infinite alternate}@keyframes rec{to{box-shadow:0 0 20px #ff367f}}@media(max-width:1050px){.templates{grid-template-columns:repeat(3,1fr)}.app{grid-template-columns:minmax(0,1fr) 335px}.slots{grid-template-columns:repeat(6,1fr)}}@media(max-width:730px){header{height:59px;padding:0 13px}.badge{display:none}main{padding:23px 12px 45px}.hero{display:block}.hero p{margin-top:14px}.app{display:flex;flex-direction:column}.preview{position:relative;top:auto;order:-1;width:100%}.phone{height:480px}.templates{display:flex;overflow:auto;scroll-snap-type:x mandatory}.tpl{min-width:133px;scroll-snap-align:start}.box{padding:14px}.form-grid{grid-template-columns:1fr}.slots{grid-template-columns:repeat(5,1fr)}.drop{align-items:flex-start;flex-direction:column}.drop .btn{width:100%}}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PHONK EDIT GENERATOR</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background: #0a0a0a; color: white; font-family: 'Roboto', sans-serif; }
+        .container { max-width: 1000px; margin: 0 auto; padding: 1rem; }
+        .preview-box { 
+            width: 320px; 
+            height: 570px; /* 9:16 aspect ratio */
+            background: #000; 
+            border: 2px solid #333; 
+            margin: 0 auto; 
+            overflow: hidden; 
+            position: relative; 
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.4);
+        }
+        canvas { display: block; width: 100%; height: 100%; object-fit: cover; }
+        .overlay-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2.5rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            font-style: italic;
+            color: white;
+            text-shadow: 0 0 10px rgba(255,0,0,0.8), 0 0 20px rgba(0,0,0,0.5);
+            z-index: 10;
+            opacity: 0; /* Hidden by default */
+            transition: opacity 0.5s ease-in-out;
+            text-align: center;
+        }
+        .loading-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease;
+        }
+        .loading-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .spinner {
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top: 4px solid #f90000;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
 </head>
-<body><div class="noise"></div>
-<header><div class="logo"><b>D</b> DRIFT CUT</div><div class="badge">15 РАБОЧИХ ШАБЛОНОВ · TIKTOK 9:16</div></header>
-<main><section class="hero"><h1>Фотки внутрь.<br><i>Жёсткий эдит наружу.</i></h1><p>Без сложного редактора: выбираешь шаблон, загружаешь фото и получаешь готовый TikTok-эдит с переходами, синхронизацией и phonk-битом.</p></section>
-<div class="app"><div>
-<section class="panel box"><div class="head"><h2>01 — Выбери эдит</h2><span>15 разных эффектов</span></div><div class="templates" id="templates"></div></section>
-<section class="panel box"><div class="head"><h2>02 — Добавь свои фото</h2><span id="need">нужно 7 фото</span></div>
-<div class="form-grid"><div class="field"><label>Надпись в начале</label><input id="title" class="input" maxlength="50" value="Быть как нефор… или"></div><div class="field"><label>Музыка</label><select id="music" class="input"><option value="phonk">Встроенный DRIFT PHONK</option><option value="aggressive">AGGRESSIVE FUNK</option><option value="slow">SLOWED PHONK</option><option value="custom">Загрузить свою музыку</option><option value="none">Без музыки</option></select></div></div>
-<div id="audioBox" style="display:none;margin-top:11px"><input id="audioFile" class="input" type="file" accept="audio/*"></div>
-<div class="drop" id="drop"><div><strong>Перетащи фотографии сюда</strong><small>Можно выбрать сразу все. Если фото мало — редактор автоматически повторит их, и эдит всё равно запустится.</small></div><button class="btn gray" id="pick">＋ Выбрать фото</button><input id="files" type="file" accept="image/*" multiple hidden></div>
-<div class="slots" id="slots"></div><div class="status"><span id="photoStatus">Фото ещё не выбраны</span><button class="btn gray" id="clear">Очистить фото</button></div>
-</section></div>
-<aside class="panel preview"><div class="preview-head"><b>Предпросмотр</b><span class="live">LIVE 9:16</span></div><div class="phone"><canvas id="canvas" width="540" height="960"></canvas><div class="empty" id="empty"><div><b>D</b>Выбери хотя бы одно фото</div></div><div class="tiktok"><i>♥</i><i>✦</i><i>↗</i></div></div><div class="bar"><i id="progress"></i></div><div class="times"><span id="now">0:00</span><span id="all">0:12</span></div><div class="actions"><button class="btn lime main-btn" id="play" disabled>▶ СОЗДАТЬ ЭДИТ</button><button class="btn gray" id="stop">■ Стоп</button><button class="btn pink" id="export" disabled>● Скачать WEBM</button></div><p class="tip">Для экспорта со звуком используй Chrome или Edge. Видео создаётся прямо на твоём устройстве.</p></aside>
-</div></main><div class="toast" id="toast"></div><audio id="customAudio" preload="auto"></audio>
-<script>
-'use strict';
-const $=s=>document.querySelector(s),C=$('#canvas'),X=C.getContext('2d');
-const T=[
-{name:'FUNK BAD DO BAD',sub:'Punch + flash + zoom',n:7,d:11.5,bpm:138,fx:'punch',a:'#d2ff36',b:'#3d125c',title:'БЫТЬ КАК НЕФОР… ИЛИ'},
-{name:'TIK TIK DRIFT',sub:'Тики в бит + drift shake',n:8,d:12,bpm:150,fx:'tiktok',a:'#ffdf31',b:'#14593a',title:'ТИК ТИК… И ПОЕХАЛИ'},
-{name:'MONTAGEM RAGE',sub:'Brazil funk + hard cuts',n:9,d:12.5,bpm:155,fx:'rage',a:'#ff4b25',b:'#191919',title:'ЭТОТ МОМЕНТ БЫЛ ЛИШНИМ'},
-{name:'NEON VELOCITY',sub:'RGB split + speed lines',n:7,d:10.5,bpm:160,fx:'neon',a:'#00e7ff',b:'#7824ff',title:'СКОРОСТЬ РЕШАЕТ ВСЁ'},
-{name:'DARK ANGEL',sub:'Dark flash + red glitch',n:6,d:13,bpm:128,fx:'dark',a:'#ed174f',b:'#120719',title:'АНГЕЛЫ ТОЖЕ ОШИБАЮТСЯ'},
-{name:'Y2K CAMERA',sub:'Camcorder + date stamp',n:8,d:12,bpm:145,fx:'y2k',a:'#ff67c7',b:'#4e65ff',title:'2000-е СНОВА С НАМИ'},
-{name:'MANGA IMPACT',sub:'Panels + manga impact',n:7,d:11,bpm:152,fx:'manga',a:'#ffffff',b:'#bd0039',title:'ГЛАВНЫЙ ГЕРОЙ НАЙДЕН'},
-{name:'LIME STROBE',sub:'Strobe + invert + bass',n:6,d:9.5,bpm:165,fx:'strobe',a:'#caff24',b:'#101010',title:'НЕ МОРГАЙ'},
-{name:'SLOWED MEMORY',sub:'Slow zoom + film burn',n:5,d:15,bpm:105,fx:'slow',a:'#7774ff',b:'#17172e',title:'ОСТАНОВИ ЭТОТ МОМЕНТ'},
-{name:'PINK DREAM',sub:'Dream blur + bloom',n:7,d:14,bpm:118,fx:'dream',a:'#ff91c9',b:'#6534b7',title:'ЭТО ВСЁ НЕ СОН'},
-{name:'STREET SHAKE',sub:'Handheld + street grain',n:8,d:11.5,bpm:158,fx:'street',a:'#ff7a25',b:'#242424',title:'НАМ НЕ НУЖЕН ПОВОД'},
-{name:'ICE COLD',sub:'Cold flash + glass split',n:7,d:12,bpm:142,fx:'ice',a:'#9cecff',b:'#17417a',title:'ХОЛОДНЕЕ ЧЕМ ВЧЕРА'},
-{name:'RED WARNING',sub:'Alarm + warning cuts',n:9,d:10,bpm:168,fx:'warning',a:'#ff263f',b:'#240008',title:'WARNING: СЛИШКОМ КРАСИВО'},
-{name:'VHS NIGHT',sub:'VHS noise + tracking',n:6,d:14,bpm:125,fx:'vhs',a:'#32ffc8',b:'#301858',title:'PLAYBACK 00:00:01'},
-{name:'CAMERA BURST',sub:'Photo stack + shutter',n:10,d:12,bpm:148,fx:'camera',a:'#ffe8b3',b:'#5e3624',title:'ОДНА НОЧЬ — 100 ФОТО'}];
-let selected=0,photos=[],running=false,start=0,raf=0,audioCtx=null,dest=null,timer=null,customURL='',customNode=null,rec=null,chunks=[],recording=false;
-function init(){$('#templates').innerHTML=T.map((t,i)=>`<button class="tpl ${i===0?'active':''}" data-i="${i}" style="--a:${t.a};--b:${t.b}"><span class="tpl-bg"></span><span class="hot">${i<3?'HOT':'0'+(i+1)}</span><span class="tpl-num">${t.n} ФОТО</span><span class="tpl-info"><b>${t.name}</b><small>${t.sub}</small></span></button>`).join('');$('#templates').onclick=e=>{let b=e.target.closest('.tpl');if(b)choose(+b.dataset.i)};bind();renderSlots();update();drawIdle()}
-function bind(){$('#pick').onclick=()=>$('#files').click();$('#files').onchange=e=>loadFiles([...e.target.files]);let d=$('#drop');['dragenter','dragover'].forEach(n=>d.addEventListener(n,e=>{e.preventDefault();d.classList.add('drag')}));['dragleave','drop'].forEach(n=>d.addEventListener(n,e=>{e.preventDefault();d.classList.remove('drag');if(n==='drop')loadFiles([...e.dataTransfer.files].filter(f=>f.type.startsWith('image/')))}));$('#music').onchange=e=>$('#audioBox').style.display=e.target.value==='custom'?'block':'none';$('#audioFile').onchange=e=>{let f=e.target.files[0];if(!f)return;if(customURL)URL.revokeObjectURL(customURL);customURL=URL.createObjectURL(f);$('#customAudio').src=customURL;toast('Своя музыка загружена 🎵')};$('#title').oninput=()=>!running&&drawIdle();$('#clear').onclick=clearPhotos;$('#play').onclick=play;$('#stop').onclick=()=>stop(true);$('#export').onclick=exportVideo}
-function choose(i){stop(true);selected=i;document.querySelectorAll('.tpl').forEach((x,n)=>x.classList.toggle('active',n===i));$('#title').value=T[i].title;renderSlots();update();drawIdle();toast(`Выбран ${T[i].name}`)}
-async function loadFiles(files){if(!files.length)return;let good=[];for(let file of files){try{good.push(await readImage(file))}catch(e){toast(`Не удалось открыть ${file.name}`)}}photos.push(...good);let max=T[selected].n;if(photos.length>max){photos.slice(max).forEach(p=>p.url&&URL.revokeObjectURL(p.url));photos=photos.slice(0,max);toast(`Загружены первые ${max} фото`)}renderSlots();update();drawIdle();if(good.length)toast(`Фото загружены: ${good.length} ✅`);$('#files').value=''}
-function readImage(file){return new Promise((resolve,reject)=>{let url=URL.createObjectURL(file),img=new Image();img.onload=()=>resolve({img,url,name:file.name});img.onerror=()=>{URL.revokeObjectURL(url);reject()};img.src=url})}
-function clearPhotos(){photos.forEach(p=>p.url&&URL.revokeObjectURL(p.url));photos=[];renderSlots();update();drawIdle()}
-function renderSlots(){let n=T[selected].n;if(photos.length>n)photos=photos.slice(0,n);$('#slots').innerHTML=Array.from({length:n},(_,i)=>`<div class="slot" data-i="${i}">${photos[i]?`<img src="${photos[i].url}"><button class="x">×</button>`:'＋'}<span class="n">${i+1}</span></div>`).join('');document.querySelectorAll('.slot').forEach(s=>s.onclick=e=>{let i=+s.dataset.i;if(e.target.classList.contains('x')){let p=photos.splice(i,1)[0];if(p)URL.revokeObjectURL(p.url);renderSlots();update();drawIdle()}else if(!photos[i])$('#files').click()})}
-function update(){let t=T[selected],have=photos.length;$('#need').textContent=`нужно ${t.n} фото`;$('#all').textContent=fmt(t.d);$('#play').disabled=have===0;$('#export').disabled=have===0;$('#empty').style.display=have?'none':'grid';$('#photoStatus').innerHTML=have?`Загружено <b>${have} из ${t.n}</b>${have<t.n?' · недостающие повторятся автоматически':''}`:'Фото ещё не выбраны'}
-function imgAt(i){return photos[i%photos.length]?.img}
-function cover(img,scale=1,x=0,y=0){if(!img||!img.complete)return;let iw=img.naturalWidth||img.width,ih=img.naturalHeight||img.height,r=Math.max(C.width/iw,C.height/ih),w=iw*r*scale,h=ih*r*scale;X.drawImage(img,(C.width-w)/2+x,(C.height-h)/2+y,w,h)}
-function drawIdle(){X.fillStyle='#050507';X.fillRect(0,0,C.width,C.height);if(photos.length){cover(imgAt(0),1.04);X.fillStyle='rgba(0,0,0,.38)';X.fillRect(0,0,C.width,C.height);title($('#title').value,1,T[selected])}}
-function title(text,a,t){X.save();X.globalAlpha=a;X.textAlign='center';X.textBaseline='middle';X.font=`900 ${Math.round(C.height*.058)}px Impact,Arial Black,sans-serif`;X.lineJoin='round';X.lineWidth=Math.max(7,C.height*.011);X.strokeStyle='#050505';X.fillStyle='#fff';let words=text.trim().toUpperCase().split(/\s+/),lines=[],line='';for(let w of words){let q=line?line+' '+w:w;if(X.measureText(q).width>C.width*.84&&line){lines.push(line);line=w}else line=q}if(line)lines.push(line);let gap=C.height*.067,sy=C.height*.5-(lines.length-1)*gap/2;lines.forEach((l,i)=>{X.strokeText(l,C.width/2,sy+i*gap);X.fillText(l,C.width/2,sy+i*gap)});X.fillStyle=t.a;X.fillRect(C.width*.34,sy+lines.length*gap*.58,C.width*.32,Math.max(6,C.height*.008));X.restore()}
-function play(){if(!photos.length)return;stop(false);running=true;start=performance.now();$('#play').textContent='▶ ЭДИТ ИДЁТ…';startAudio();loop()}
-function loop(now=performance.now()){if(!running)return;let t=T[selected],sec=(now-start)/1000,p=Math.min(1,sec/t.d);render(sec,t);$('#progress').style.width=p*100+'%';$('#now').textContent=fmt(sec);if(p>=1)finish();else raf=requestAnimationFrame(loop)}
-function render(sec,t){X.clearRect(0,0,C.width,C.height);X.fillStyle='#030305';X.fillRect(0,0,C.width,C.height);let intro=1.75;if(sec<intro){let u=sec/intro;X.save();X.translate(C.width/2,C.height/2);X.scale(1+.09*u,1+.09*u);X.translate(-C.width/2,-C.height/2);cover(imgAt(0));X.restore();X.fillStyle=`rgba(0,0,0,${.4-.18*u})`;X.fillRect(0,0,C.width,C.height);title($('#title').value,Math.min(1,sec*3)*Math.min(1,(intro-sec)*5),t);if(sec>.12&&sec<.22)flash('#fff',.7);return}let count=Math.max(T[selected].n,photos.length),span=(t.d-intro)/count,raw=(sec-intro)/span,i=Math.min(count-1,Math.floor(raw)),u=raw-i,a=imgAt(i),b=imgAt(i+1);effect(t.fx,a,b,u,i,t,sec);hud(t,i+1);if(u<.055)flash(i%2?t.a:'#fff',.34*(1-u/.055))}
-function effect(f,a,b,u,i,t,sec){let q=ease(Math.min(1,u/.24)),shake=1-q;X.save();if(f==='punch'){X.translate((Math.random()-.5)*16*shake,(Math.random()-.5)*12*shake);cover(a,1.05+.1*u);if(u>.82){X.globalAlpha=(u-.82)/.18;cover(b,1.2-.18*q)}}else if(f==='tiktok'){let tick=Math.floor(u*8)%2;X.translate(tick?8:-8,tick?-5:5);cover(a,1.08+.025*Math.sin(u*25));if(Math.floor(u*12)%5===0)rgbSplit(a)}else if(f==='rage'){X.translate((Math.random()-.5)*25*shake,(Math.random()-.5)*18*shake);cover(a,1.12-.05*q);if(u>.72){X.globalAlpha=(u-.72)/.28;cover(b,1.22-.18*q)}}else if(f==='neon'){cover(a,1.04+.05*u);rgbSplit(a);speedLines(t.a,u)}else if(f==='dark'){cover(a,1.08);X.fillStyle='rgba(55,0,14,.28)';X.fillRect(0,0,C.width,C.height);glitch(sec,i)}else if(f==='y2k'){cover(a,1.04+.03*u);scan();X.strokeStyle='rgba(255,255,255,.7)';X.lineWidth=2;X.strokeRect(20,20,C.width-40,C.height-40);X.font='18px monospace';X.fillStyle='#fff';X.fillText('REC ●',35,55);X.fillText('00:'+String(i).padStart(2,'0')+':'+String(Math.floor(u*30)).padStart(2,'0'),35,C.height-35)}else if(f==='manga'){X.save();X.beginPath();X.moveTo(0,0);X.lineTo(C.width*(.72+.2*q),0);X.lineTo(C.width*(.52+.2*q),C.height);X.lineTo(0,C.height);X.clip();cover(a,1.07);X.restore();X.save();X.beginPath();X.moveTo(C.width*(.75+.2*q),0);X.lineTo(C.width,0);X.lineTo(C.width,C.height);X.lineTo(C.width*(.55+.2*q),C.height);X.clip();cover(b,1.1);X.restore();X.fillStyle='#fff';X.setTransform(1,0,-.2,1,0,0);X.fillRect(C.width*.62,0,8,C.height)}else if(f==='strobe'){cover(a,1.1);if(Math.floor(u*20)%2===0){X.globalCompositeOperation='difference';X.fillStyle=t.a;X.fillRect(0,0,C.width,C.height)}}else if(f==='slow'){cover(a,1.02+.11*u,Math.sin(u*Math.PI)*12,0);X.fillStyle='rgba(60,40,130,.13)';X.fillRect(0,0,C.width,C.height);if(u>.85){X.globalAlpha=(u-.85)/.15;cover(b,1.12)}}else if(f==='dream'){X.filter='blur(9px) saturate(1.5)';cover(a,1.1);X.filter='none';X.globalAlpha=.72;cover(a,1.04+.04*u);X.fillStyle='rgba(255,80,180,.11)';X.fillRect(0,0,C.width,C.height)}else if(f==='street'){X.translate(Math.sin(sec*49)*7,Math.cos(sec*37)*5);X.filter='contrast(1.25) saturate(.75)';cover(a,1.08);grain()}else if(f==='ice'){X.filter='saturate(.65) hue-rotate(165deg) contrast(1.15)';cover(a,1.06);X.filter='none';X.globalAlpha=.18;for(let k=0;k<5;k++){X.strokeStyle='#c9f8ff';X.beginPath();X.moveTo(C.width/2,C.height/2);X.lineTo((k*157+i*73)%C.width,(k%2)*C.height);X.stroke()}}else if(f==='warning'){cover(a,1.1);if(Math.floor(sec*10)%2===0){X.fillStyle='rgba(255,0,30,.18)';X.fillRect(0,0,C.width,C.height)}X.fillStyle='#ff263f';X.fillRect(0,25,C.width,10);X.fillRect(0,C.height-35,C.width,10)}else if(f==='vhs'){cover(a,1.06,Math.sin(sec*40)*4,0);scan();glitch(sec,i);X.font='20px monospace';X.fillStyle='#fff';X.fillText('PLAY ▶',30,55)}else if(f==='camera'){X.fillStyle='#e7dfd1';X.fillRect(0,0,C.width,C.height);X.save();X.translate(C.width/2,C.height/2);X.rotate((i%2?1:-1)*(.08-.06*q));let iw=C.width*.82,ih=C.height*.68;X.fillStyle='#fff';X.shadowColor='#000';X.shadowBlur=25;X.fillRect(-iw/2-15,-ih/2-15,iw+30,ih+75);X.beginPath();X.rect(-iw/2,-ih/2,iw,ih);X.clip();coverLocal(a,iw,ih);X.restore()}X.restore()}
-function coverLocal(img,w,h){let iw=img.naturalWidth,ih=img.naturalHeight,r=Math.max(w/iw,h/ih);X.drawImage(img,-iw*r/2,-ih*r/2,iw*r,ih*r)}function rgbSplit(img){X.save();X.globalCompositeOperation='screen';X.globalAlpha=.16;X.filter='hue-rotate(90deg)';cover(img,1.04,10,0);X.filter='hue-rotate(250deg)';cover(img,1.04,-10,0);X.restore()}function speedLines(c,u){X.save();X.strokeStyle=c;X.globalAlpha=.22;X.lineWidth=3;for(let i=0;i<12;i++){let y=(i*91+u*800)%C.height;X.beginPath();X.moveTo(0,y);X.lineTo(C.width*(.2+(i%4)/5),y-40);X.stroke()}X.restore()}function scan(){X.save();X.globalAlpha=.12;X.fillStyle='#fff';for(let y=0;y<C.height;y+=7)X.fillRect(0,y,C.width,1);X.restore()}function grain(){X.save();X.globalAlpha=.07;for(let i=0;i<160;i++){X.fillStyle=Math.random()>.5?'#fff':'#000';X.fillRect(Math.random()*C.width,Math.random()*C.height,2,2)}X.restore()}function glitch(sec,i){X.save();for(let k=0;k<6;k++){let y=(k*151+sec*500+i*37)%C.height,h=5+k*2;try{X.drawImage(C,0,y,C.width,h,Math.sin(k+sec*30)*18,y,C.width,h)}catch(e){}}X.restore()}function hud(t,n){X.save();X.font='900 17px system-ui';X.fillStyle=t.a;X.fillText(t.name,21,45);X.textAlign='right';X.fillStyle='#fff';X.fillText(String(n).padStart(2,'0'),C.width-20,45);X.restore()}function flash(c,a){X.save();X.globalAlpha=a;X.fillStyle=c;X.fillRect(0,0,C.width,C.height);X.restore()}const ease=x=>1-Math.pow(1-x,3);
-function audioInit(){if(!audioCtx){audioCtx=new (window.AudioContext||window.webkitAudioContext)();dest=audioCtx.createMediaStreamDestination()}if(audioCtx.state==='suspended')audioCtx.resume()}
-function connectOut(n){n.connect(audioCtx.destination);n.connect(dest)}
-function startAudio(){let mode=$('#music').value;if(mode==='none')return;audioInit();if(mode==='custom'){let a=$('#customAudio');if(!a.src)return toast('Музыка не выбрана — запускаю без неё');if(!customNode){try{customNode=audioCtx.createMediaElementSource(a);connectOut(customNode)}catch(e){}}a.currentTime=0;a.play().catch(()=>toast('Нажми ещё раз для запуска музыки'));return}let bpm=T[selected].bpm*(mode==='slow'?.78:mode==='aggressive'?1.08:1),step=60000/bpm/2,n=0;let beat=()=>{kick(mode);if(n%4===2)clap();hat(mode);if(n%8===6)bass(mode);n++};beat();timer=setInterval(beat,step)}
-function osc(type,freq,dur,vol,endFreq){let o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type=type;o.frequency.setValueAtTime(freq,audioCtx.currentTime);if(endFreq)o.frequency.exponentialRampToValueAtTime(endFreq,audioCtx.currentTime+dur);g.gain.setValueAtTime(vol,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+dur);o.connect(g);connectOut(g);o.start();o.stop(audioCtx.currentTime+dur)}function kick(m){osc('sine',m==='aggressive'?180:145,.18,m==='aggressive'?.85:.68,42)}function bass(m){osc('sawtooth',m==='slow'?45:55,.24,.12,38)}function hat(m){let len=audioCtx.sampleRate*.035,b=audioCtx.createBuffer(1,len,audioCtx.sampleRate),d=b.getChannelData(0);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*(1-i/len);let s=audioCtx.createBufferSource(),f=audioCtx.createBiquadFilter(),g=audioCtx.createGain();s.buffer=b;f.type='highpass';f.frequency.value=6500;g.gain.value=m==='aggressive'?.14:.08;s.connect(f);f.connect(g);connectOut(g);s.start()}function clap(){for(let j=0;j<2;j++){let len=audioCtx.sampleRate*.06,b=audioCtx.createBuffer(1,len,audioCtx.sampleRate),d=b.getChannelData(0);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,2);let s=audioCtx.createBufferSource(),g=audioCtx.createGain();s.buffer=b;g.gain.value=.12;s.connect(g);connectOut(g);s.start(audioCtx.currentTime+j*.02)}}
-function stopAudio(){clearInterval(timer);timer=null;let a=$('#customAudio');a.pause();a.currentTime=0}
-function finish(){running=false;cancelAnimationFrame(raf);stopAudio();$('#play').textContent='↻ ПОВТОРИТЬ ЭДИТ';if(recording&&rec&&rec.state!=='inactive')setTimeout(()=>rec.stop(),250)}function stop(reset=true){running=false;cancelAnimationFrame(raf);stopAudio();$('#play').textContent='▶ СОЗДАТЬ ЭДИТ';if(reset){$('#progress').style.width='0';$('#now').textContent='0:00';drawIdle()}if(recording&&rec&&rec.state!=='inactive')rec.stop()}
-function exportVideo(){if(!window.MediaRecorder||!C.captureStream)return toast('Открой сайт в Chrome или Edge для экспорта');audioInit();let stream=C.captureStream(30),track=dest.stream.getAudioTracks()[0];if($('#music').value!=='none'&&track)stream.addTrack(track);let mime=MediaRecorder.isTypeSupported('video/webm;codecs=vp9')?'video/webm;codecs=vp9':'video/webm';chunks=[];try{rec=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:6500000})}catch(e){return toast('Браузер не смог запустить запись')}rec.ondataavailable=e=>e.data.size&&chunks.push(e.data);rec.onstop=()=>{recording=false;$('#export').classList.remove('recording');let blob=new Blob(chunks,{type:'video/webm'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=T[selected].name.toLowerCase().replace(/\s+/g,'-')+'-'+Date.now()+'.webm';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),10000);toast('Эдит скачан 🔥')};recording=true;$('#export').classList.add('recording');rec.start(1000);play();toast('Запись началась — дождись конца эдита')}
-function fmt(s){s=Math.floor(Math.max(0,s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')}let tm;function toast(s){let e=$('#toast');e.textContent=s;e.classList.add('show');clearTimeout(tm);tm=setTimeout(()=>e.classList.remove('show'),2500)}
-init();
-</script></body></html>
+<body class="p-4 bg-gray-900 text-gray-200">
+    <div class="container">
+        <h1 class="text-3xl font-extrabold text-center mb-8 text-red-500 uppercase tracking-wide">PHONK EDIT ENGINE</h1>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+            <!-- Левая колонка: Управление -->
+            <div class="space-y-6 p-6 bg-gray-800 rounded-lg shadow-xl border border-gray-700">
+                <div>
+                    <label for="photoInput" class="block text-sm font-medium text-gray-300 mb-2">Загрузи фото для эдита (мин. 1)</label>
+                    <div id="dropZone" class="w-full p-4 border-2 border-dashed border-gray-600 rounded-md text-center cursor-pointer hover:border-red-500 transition-colors duration-200">
+                        <input type="file" id="photoInput" multiple accept="image/*" class="hidden">
+                        <p class="text-gray-400">Перетащи фото сюда или <span class="text-red-400 font-semibold">нажми для выбора</span></p>
+                        <p id="photoCount" class="text-sm mt-2 text-gray-500"></p>
+                    </div>
+                </div>
+                
+                <div>
+                    <label for="templateSelect" class="block text-sm font-medium text-gray-300 mb-2">Выбери шаблон эдита</label>
+                    <select id="templateSelect" class="w-full bg-gray-700 p-3 rounded-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-red-500">
+                        <option value="funk_bad_do_bad">FUNK BAD DO BAD</option>
+                        <option value="drift_phonk">DRIFT PHONK STYLE</option>
+                        <option value="strobe_rage">STROBE RAGE</option>
+                        <option value="glitch_vibes">GLITCH VIBES</option>
+                        <option value="vhs_rewind">VHS REWIND</option>
+                        <option value="shake_punch">SHAKE PUNCH</option>
+                        <option value="zoom_in">ZOOM IN</option>
+                        <option value="rgb_punch">RGB PUNCH</option>
+                        <option value="neon_fade">NEON FADE</option>
+                        <option value="deep_bass">DEEP BASS</option>
+                        <option value="cinematic">CINEMATIC</option>
+                        <option value="manga_glitch">MANGA GLITCH</option>
+                        <option value="cyberpunk">CYBERPUNK</option>
+                        <option value="retro_wave">RETRO WAVE</option>
+                        <option value="hyperpop">HYPERPOP</option>
+                        <option value="ghosting">GHOSTING</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="startText" class="block text-sm font-medium text-gray-300 mb-2">Стартовый текст (опционально)</label>
+                    <input type="text" id="startText" placeholder="Будь как нефор..." class="w-full bg-gray-700 p-3 rounded-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-red-500">
+                </div>
+                
+                <div>
+                    <label for="duration" class="block text-sm font-medium text-gray-300 mb-2">Длительность эдита (сек): <span id="durVal" class="font-semibold text-red-400">10</span></label>
+                    <input type="range" id="duration" min="5" max="30" value="10" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer focus:outline-none focus:ring-red-500 focus:ring-2">
+                </div>
+
+                <div class="bg-gray-700 p-4 rounded-md border border-gray-600">
+                    <label for="audioInput" class="block text-sm font-medium text-gray-300 mb-2">Загрузи свою музыку</label>
+                    <input type="file" id="audioInput" accept="audio/*" class="w-full bg-gray-600 p-2 rounded-md mb-3 text-sm">
+                    <label for="audioStart" class="block text-sm font-medium text-gray-300 mb-2">Начало аудио (сек): <span id="audioStartVal" class="font-semibold text-red-400">0</span></label>
+                    <input type="range" id="audioStart" min="0" max="0" value="0" step="0.1" class="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer focus:outline-none focus:ring-red-500 focus:ring-2">
+                    <p id="audioDurationInfo" class="text-xs text-gray-400 mt-2"></p>
+                </div>
+
+                <button id="renderBtn" class="w-full bg-red-600 py-3 font-bold rounded-md hover:bg-red-700 transition-colors duration-200 text-lg uppercase shadow-lg focus:outline-none focus:ring-2 focus:ring-red-500">СОЗДАТЬ И СКАЧАТЬ ЭДИТ</button>
+            </div>
+
+            <!-- Правая колонка: Превью -->
+            <div class="preview-box relative">
+                <canvas id="editCanvas" width="320" height="570"></canvas>
+                <div id="overlayText" class="overlay-text"></div>
+                
+                <div id="loadingOverlay" class="loading-overlay">
+                    <div class="spinner mb-4"></div>
+                    <p id="loadingText" class="text-white text-lg font-semibold">Рендеринг видео...</p>
+                    <p class="text-sm text-gray-400 mt-2">Это может занять некоторое время.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('editCanvas');
+        const ctx = canvas.getContext('2d');
+
+        const photoInput = document.getElementById('photoInput');
+        const dropZone = document.getElementById('dropZone');
+        const photoCountDisplay = document.getElementById('photoCount');
+        const templateSelect = document.getElementById('templateSelect');
+        const startTextInput = document.getElementById('startText');
+        const durationInput = document.getElementById('duration');
+        const durValDisplay = document.getElementById('durVal');
+        const audioInput = document.getElementById('audioInput');
+        const audioStartInput = document.getElementById('audioStart');
+        const audioStartValDisplay = document.getElementById('audioStartVal');
+        const audioDurationInfo = document.getElementById('audioDurationInfo');
+        const renderBtn = document.getElementById('renderBtn');
+        const overlayTextElement = document.getElementById('overlayText');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const loadingText = document.getElementById('loadingText');
+
+        let loadedImages = [];
+        let audioBuffer = null;
+        let audioContext = null;
+        let animationFrameId = null;
+        let mediaRecorder = null;
+        let recordedChunks = [];
+        let audioSourceNode = null;
+        let gainNode = null;
+        let audioOutputNode = null; // For MediaRecorder
+
+        // --- UI Listeners ---
+        dropZone.addEventListener('click', () => photoInput.click());
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('border-red-500');
+        });
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('border-red-500');
+        });
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('border-red-500');
+            photoInput.files = e.dataTransfer.files;
+            handlePhotoFiles(e.dataTransfer.files);
+        });
+
+        photoInput.addEventListener('change', (e) => handlePhotoFiles(e.target.files));
+
+        function handlePhotoFiles(files) {
+            loadedImages = [];
+            photoCountDisplay.textContent = `Загружено: ${files.length} фото.`;
+            Array.from(files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => loadedImages.push(img);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        durationInput.addEventListener('input', () => {
+            durValDisplay.textContent = durationInput.value;
+            // Update audio max start time if audio is loaded
+            if (audioBuffer) {
+                const maxStartTime = Math.max(0, audioBuffer.duration - parseFloat(durationInput.value));
+                audioStartInput.max = maxStartTime.toFixed(1);
+            }
+        });
+
+        audioInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            loadingOverlay.classList.add('active');
+            loadingText.textContent = 'Загрузка и обработка аудио...';
+
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+                audioDurationInfo.textContent = `Длительность трека: ${audioBuffer.duration.toFixed(1)} сек.`;
+                
+                const maxStartTime = Math.max(0, audioBuffer.duration - parseFloat(durationInput.value));
+                audioStartInput.max = maxStartTime.toFixed(1);
+                audioStartInput.value = 0;
+                audioStartValDisplay.textContent = '0';
+                
+            } catch (error) {
+                console.error("Error decoding audio:", error);
+                alert("Не удалось загрузить или обработать аудио. Убедитесь, что это поддерживаемый формат.");
+                audioBuffer = null;
+                audioDurationInfo.textContent = 'Ошибка загрузки аудио.';
+                audioStartInput.max = 0;
+                audioStartInput.value = 0;
+            } finally {
+                loadingOverlay.classList.remove('active');
+            }
+        });
+
+        audioStartInput.addEventListener('input', () => {
+            audioStartValDisplay.textContent = audioStartInput.value;
+        });
+
+        renderBtn.addEventListener('click', startRenderAndRecord);
+
+        // --- Core Render & Export Logic ---
+
+        const FPS = 30; // Frames per second for the output video
+
+        async function startRenderAndRecord() {
+            if (loadedImages.length === 0) {
+                alert("Пожалуйста, загрузите хотя бы одно фото!");
+                return;
+            }
+            if (!audioBuffer) {
+                alert("Пожалуйста, загрузите музыку!");
+                return;
+            }
+
+            renderBtn.disabled = true;
+            loadingOverlay.classList.add('active');
+            loadingText.textContent = 'Начинаем рендеринг...';
+
+            const videoDuration = parseFloat(durationInput.value);
+            const audioStartTime = parseFloat(audioStartInput.value);
+            const selectedTemplate = templateSelect.value;
+            const startText = startTextInput.value;
+
+            // Prepare audio for recording
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioSourceNode) audioSourceNode.stop(); // Stop any previous playback
+
+            audioSourceNode = audioContext.createBufferSource();
+            audioSourceNode.buffer = audioBuffer;
+
+            // Create a MediaStreamDestinationNode to capture audio
+            audioOutputNode = audioContext.createMediaStreamDestination();
+            audioSourceNode.connect(audioOutputNode);
+
+            // Connect to real speakers for live preview during recording (optional, could be muted)
+            // audioSourceNode.connect(audioContext.destination); 
+            // Better to not connect to destination if we only want to record
+
+            // Prepare video stream from canvas
+            const canvasStream = canvas.captureStream(FPS);
+
+            // Combine video and audio streams
+            const combinedStream = new MediaStream([
+                ...canvasStream.getVideoTracks(),
+                ...audioOutputNode.stream.getAudioTracks()
+            ]);
+
+            mediaRecorder = new MediaRecorder(combinedStream, {
+                mimeType: 'video/webm; codecs="vp8, opus"',
+                videoBitsPerSecond: 2500000, // 2.5 Mbps
+                audioBitsPerSecond: 128000 // 128 Kbps
+            });
+            recordedChunks = [];
+
+            mediaRecorder.ondataavailable = (event) => {
+                if (event.data.size > 0) {
+                    recordedChunks.push(event.data);
+                }
+            };
+
+            mediaRecorder.onstop = () => {
+                const blob = new Blob(recordedChunks, { type: 'video/webm' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = `edit_${Date.now()}.webm`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                
+                loadingOverlay.classList.remove('active');
+                renderBtn.disabled = false;
+                alert("Эдит успешно скачан!");
+            };
+
+            mediaRecorder.start();
+            audioSourceNode.start(0, audioStartTime, videoDuration); // Play audio for exact video duration
+
+            // Start animation loop for recording
+            let startTime = performance.now();
+            let lastFrameTime = startTime;
+            let currentImageIndex = 0;
+            let textVisible = startText !== ''; // Show text if provided
+
+            if (textVisible) {
+                overlayTextElement.textContent = startText;
+                overlayTextElement.style.opacity = 1;
+            }
+
+            function animate(currentTime) {
+                const elapsed = (currentTime - startTime) / 1000; // in seconds
+                const deltaTime = (currentTime - lastFrameTime) / 1000;
+                lastFrameTime = currentTime;
+
+                if (elapsed >= videoDuration) {
+                    stopRecording();
+                    return;
+                }
+
+                // Calculate image change timing
+                const imageChangeInterval = videoDuration / loadedImages.length;
+                if (elapsed % imageChangeInterval < deltaTime) { // Check if it's time for a new image
+                     currentImageIndex = (currentImageIndex + 1) % loadedImages.length;
+                }
+                
+                const currentImage = loadedImages[currentImageIndex];
+
+                // Clear canvas
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                // Apply template-specific effects
+                applyTemplateEffects(ctx, currentImage, selectedTemplate, elapsed, videoDuration);
+
+                // Hide text after initial few seconds
+                if (textVisible && elapsed > Math.min(3, videoDuration / 3)) {
+                    overlayTextElement.style.opacity = 0;
+                    textVisible = false;
+                }
+                
+                animationFrameId = requestAnimationFrame(animate);
+            }
+
+            animationFrameId = requestAnimationFrame(animate);
+        }
+
+        function stopRecording() {
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+                animationFrameId = null;
+            }
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                mediaRecorder.stop();
+            }
+            if (audioSourceNode) {
+                audioSourceNode.stop();
+                audioSourceNode.disconnect(); // Disconnect from output
+                audioSourceNode = null;
+            }
+            overlayTextElement.style.opacity = 0; // Hide text after recording
+        }
+
+        // --- Effect Library ---
+        function applyTemplateEffects(ctx, img, template, time, totalDuration) {
+            const width = canvas.width;
+            const height = canvas.height;
+
+            // Reset context for each frame
+            ctx.filter = 'none';
+            ctx.globalAlpha = 1;
+            ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transformations
+
+            let scale = 1;
+            let translateX = 0;
+            let translateY = 0;
+            let rotate = 0;
+
+            const imageRatio = img.width / img.height;
+            const canvasRatio = width / height;
+
+            let drawWidth, drawHeight, offsetX, offsetY;
+
+            // Calculate initial drawing size to cover canvas (like object-fit: cover)
+            if (imageRatio > canvasRatio) { // Image wider than canvas
+                drawHeight = height;
+                drawWidth = img.width * (height / img.height);
+                offsetX = (width - drawWidth) / 2;
+                offsetY = 0;
+            } else { // Image taller than canvas
+                drawWidth = width;
+                drawHeight = img.height * (width / img.width);
+                offsetX = 0;
+                offsetY = (height - drawHeight) / 2;
+            }
+
+            switch (template) {
+                case 'funk_bad_do_bad':
+                case 'drift_phonk':
+                    // Subtle pan and zoom, fast flashes
+                    scale = 1 + Math.sin(time * 2) * 0.05;
+                    translateX = Math.sin(time * 3) * 10;
+                    translateY = Math.cos(time * 2.5) * 8;
+                    if (Math.random() < 0.1) ctx.filter = `brightness(2) contrast(1.5)`; // Flash
+                    if (time % 1 < 0.2) ctx.filter = `hue-rotate(${Math.sin(time*20)*10}deg) brightness(1.2) contrast(1.1)`;
+                    break;
+                case 'strobe_rage':
+                    // Intense strobing and shake
+                    if (Math.floor(time * 10) % 2 === 0) ctx.filter = `brightness(2) contrast(1.5) saturate(2)`;
+                    else ctx.filter = `brightness(0.5) contrast(2) saturate(2)`;
+                    translateX = Math.sin(time * 50) * 10;
+                    translateY = Math.cos(time * 50) * 10;
+                    rotate = Math.sin(time * 30) * 0.01;
+                    break;
+                case 'glitch_vibes':
+                    // Random glitches, color shifts
+                    if (Math.random() < 0.05) { // Occasional major glitch
+                        ctx.filter = `hue-rotate(${Math.random() * 360}deg) contrast(2) saturate(3)`;
+                        ctx.setTransform(1.0 + Math.random() * 0.05, Math.random() * 0.02, Math.random() * 0.02, 1.0 + Math.random() * 0.05, Math.random() * 20 - 10, Math.random() * 20 - 10);
+                    } else if (Math.random() < 0.1) { // Minor pixel shift
+                        translateX = Math.random() * 5 - 2.5;
+                        translateY = Math.random() * 5 - 2.5;
+                    }
+                    break;
+                case 'vhs_rewind':
+                    // Old tape look, scanlines, color bleed
+                    ctx.filter = `contrast(1.2) sepia(0.5) saturate(1.5) blur(${Math.sin(time*5)*0.5 + 0.5}px)`;
+                    ctx.globalAlpha = 0.95 + Math.sin(time * 15) * 0.05; // Random flicker
+                    translateX = Math.sin(time * 7) * 3;
+                    translateY = Math.cos(time * 8) * 2;
+                    // Add subtle scanlines (requires drawing separate rects or a pattern) - simplified for canvas.
+                    break;
+                case 'shake_punch':
+                    // Strong shake on photo change
+                    const imageChangeIntervalShake = totalDuration / loadedImages.length;
+                    if (time % imageChangeIntervalShake < 0.1 && time % imageChangeIntervalShake > 0) { // On image change
+                         translateX = Math.random() * 40 - 20;
+                         translateY = Math.random() * 40 - 20;
+                         rotate = Math.random() * 0.05 - 0.025;
+                         ctx.filter = `brightness(1.8) contrast(1.5)`;
+                    } else {
+                        translateX = Math.sin(time * 30) * 5;
+                        translateY = Math.cos(time * 25) * 5;
+                    }
+                    scale = 1 + Math.sin(time * 5) * 0.02;
+                    break;
+                case 'zoom_in':
+                    // Continuous zoom in
+                    scale = 1 + (time / totalDuration) * 0.5;
+                    translateX = Math.sin(time * 2) * 5;
+                    translateY = Math.cos(time * 2) * 5;
+                    break;
+                case 'rgb_punch':
+                    // RGB split effect with punchy transitions
+                    const rgbOffset = Math.sin(time * 15) * 5; // Rapid RGB shift
+                    ctx.filter = `drop-shadow(${rgbOffset}px 0 0 red) drop-shadow(${-rgbOffset}px 0 0 blue) brightness(1.1) contrast(1.1)`;
+                    if (Math.random() < 0.08) ctx.filter += ` saturate(3) brightness(1.5)`;
+                    scale = 1 + Math.sin(time * 7) * 0.03;
+                    translateX = Math.sin(time * 10) * 7;
+                    break;
+                case 'neon_fade':
+                    // Photos slowly fade with neon-like glow
+                    ctx.filter = `brightness(1.1) saturate(1.3) hue-rotate(${Math.sin(time * 0.5) * 30}deg) drop-shadow(0 0 10px rgba(255,0,255,0.7))`;
+                    ctx.globalAlpha = 0.8 + Math.sin(time * 1) * 0.2; // Gentle fade in/out
+                    scale = 1 + Math.sin(time * 0.3) * 0.02;
+                    break;
+                case 'deep_bass':
+                    // Subtle shake and brightness pulse on a "beat"
+                    const beat = Math.sin(time * 10); // Simulated bass beat
+                    translateX = beat * 5;
+                    translateY = beat * 5;
+                    scale = 1 + beat * 0.02;
+                    ctx.filter = `brightness(1 + ${beat * 0.2}) contrast(1.1)`;
+                    break;
+                case 'cinematic':
+                    // Slow pan, subtle zoom, desaturated colors
+                    ctx.filter = `grayscale(0.3) contrast(1.1) brightness(1.05)`;
+                    scale = 1 + (time / totalDuration) * 0.1;
+                    translateX = Math.sin(time * 0.2) * 15;
+                    translateY = Math.cos(time * 0.2) * 10;
+                    break;
+                case 'manga_glitch':
+                    // Black and white, halftone-like effect with sudden glitches
+                    ctx.filter = `grayscale(1) contrast(2) brightness(0.8) blur(${Math.random() < 0.05 ? 2 : 0}px)`;
+                    if (Math.random() < 0.07) {
+                        ctx.filter += ` hue-rotate(${Math.random() * 360}deg)`;
+                        ctx.globalAlpha = 0.5 + Math.random() * 0.5;
+                    }
+                    break;
+                case 'cyberpunk':
+                    // Neon colors, chromatic aberration, scanlines
+                    const cybOffset = Math.sin(time * 18) * 8;
+                    ctx.filter = `contrast(1.5) saturate(2) brightness(1.2) hue-rotate(${Math.sin(time * 0.8) * 20}deg) drop-shadow(${cybOffset}px 0 0 rgba(0,255,255,0.5)) drop-shadow(${-cybOffset}px 0 0 rgba(255,0,255,0.5))`;
+                    translateX = Math.sin(time * 12) * 5;
+                    translateY = Math.cos(time * 10) * 5;
+                    break;
+                case 'retro_wave':
+                    // Purple/pink hues, gentle glow, slow movement
+                    ctx.filter = `saturate(1.5) contrast(1.2) brightness(1.1) hue-rotate(${Math.sin(time * 0.4) * 15 + 280}deg) drop-shadow(0 0 8px rgba(255,100,200,0.6))`;
+                    scale = 1 + Math.sin(time * 0.2) * 0.03;
+                    translateX = Math.sin(time * 0.5) * 8;
+                    translateY = Math.cos(time * 0.6) * 7;
+                    break;
+                case 'hyperpop':
+                    // Extremely saturated, high contrast, rapid color shifts, quick zooms
+                    ctx.filter = `saturate(5) contrast(2) brightness(1.5) hue-rotate(${Math.sin(time * 10) * 180}deg)`;
+                    scale = 1 + Math.abs(Math.sin(time * 8)) * 0.1;
+                    translateX = Math.sin(time * 25) * 10;
+                    translateY = Math.cos(time * 20) * 10;
+                    break;
+                case 'ghosting':
+                    // Fading trails, subtle movement, desaturated
+                    ctx.filter = `grayscale(0.5) contrast(1.2)`;
+                    ctx.globalAlpha = 0.7 + Math.sin(time * 2) * 0.1; // Make it semi-transparent
+                    scale = 1 + Math.sin(time * 0.7) * 0.02;
+                    translateX = Math.sin(time * 0.9) * 10;
+                    translateY = Math.cos(time * 0.8) * 8;
+                    ctx.drawImage(canvas, 0, 0, width, height); // Draw previous frame for ghosting
+                    break;
+            }
+
+            // Apply transformations
+            ctx.translate(width / 2 + translateX, height / 2 + translateY);
+            ctx.rotate(rotate);
+            ctx.scale(scale, scale);
+            ctx.translate(-(width / 2), -(height / 2));
+
+            // Draw image
+            ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
+        }
+
+        // Initial setup for the canvas
+        function setupCanvas() {
+            canvas.width = 320;
+            canvas.height = 570;
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+        }
+
+        setupCanvas();
+
+        // Initial image load and template select to show something
+        const demoImageUrl = 'https://via.placeholder.com/320x570/000000/FFFFFF?text=PHONK'; // Example placeholder
+        const demoImage = new Image();
+        demoImage.src = demoImageUrl;
+        demoImage.onload = () => {
+            loadedImages.push(demoImage);
+            photoCountDisplay.textContent = `Загружено: 1 фото (демо)`;
+            // Draw initial image to canvas
+            ctx.drawImage(demoImage, 0, 0, canvas.width, canvas.height);
+        };
+    </script>
+</body>
+</html>
