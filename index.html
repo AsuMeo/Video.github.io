@@ -2,141 +2,189 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PHONK EDIT GENERATOR</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0">
+    <title>PHONK EDIT MAKER</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background: #0a0a0a; color: white; font-family: 'Roboto', sans-serif; }
-        .container { max-width: 1000px; margin: 0 auto; padding: 1rem; }
-        .preview-box { 
-            width: 320px; 
-            height: 570px; /* 9:16 aspect ratio */
-            background: #000; 
-            border: 2px solid #333; 
-            margin: 0 auto; 
-            overflow: hidden; 
-            position: relative; 
-            box-shadow: 0 0 20px rgba(255, 0, 0, 0.4);
+        body { 
+            background: #050505; 
+            color: #fff; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
-        canvas { display: block; width: 100%; height: 100%; object-fit: cover; }
-        .overlay-text {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 2.5rem;
-            font-weight: 900;
-            text-transform: uppercase;
-            font-style: italic;
-            color: white;
-            text-shadow: 0 0 10px rgba(255,0,0,0.8), 0 0 20px rgba(0,0,0,0.5);
-            z-index: 10;
-            opacity: 0; /* Hidden by default */
-            transition: opacity 0.5s ease-in-out;
-            text-align: center;
-        }
-        .loading-overlay {
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.8);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 20;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease;
-        }
-        .loading-overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
-        .spinner {
-            border: 4px solid rgba(255,255,255,0.3);
-            border-top: 4px solid #f90000;
+        /* Стилизация ползунков для удобства пальцев на Android */
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
+            background: #ff0055;
+            cursor: pointer;
+            box-shadow: 0 0 10px #ff0055;
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .neo-blur {
+            background: rgba(10, 10, 10, 0.8);
+            backdrop-filter: blur(10px);
+        }
+        /* Анимация пульсации для кнопок */
+        .pulse-red {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 0, 85, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(255, 0, 85, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 0, 85, 0); }
+        }
+        /* Полноэкранный режим для превью */
+        .fullscreen-preview {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            z-index: 50 !important;
+            background: #000 !important;
         }
     </style>
 </head>
-<body class="p-4 bg-gray-900 text-gray-200">
-    <div class="container">
-        <h1 class="text-3xl font-extrabold text-center mb-8 text-red-500 uppercase tracking-wide">PHONK EDIT ENGINE</h1>
+<body class="flex flex-col min-h-screen pb-10">
+
+    <!-- HEADER -->
+    <header class="p-4 border-b border-zinc-800 bg-black sticky top-0 z-30 flex items-center justify-between">
+        <h1 class="text-xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-purple-600">PHONKMAKER AI</h1>
+        <span class="text-xs bg-red-600 px-2 py-1 rounded-full font-bold uppercase">Android Edition</span>
+    </header>
+
+    <div class="flex-1 w-full max-w-md mx-auto px-4 py-4 space-y-6">
         
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-            <!-- Левая колонка: Управление -->
-            <div class="space-y-6 p-6 bg-gray-800 rounded-lg shadow-xl border border-gray-700">
-                <div>
-                    <label for="photoInput" class="block text-sm font-medium text-gray-300 mb-2">Загрузи фото для эдита (мин. 1)</label>
-                    <div id="dropZone" class="w-full p-4 border-2 border-dashed border-gray-600 rounded-md text-center cursor-pointer hover:border-red-500 transition-colors duration-200">
-                        <input type="file" id="photoInput" multiple accept="image/*" class="hidden">
-                        <p class="text-gray-400">Перетащи фото сюда или <span class="text-red-400 font-semibold">нажми для выбора</span></p>
-                        <p id="photoCount" class="text-sm mt-2 text-gray-500"></p>
-                    </div>
-                </div>
-                
-                <div>
-                    <label for="templateSelect" class="block text-sm font-medium text-gray-300 mb-2">Выбери шаблон эдита</label>
-                    <select id="templateSelect" class="w-full bg-gray-700 p-3 rounded-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-red-500">
-                        <option value="funk_bad_do_bad">FUNK BAD DO BAD</option>
-                        <option value="drift_phonk">DRIFT PHONK STYLE</option>
-                        <option value="strobe_rage">STROBE RAGE</option>
-                        <option value="glitch_vibes">GLITCH VIBES</option>
-                        <option value="vhs_rewind">VHS REWIND</option>
-                        <option value="shake_punch">SHAKE PUNCH</option>
-                        <option value="zoom_in">ZOOM IN</option>
-                        <option value="rgb_punch">RGB PUNCH</option>
-                        <option value="neon_fade">NEON FADE</option>
-                        <option value="deep_bass">DEEP BASS</option>
-                        <option value="cinematic">CINEMATIC</option>
-                        <option value="manga_glitch">MANGA GLITCH</option>
-                        <option value="cyberpunk">CYBERPUNK</option>
-                        <option value="retro_wave">RETRO WAVE</option>
-                        <option value="hyperpop">HYPERPOP</option>
-                        <option value="ghosting">GHOSTING</option>
-                    </select>
-                </div>
+        <!-- 1. ПРЕВЬЮ ЭКРАН (9:16) -->
+        <div class="relative w-full aspect-[9/16] max-h-[60vh] mx-auto rounded-2xl overflow-hidden border-2 border-zinc-800 shadow-2xl bg-black" id="previewContainer">
+            <canvas id="editCanvas" class="w-full h-full object-cover"></canvas>
+            
+            <!-- Интерактивный текст в начале -->
+            <div id="overlayText" class="absolute inset-0 flex items-center justify-center p-4 text-center text-3xl font-black italic uppercase text-white drop-shadow-[0_4px_8px_rgba(0,0,0,0.9)] opacity-0 pointer-events-none transition-all duration-300"></div>
 
-                <div>
-                    <label for="startText" class="block text-sm font-medium text-gray-300 mb-2">Стартовый текст (опционально)</label>
-                    <input type="text" id="startText" placeholder="Будь как нефор..." class="w-full bg-gray-700 p-3 rounded-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-red-500">
-                </div>
-                
-                <div>
-                    <label for="duration" class="block text-sm font-medium text-gray-300 mb-2">Длительность эдита (сек): <span id="durVal" class="font-semibold text-red-400">10</span></label>
-                    <input type="range" id="duration" min="5" max="30" value="10" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer focus:outline-none focus:ring-red-500 focus:ring-2">
-                </div>
+            <!-- Кнопка во весь экран -->
+            <button id="fullscreenBtn" class="absolute bottom-4 right-4 bg-black/60 p-3 rounded-full border border-zinc-700 active:scale-90 transition-transform">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 0h-4m4 0l-5 5" />
+                </svg>
+            </button>
+        </div>
 
-                <div class="bg-gray-700 p-4 rounded-md border border-gray-600">
-                    <label for="audioInput" class="block text-sm font-medium text-gray-300 mb-2">Загрузи свою музыку</label>
-                    <input type="file" id="audioInput" accept="audio/*" class="w-full bg-gray-600 p-2 rounded-md mb-3 text-sm">
-                    <label for="audioStart" class="block text-sm font-medium text-gray-300 mb-2">Начало аудио (сек): <span id="audioStartVal" class="font-semibold text-red-400">0</span></label>
-                    <input type="range" id="audioStart" min="0" max="0" value="0" step="0.1" class="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer focus:outline-none focus:ring-red-500 focus:ring-2">
-                    <p id="audioDurationInfo" class="text-xs text-gray-400 mt-2"></p>
-                </div>
-
-                <button id="renderBtn" class="w-full bg-red-600 py-3 font-bold rounded-md hover:bg-red-700 transition-colors duration-200 text-lg uppercase shadow-lg focus:outline-none focus:ring-2 focus:ring-red-500">СОЗДАТЬ И СКАЧАТЬ ЭДИТ</button>
+        <!-- 2. НАСТРОЙКИ ЭДИТА -->
+        <div class="space-y-5 bg-zinc-950 p-5 rounded-2xl border border-zinc-900 shadow-xl">
+            
+            <!-- Шаг 1: Фотографии -->
+            <div>
+                <label class="block text-sm font-bold text-zinc-400 mb-2 uppercase tracking-wider">Шаг 1: Фото для эдита</label>
+                <button onclick="document.getElementById('photoInput').click()" class="w-full bg-zinc-900 active:bg-zinc-800 border-2 border-dashed border-zinc-700 p-6 rounded-xl text-center transition-all">
+                    <span class="block text-2xl mb-1">📸</span>
+                    <span class="block font-bold text-white text-sm">Выбрать фотографии</span>
+                    <span id="photoCount" class="block text-xs text-zinc-500 mt-1">Минимум 1 фото</span>
+                </button>
+                <input type="file" id="photoInput" multiple accept="image/*" class="hidden">
             </div>
 
-            <!-- Правая колонка: Превью -->
-            <div class="preview-box relative">
-                <canvas id="editCanvas" width="320" height="570"></canvas>
-                <div id="overlayText" class="overlay-text"></div>
-                
-                <div id="loadingOverlay" class="loading-overlay">
-                    <div class="spinner mb-4"></div>
-                    <p id="loadingText" class="text-white text-lg font-semibold">Рендеринг видео...</p>
-                    <p class="text-sm text-gray-400 mt-2">Это может занять некоторое время.</p>
+            <!-- Шаг 2: Музыка -->
+            <div class="border-t border-zinc-900 pt-4">
+                <label class="block text-sm font-bold text-zinc-400 mb-2 uppercase tracking-wider">Шаг 2: Твоя музыка</label>
+                <button onclick="document.getElementById('audioInput').click()" class="w-full bg-zinc-900 active:bg-zinc-800 p-4 rounded-xl flex items-center justify-between border border-zinc-800">
+                    <div class="flex items-center space-x-3">
+                        <span class="text-xl">🎵</span>
+                        <div class="text-left">
+                            <span id="audioTrackName" class="block text-sm font-bold text-white truncate max-w-[200px]">Выбрать трек</span>
+                            <span id="audioTrackDuration" class="block text-xs text-zinc-500">Поддерживает MP3, WAV, M4A</span>
+                        </div>
+                    </div>
+                    <span class="text-xs bg-zinc-800 px-2 py-1 rounded text-zinc-400">Обзор</span>
+                </button>
+                <input type="file" id="audioInput" accept="audio/*" class="hidden">
+
+                <!-- Слайдер обрезки музыки -->
+                <div id="audioCropContainer" class="mt-4 hidden space-y-2">
+                    <div class="flex justify-between text-xs font-bold text-zinc-400">
+                        <span>Начало музыки:</span>
+                        <span id="audioStartVal" class="text-red-500">0.0 сек</span>
+                    </div>
+                    <input type="range" id="audioStart" min="0" max="100" value="0" step="0.5" class="w-full h-2 bg-zinc-800 rounded-lg appearance-none">
                 </div>
+            </div>
+
+            <!-- Шаг 3: Шаблоны -->
+            <div class="border-t border-zinc-900 pt-4">
+                <label class="block text-sm font-bold text-zinc-400 mb-2 uppercase tracking-wider">Шаг 3: Шаблон эдита</label>
+                <select id="templateSelect" class="w-full bg-zinc-900 p-4 rounded-xl border border-zinc-800 text-white font-bold text-sm focus:outline-none focus:border-red-500 appearance-none">
+                    <option value="funk_bad_do_bad">🔥 FUNK BAD DO BAD</option>
+                    <option value="drift_phonk">🚗 DRIFT PHONK STYLE</option>
+                    <option value="strobe_rage">⚡ STROBE RAGE</option>
+                    <option value="glitch_vibes">👾 GLITCH VIBES</option>
+                    <option value="vhs_rewind">📼 VHS RETRO</option>
+                    <option value="shake_punch">👊 SHAKE PUNCH</option>
+                    <option value="zoom_in">🔍 ZOOM BURST</option>
+                    <option value="rgb_punch">🌈 RGB DISSOLVE</option>
+                    <option value="neon_fade">🌌 NEON GLOW</option>
+                    <option value="deep_bass">🔊 DEEP BASS CLIPS</option>
+                    <option value="cinematic">🎬 DARK CINEMATIC</option>
+                    <option value="manga_glitch">💥 MANGA BLACK/WHITE</option>
+                    <option value="cyberpunk">🤖 CYBERPUNK TOKYO</option>
+                    <option value="retro_wave">🏝️ RETRO WAVE 80S</option>
+                    <option value="hyperpop">🌸 HYPERPOP SHAKE</option>
+                </select>
+            </div>
+
+            <!-- Шаг 4: Текст в начале -->
+            <div class="border-t border-zinc-900 pt-4">
+                <label class="block text-sm font-bold text-zinc-400 mb-2 uppercase tracking-wider">Шаг 4: Надпись в начале</label>
+                <input type="text" id="startText" placeholder="Будь как нефор..." class="w-full bg-zinc-900 p-4 rounded-xl border border-zinc-800 text-white placeholder-zinc-600 focus:outline-none focus:border-red-500 font-semibold text-sm">
+            </div>
+
+            <!-- Шаг 5: Длительность эдита -->
+            <div class="border-t border-zinc-900 pt-4 space-y-2">
+                <div class="flex justify-between text-sm font-bold text-zinc-400">
+                    <span class="uppercase tracking-wider">Длительность:</span>
+                    <span id="durVal" class="text-red-500">10 сек</span>
+                </div>
+                <input type="range" id="duration" min="5" max="30" value="10" class="w-full h-2 bg-zinc-800 rounded-lg appearance-none">
+                <p class="text-xs text-zinc-500">Скорость смены кадров и эффектов автоматически подстроится под это время.</p>
+            </div>
+
+            <!-- Кнопка запуска -->
+            <button id="renderBtn" class="pulse-red w-full bg-gradient-to-r from-red-600 to-rose-500 text-white py-4 px-6 rounded-xl font-black text-base tracking-widest uppercase active:scale-95 transition-all shadow-lg shadow-red-600/30">
+                Создать и Скачать
+            </button>
+
+        </div>
+    </div>
+
+    <!-- МОДАЛЬНОЕ ОКНО СКАЧИВАНИЯ (ДЛЯ СТАБИЛЬНОСТИ НА ANDROID) -->
+    <div id="exportModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 hidden">
+        <div class="bg-zinc-950 border border-zinc-800 w-full max-w-sm rounded-3xl p-6 text-center space-y-5">
+            <h3 class="text-lg font-black tracking-wider text-red-500 uppercase">Эдит Готов! 🔥</h3>
+            
+            <div class="aspect-[9/16] w-full max-h-[40vh] bg-black rounded-2xl overflow-hidden border border-zinc-800">
+                <video id="exportedVideo" controls playsinline class="w-full h-full object-cover"></video>
+            </div>
+
+            <p class="text-xs text-zinc-400">Нажми на кнопку ниже или **зажми видео пальцем**, чтобы сохранить его в Галерею телефона.</p>
+
+            <div class="space-y-3">
+                <a id="downloadLink" href="#" download="my_phonk_edit.webm" class="block w-full bg-red-600 active:bg-red-700 py-3 rounded-xl font-bold uppercase tracking-wider text-sm transition-colors">
+                    Скачать файл видео
+                </a>
+                <button onclick="closeExportModal()" class="block w-full bg-zinc-900 active:bg-zinc-800 py-3 rounded-xl font-bold text-zinc-400 text-sm transition-colors">
+                    Назад в редактор
+                </button>
             </div>
         </div>
+    </div>
+
+    <!-- ПОЛУПРОЗРАЧНЫЙ ЭКРАН ЗАГРУЗКИ (РЕНДЕРИНГ) -->
+    <div id="loadingOverlay" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/95 hidden">
+        <div class="w-16 h-16 border-4 border-t-red-600 border-zinc-800 rounded-full animate-spin mb-4"></div>
+        <p id="loadingText" class="text-white text-lg font-black tracking-widest uppercase">Рендеринг клипа...</p>
+        <p class="text-zinc-500 text-xs mt-2 px-10 text-center">Создаем крутые переходы и накладываем музыку. Не сворачивайте браузер.</p>
     </div>
 
     <script>
@@ -144,240 +192,234 @@
         const ctx = canvas.getContext('2d');
 
         const photoInput = document.getElementById('photoInput');
-        const dropZone = document.getElementById('dropZone');
-        const photoCountDisplay = document.getElementById('photoCount');
-        const templateSelect = document.getElementById('templateSelect');
-        const startTextInput = document.getElementById('startText');
-        const durationInput = document.getElementById('duration');
-        const durValDisplay = document.getElementById('durVal');
+        const photoCount = document.getElementById('photoCount');
         const audioInput = document.getElementById('audioInput');
-        const audioStartInput = document.getElementById('audioStart');
-        const audioStartValDisplay = document.getElementById('audioStartVal');
-        const audioDurationInfo = document.getElementById('audioDurationInfo');
+        const audioTrackName = document.getElementById('audioTrackName');
+        const audioTrackDuration = document.getElementById('audioTrackDuration');
+        const audioCropContainer = document.getElementById('audioCropContainer');
+        const audioStart = document.getElementById('audioStart');
+        const audioStartVal = document.getElementById('audioStartVal');
+        const durationInput = document.getElementById('duration');
+        const durVal = document.getElementById('durVal');
+        const templateSelect = document.getElementById('templateSelect');
+        const startText = document.getElementById('startText');
         const renderBtn = document.getElementById('renderBtn');
-        const overlayTextElement = document.getElementById('overlayText');
+        const overlayText = document.getElementById('overlayText');
+        
+        const previewContainer = document.getElementById('previewContainer');
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+
+        const exportModal = document.getElementById('exportModal');
+        const exportedVideo = document.getElementById('exportedVideo');
+        const downloadLink = document.getElementById('downloadLink');
         const loadingOverlay = document.getElementById('loadingOverlay');
         const loadingText = document.getElementById('loadingText');
 
         let loadedImages = [];
         let audioBuffer = null;
-        let audioContext = null;
+        let audioCtx = null;
         let animationFrameId = null;
         let mediaRecorder = null;
         let recordedChunks = [];
-        let audioSourceNode = null;
-        let gainNode = null;
-        let audioOutputNode = null; // For MediaRecorder
+        let sourceNode = null;
+        let audioDestNode = null;
 
-        // --- UI Listeners ---
-        dropZone.addEventListener('click', () => photoInput.click());
-        dropZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dropZone.classList.add('border-red-500');
-        });
-        dropZone.addEventListener('dragleave', () => {
-            dropZone.classList.remove('border-red-500');
-        });
-        dropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropZone.classList.remove('border-red-500');
-            photoInput.files = e.dataTransfer.files;
-            handlePhotoFiles(e.dataTransfer.files);
+        // Настройка холста под HD разрешение (для экспорта и красивого рендера)
+        const RENDER_WIDTH = 720;
+        const RENDER_HEIGHT = 1280;
+        canvas.width = RENDER_WIDTH;
+        canvas.height = RENDER_HEIGHT;
+
+        // Полноэкранный режим на CSS
+        fullscreenBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            previewContainer.classList.toggle('fullscreen-preview');
         });
 
-        photoInput.addEventListener('change', (e) => handlePhotoFiles(e.target.files));
-
-        function handlePhotoFiles(files) {
+        // Загрузка фотографий
+        photoInput.addEventListener('change', (e) => {
             loadedImages = [];
-            photoCountDisplay.textContent = `Загружено: ${files.length} фото.`;
-            Array.from(files).forEach(file => {
+            const files = Array.from(e.target.files);
+            if (files.length === 0) {
+                photoCount.textContent = "Минимум 1 фото";
+                return;
+            }
+            photoCount.textContent = `Выбрано: ${files.length} фото.`;
+
+            files.forEach(file => {
                 const reader = new FileReader();
                 reader.onload = (event) => {
                     const img = new Image();
                     img.src = event.target.result;
-                    img.onload = () => loadedImages.push(img);
+                    img.onload = () => {
+                        loadedImages.push(img);
+                        if (loadedImages.length === 1) {
+                            drawFrame(img, 0, 'none', 0, 10); // Отрисовка первого кадра сразу
+                        }
+                    };
                 };
                 reader.readAsDataURL(file);
             });
-        }
-
-        durationInput.addEventListener('input', () => {
-            durValDisplay.textContent = durationInput.value;
-            // Update audio max start time if audio is loaded
-            if (audioBuffer) {
-                const maxStartTime = Math.max(0, audioBuffer.duration - parseFloat(durationInput.value));
-                audioStartInput.max = maxStartTime.toFixed(1);
-            }
         });
 
+        // Загрузка аудио
         audioInput.addEventListener('change', async (e) => {
             const file = e.target.files[0];
             if (!file) return;
 
-            loadingOverlay.classList.add('active');
-            loadingText.textContent = 'Загрузка и обработка аудио...';
+            audioTrackName.textContent = file.name;
+            audioTrackDuration.textContent = "Декодирование файла...";
 
-            if (!audioContext) {
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             }
 
             try {
                 const arrayBuffer = await file.arrayBuffer();
-                audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-                audioDurationInfo.textContent = `Длительность трека: ${audioBuffer.duration.toFixed(1)} сек.`;
+                audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
                 
-                const maxStartTime = Math.max(0, audioBuffer.duration - parseFloat(durationInput.value));
-                audioStartInput.max = maxStartTime.toFixed(1);
-                audioStartInput.value = 0;
-                audioStartValDisplay.textContent = '0';
-                
-            } catch (error) {
-                console.error("Error decoding audio:", error);
-                alert("Не удалось загрузить или обработать аудио. Убедитесь, что это поддерживаемый формат.");
+                audioTrackDuration.textContent = `Продолжительность: ${audioBuffer.duration.toFixed(1)} сек.`;
+                audioCropContainer.classList.remove('hidden');
+
+                // Ограничиваем обрезку так, чтобы трека хватило под видео
+                const maxStart = Math.max(0, audioBuffer.duration - parseFloat(durationInput.value));
+                audioStart.max = maxStart;
+                audioStart.value = 0;
+                audioStartVal.textContent = "0.0 сек";
+            } catch (err) {
+                audioTrackDuration.textContent = "Ошибка чтения аудио!";
                 audioBuffer = null;
-                audioDurationInfo.textContent = 'Ошибка загрузки аудио.';
-                audioStartInput.max = 0;
-                audioStartInput.value = 0;
-            } finally {
-                loadingOverlay.classList.remove('active');
             }
         });
 
-        audioStartInput.addEventListener('input', () => {
-            audioStartValDisplay.textContent = audioStartInput.value;
+        // Интерактив на ползунках
+        durationInput.addEventListener('input', () => {
+            durVal.textContent = `${durationInput.value} сек`;
+            if (audioBuffer) {
+                const maxStart = Math.max(0, audioBuffer.duration - parseFloat(durationInput.value));
+                audioStart.max = maxStart;
+            }
         });
 
-        renderBtn.addEventListener('click', startRenderAndRecord);
+        audioStart.addEventListener('input', () => {
+            audioStartVal.textContent = `${parseFloat(audioStart.value).toFixed(1)} сек`;
+        });
 
-        // --- Core Render & Export Logic ---
-
-        const FPS = 30; // Frames per second for the output video
+        // --- РЕНДЕРИНГ И ЗАПИСЬ ---
 
         async function startRenderAndRecord() {
             if (loadedImages.length === 0) {
-                alert("Пожалуйста, загрузите хотя бы одно фото!");
-                return;
-            }
-            if (!audioBuffer) {
-                alert("Пожалуйста, загрузите музыку!");
+                alert("Сначала выберите хотя бы одно фото!");
                 return;
             }
 
-            renderBtn.disabled = true;
-            loadingOverlay.classList.add('active');
-            loadingText.textContent = 'Начинаем рендеринг...';
-
-            const videoDuration = parseFloat(durationInput.value);
-            const audioStartTime = parseFloat(audioStartInput.value);
-            const selectedTemplate = templateSelect.value;
-            const startText = startTextInput.value;
-
-            // Prepare audio for recording
-            if (!audioContext) {
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            // Запускаем AudioContext при жесте пользователя (требование Android)
+            if (audioCtx && audioCtx.state === 'suspended') {
+                await audioCtx.resume();
             }
-            if (audioSourceNode) audioSourceNode.stop(); // Stop any previous playback
 
-            audioSourceNode = audioContext.createBufferSource();
-            audioSourceNode.buffer = audioBuffer;
+            loadingOverlay.classList.remove('hidden');
+            loadingText.textContent = "Рендеринг видео...";
 
-            // Create a MediaStreamDestinationNode to capture audio
-            audioOutputNode = audioContext.createMediaStreamDestination();
-            audioSourceNode.connect(audioOutputNode);
+            const totalDuration = parseFloat(durationInput.value);
+            const chosenAudioStart = audioBuffer ? parseFloat(audioStart.value) : 0;
+            const chosenTemplate = templateSelect.value;
+            const textContent = startText.value.trim();
 
-            // Connect to real speakers for live preview during recording (optional, could be muted)
-            // audioSourceNode.connect(audioContext.destination); 
-            // Better to not connect to destination if we only want to record
+            const canvasStream = canvas.captureStream(30); // 30 кадров в секунду
+            let combinedStream = canvasStream;
 
-            // Prepare video stream from canvas
-            const canvasStream = canvas.captureStream(FPS);
+            // Если есть своя музыка - объединяем дорожки
+            if (audioBuffer && audioCtx) {
+                if (sourceNode) {
+                    try { sourceNode.stop(); } catch(e){}
+                }
 
-            // Combine video and audio streams
-            const combinedStream = new MediaStream([
-                ...canvasStream.getVideoTracks(),
-                ...audioOutputNode.stream.getAudioTracks()
-            ]);
+                sourceNode = audioCtx.createBufferSource();
+                sourceNode.buffer = audioBuffer;
 
-            mediaRecorder = new MediaRecorder(combinedStream, {
-                mimeType: 'video/webm; codecs="vp8, opus"',
-                videoBitsPerSecond: 2500000, // 2.5 Mbps
-                audioBitsPerSecond: 128000 // 128 Kbps
-            });
+                audioDestNode = audioCtx.createMediaStreamDestination();
+                sourceNode.connect(audioDestNode);
+
+                combinedStream = new MediaStream([
+                    ...canvasStream.getVideoTracks(),
+                    ...audioDestNode.stream.getAudioTracks()
+                ]);
+            }
+
+            // Поддержка записи на Android (WebM/VP8 лучший выбор для стабильности)
+            let options = { mimeType: 'video/webm;codecs=vp8,opus' };
+            if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+                options = { mimeType: 'video/webm' };
+            }
+
             recordedChunks = [];
+            mediaRecorder = new MediaRecorder(combinedStream, options);
 
-            mediaRecorder.ondataavailable = (event) => {
-                if (event.data.size > 0) {
-                    recordedChunks.push(event.data);
+            mediaRecorder.ondataavailable = (e) => {
+                if (e.data && e.data.size > 0) {
+                    recordedChunks.push(e.data);
                 }
             };
 
             mediaRecorder.onstop = () => {
-                const blob = new Blob(recordedChunks, { type: 'video/webm' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.style.display = 'none';
-                a.href = url;
-                a.download = `edit_${Date.now()}.webm`;
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
+                const videoBlob = new Blob(recordedChunks, { type: 'video/webm' });
+                const videoURL = URL.createObjectURL(videoBlob);
                 
-                loadingOverlay.classList.remove('active');
-                renderBtn.disabled = false;
-                alert("Эдит успешно скачан!");
+                // Настройка модального окна скачивания
+                exportedVideo.src = videoURL;
+                downloadLink.href = videoURL;
+                
+                loadingOverlay.classList.add('hidden');
+                exportModal.classList.remove('hidden');
             };
 
+            // Запускаем воспроизведение звука и запись
             mediaRecorder.start();
-            audioSourceNode.start(0, audioStartTime, videoDuration); // Play audio for exact video duration
-
-            // Start animation loop for recording
-            let startTime = performance.now();
-            let lastFrameTime = startTime;
-            let currentImageIndex = 0;
-            let textVisible = startText !== ''; // Show text if provided
-
-            if (textVisible) {
-                overlayTextElement.textContent = startText;
-                overlayTextElement.style.opacity = 1;
+            if (sourceNode) {
+                sourceNode.start(0, chosenAudioStart, totalDuration);
             }
 
-            function animate(currentTime) {
-                const elapsed = (currentTime - startTime) / 1000; // in seconds
-                const deltaTime = (currentTime - lastFrameTime) / 1000;
-                lastFrameTime = currentTime;
+            let startRealTime = performance.now();
+            let currentImgIndex = 0;
 
-                if (elapsed >= videoDuration) {
-                    stopRecording();
+            if (textContent !== "") {
+                overlayText.textContent = textContent;
+                overlayText.style.opacity = '1';
+            }
+
+            // Динамическая смена кадров под выбранную музыку и длительность
+            const BPM = 140; // Стандартный ритм фанка для синхронизации
+            const beatDuration = 60 / BPM; // Длительность одного бита
+
+            function drawLoop(now) {
+                const elapsed = (now - startRealTime) / 1000;
+
+                if (elapsed >= totalDuration) {
+                    stopEverything();
                     return;
                 }
 
-                // Calculate image change timing
-                const imageChangeInterval = videoDuration / loadedImages.length;
-                if (elapsed % imageChangeInterval < deltaTime) { // Check if it's time for a new image
-                     currentImageIndex = (currentImageIndex + 1) % loadedImages.length;
+                // Скорость смены кадров подстраивается под длительность и бит
+                const speedDivider = totalDuration < 10 ? beatDuration : beatDuration * 2;
+                currentImgIndex = Math.floor(elapsed / speedDivider) % loadedImages.length;
+                const activeImage = loadedImages[currentImgIndex];
+
+                // Отрисовка
+                drawFrame(activeImage, elapsed, chosenTemplate, currentImgIndex, totalDuration);
+
+                // Выключение стартового текста на 1/3 видео
+                if (elapsed > totalDuration / 3) {
+                    overlayText.style.opacity = '0';
                 }
-                
-                const currentImage = loadedImages[currentImageIndex];
 
-                // Clear canvas
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-                // Apply template-specific effects
-                applyTemplateEffects(ctx, currentImage, selectedTemplate, elapsed, videoDuration);
-
-                // Hide text after initial few seconds
-                if (textVisible && elapsed > Math.min(3, videoDuration / 3)) {
-                    overlayTextElement.style.opacity = 0;
-                    textVisible = false;
-                }
-                
-                animationFrameId = requestAnimationFrame(animate);
+                animationFrameId = requestAnimationFrame(drawLoop);
             }
 
-            animationFrameId = requestAnimationFrame(animate);
+            animationFrameId = requestAnimationFrame(drawLoop);
         }
 
-        function stopRecording() {
+        function stopEverything() {
             if (animationFrameId) {
                 cancelAnimationFrame(animationFrameId);
                 animationFrameId = null;
@@ -385,201 +427,176 @@
             if (mediaRecorder && mediaRecorder.state === 'recording') {
                 mediaRecorder.stop();
             }
-            if (audioSourceNode) {
-                audioSourceNode.stop();
-                audioSourceNode.disconnect(); // Disconnect from output
-                audioSourceNode = null;
+            if (sourceNode) {
+                try { sourceNode.stop(); } catch(e){}
+                sourceNode = null;
             }
-            overlayTextElement.style.opacity = 0; // Hide text after recording
+            overlayText.style.opacity = '0';
         }
 
-        // --- Effect Library ---
-        function applyTemplateEffects(ctx, img, template, time, totalDuration) {
-            const width = canvas.width;
-            const height = canvas.height;
+        function closeExportModal() {
+            exportModal.classList.add('hidden');
+            exportedVideo.src = '';
+        }
 
-            // Reset context for each frame
+        renderBtn.addEventListener('click', startRenderAndRecord);
+
+        // --- ДВИЖОК ЭФФЕКТОВ И ШАБЛОНОВ ---
+
+        function drawFrame(img, time, template, imgIndex, totalDuration) {
+            ctx.clearRect(0, 0, RENDER_WIDTH, RENDER_HEIGHT);
             ctx.filter = 'none';
-            ctx.globalAlpha = 1;
-            ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transformations
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
 
-            let scale = 1;
-            let translateX = 0;
-            let translateY = 0;
-            let rotate = 0;
+            if (!img) return;
 
-            const imageRatio = img.width / img.height;
-            const canvasRatio = width / height;
+            // Расчет покрытия экрана 9:16 (Cover)
+            const imgRatio = img.width / img.height;
+            const canvasRatio = RENDER_WIDTH / RENDER_HEIGHT;
+            let dw, dh, dx, dy;
 
-            let drawWidth, drawHeight, offsetX, offsetY;
-
-            // Calculate initial drawing size to cover canvas (like object-fit: cover)
-            if (imageRatio > canvasRatio) { // Image wider than canvas
-                drawHeight = height;
-                drawWidth = img.width * (height / img.height);
-                offsetX = (width - drawWidth) / 2;
-                offsetY = 0;
-            } else { // Image taller than canvas
-                drawWidth = width;
-                drawHeight = img.height * (width / img.width);
-                offsetX = 0;
-                offsetY = (height - drawHeight) / 2;
+            if (imgRatio > canvasRatio) {
+                dh = RENDER_HEIGHT;
+                dw = img.width * (RENDER_HEIGHT / img.height);
+                dx = (RENDER_WIDTH - dw) / 2;
+                dy = 0;
+            } else {
+                dw = RENDER_WIDTH;
+                dh = img.height * (RENDER_WIDTH / img.width);
+                dx = 0;
+                dy = (RENDER_HEIGHT - dh) / 2;
             }
+
+            let scale = 1.0;
+            let rotate = 0;
+            let tx = 0;
+            let ty = 0;
+
+            // Ритмические биты для синхронизации
+            const beatFreq = 2.5; // Частота пульсации
+            const beatPulse = Math.abs(Math.sin(time * Math.PI * beatFreq));
 
             switch (template) {
                 case 'funk_bad_do_bad':
+                    // Подражание жесткому фанк стилю: медленный наплыв + жесткие дрифты в такт
+                    scale = 1.05 + beatPulse * 0.08;
+                    if (beatPulse > 0.85) {
+                        ctx.filter = 'contrast(1.6) brightness(1.4) saturate(1.8)';
+                        tx = (Math.random() - 0.5) * 20;
+                        ty = (Math.random() - 0.5) * 20;
+                    }
+                    break;
+
                 case 'drift_phonk':
-                    // Subtle pan and zoom, fast flashes
-                    scale = 1 + Math.sin(time * 2) * 0.05;
-                    translateX = Math.sin(time * 3) * 10;
-                    translateY = Math.cos(time * 2.5) * 8;
-                    if (Math.random() < 0.1) ctx.filter = `brightness(2) contrast(1.5)`; // Flash
-                    if (time % 1 < 0.2) ctx.filter = `hue-rotate(${Math.sin(time*20)*10}deg) brightness(1.2) contrast(1.1)`;
+                    // Смещение в бока, эффект высокой скорости дрифта
+                    scale = 1.1;
+                    tx = Math.sin(time * 8) * 30;
+                    ty = Math.cos(time * 4) * 10;
+                    rotate = Math.sin(time * 4) * 0.02;
+                    if (beatPulse > 0.9) {
+                        ctx.filter = 'brightness(1.8) hue-rotate(15deg)';
+                    }
                     break;
+
                 case 'strobe_rage':
-                    // Intense strobing and shake
-                    if (Math.floor(time * 10) % 2 === 0) ctx.filter = `brightness(2) contrast(1.5) saturate(2)`;
-                    else ctx.filter = `brightness(0.5) contrast(2) saturate(2)`;
-                    translateX = Math.sin(time * 50) * 10;
-                    translateY = Math.cos(time * 50) * 10;
-                    rotate = Math.sin(time * 30) * 0.01;
-                    break;
-                case 'glitch_vibes':
-                    // Random glitches, color shifts
-                    if (Math.random() < 0.05) { // Occasional major glitch
-                        ctx.filter = `hue-rotate(${Math.random() * 360}deg) contrast(2) saturate(3)`;
-                        ctx.setTransform(1.0 + Math.random() * 0.05, Math.random() * 0.02, Math.random() * 0.02, 1.0 + Math.random() * 0.05, Math.random() * 20 - 10, Math.random() * 20 - 10);
-                    } else if (Math.random() < 0.1) { // Minor pixel shift
-                        translateX = Math.random() * 5 - 2.5;
-                        translateY = Math.random() * 5 - 2.5;
-                    }
-                    break;
-                case 'vhs_rewind':
-                    // Old tape look, scanlines, color bleed
-                    ctx.filter = `contrast(1.2) sepia(0.5) saturate(1.5) blur(${Math.sin(time*5)*0.5 + 0.5}px)`;
-                    ctx.globalAlpha = 0.95 + Math.sin(time * 15) * 0.05; // Random flicker
-                    translateX = Math.sin(time * 7) * 3;
-                    translateY = Math.cos(time * 8) * 2;
-                    // Add subtle scanlines (requires drawing separate rects or a pattern) - simplified for canvas.
-                    break;
-                case 'shake_punch':
-                    // Strong shake on photo change
-                    const imageChangeIntervalShake = totalDuration / loadedImages.length;
-                    if (time % imageChangeIntervalShake < 0.1 && time % imageChangeIntervalShake > 0) { // On image change
-                         translateX = Math.random() * 40 - 20;
-                         translateY = Math.random() * 40 - 20;
-                         rotate = Math.random() * 0.05 - 0.025;
-                         ctx.filter = `brightness(1.8) contrast(1.5)`;
+                    // Эффект бешеных стробоскопов
+                    scale = 1.0 + beatPulse * 0.15;
+                    if (Math.floor(time * 15) % 2 === 0) {
+                        ctx.filter = 'invert(1) contrast(2)';
                     } else {
-                        translateX = Math.sin(time * 30) * 5;
-                        translateY = Math.cos(time * 25) * 5;
+                        ctx.filter = 'brightness(1.5) saturate(2)';
                     }
-                    scale = 1 + Math.sin(time * 5) * 0.02;
                     break;
+
+                case 'glitch_vibes':
+                    // Сдвиги каналов и горизонтальный разрез
+                    scale = 1.02;
+                    if (Math.random() < 0.15) {
+                        tx = (Math.random() - 0.5) * 40;
+                        ctx.filter = `hue-rotate(${Math.random() * 360}deg) contrast(1.5)`;
+                    }
+                    break;
+
+                case 'vhs_retro':
+                    // Эффект старого видео
+                    ctx.filter = 'contrast(1.1) saturate(1.2) sepia(0.1)';
+                    ty = Math.sin(time * 20) * 2;
+                    scale = 1.02 + Math.sin(time * 0.5) * 0.01;
+                    break;
+
+                case 'shake_punch':
+                    // Удар камеры на каждой смене фото
+                    const punch = Math.exp(-((time % 1) * 5)); 
+                    scale = 1.0 + punch * 0.2;
+                    tx = (Math.random() - 0.5) * punch * 50;
+                    ty = (Math.random() - 0.5) * punch * 50;
+                    if (punch > 0.5) ctx.filter = 'brightness(2) contrast(1.5)';
+                    break;
+
                 case 'zoom_in':
-                    // Continuous zoom in
-                    scale = 1 + (time / totalDuration) * 0.5;
-                    translateX = Math.sin(time * 2) * 5;
-                    translateY = Math.cos(time * 2) * 5;
+                    scale = 1.0 + (time * 0.05);
                     break;
+
                 case 'rgb_punch':
-                    // RGB split effect with punchy transitions
-                    const rgbOffset = Math.sin(time * 15) * 5; // Rapid RGB shift
-                    ctx.filter = `drop-shadow(${rgbOffset}px 0 0 red) drop-shadow(${-rgbOffset}px 0 0 blue) brightness(1.1) contrast(1.1)`;
-                    if (Math.random() < 0.08) ctx.filter += ` saturate(3) brightness(1.5)`;
-                    scale = 1 + Math.sin(time * 7) * 0.03;
-                    translateX = Math.sin(time * 10) * 7;
+                    scale = 1.0 + beatPulse * 0.05;
+                    ctx.filter = `drop-shadow(${beatPulse * 10}px 0 0 red) drop-shadow(${-beatPulse * 10}px 0 0 blue)`;
                     break;
-                case 'neon_fade':
-                    // Photos slowly fade with neon-like glow
-                    ctx.filter = `brightness(1.1) saturate(1.3) hue-rotate(${Math.sin(time * 0.5) * 30}deg) drop-shadow(0 0 10px rgba(255,0,255,0.7))`;
-                    ctx.globalAlpha = 0.8 + Math.sin(time * 1) * 0.2; // Gentle fade in/out
-                    scale = 1 + Math.sin(time * 0.3) * 0.02;
+
+                case 'neon_glow':
+                    ctx.filter = `saturate(2) hue-rotate(${time * 50}deg) brightness(1.2)`;
+                    scale = 1.05 + Math.sin(time * 3) * 0.03;
                     break;
+
                 case 'deep_bass':
-                    // Subtle shake and brightness pulse on a "beat"
-                    const beat = Math.sin(time * 10); // Simulated bass beat
-                    translateX = beat * 5;
-                    translateY = beat * 5;
-                    scale = 1 + beat * 0.02;
-                    ctx.filter = `brightness(1 + ${beat * 0.2}) contrast(1.1)`;
+                    scale = 1.0 + beatPulse * 0.12;
+                    tx = (Math.random() - 0.5) * beatPulse * 15;
+                    ty = (Math.random() - 0.5) * beatPulse * 15;
                     break;
+
                 case 'cinematic':
-                    // Slow pan, subtle zoom, desaturated colors
-                    ctx.filter = `grayscale(0.3) contrast(1.1) brightness(1.05)`;
-                    scale = 1 + (time / totalDuration) * 0.1;
-                    translateX = Math.sin(time * 0.2) * 15;
-                    translateY = Math.cos(time * 0.2) * 10;
+                    ctx.filter = 'contrast(1.2) grayscale(0.25) brightness(0.9)';
+                    scale = 1.05;
+                    tx = Math.sin(time * 0.5) * 25;
                     break;
+
                 case 'manga_glitch':
-                    // Black and white, halftone-like effect with sudden glitches
-                    ctx.filter = `grayscale(1) contrast(2) brightness(0.8) blur(${Math.random() < 0.05 ? 2 : 0}px)`;
-                    if (Math.random() < 0.07) {
-                        ctx.filter += ` hue-rotate(${Math.random() * 360}deg)`;
-                        ctx.globalAlpha = 0.5 + Math.random() * 0.5;
+                    ctx.filter = 'grayscale(1) contrast(2.5)';
+                    if (Math.random() < 0.1) {
+                        ctx.filter = 'invert(1) grayscale(1) contrast(3)';
+                        tx = (Math.random() - 0.5) * 30;
                     }
                     break;
+
                 case 'cyberpunk':
-                    // Neon colors, chromatic aberration, scanlines
-                    const cybOffset = Math.sin(time * 18) * 8;
-                    ctx.filter = `contrast(1.5) saturate(2) brightness(1.2) hue-rotate(${Math.sin(time * 0.8) * 20}deg) drop-shadow(${cybOffset}px 0 0 rgba(0,255,255,0.5)) drop-shadow(${-cybOffset}px 0 0 rgba(255,0,255,0.5))`;
-                    translateX = Math.sin(time * 12) * 5;
-                    translateY = Math.cos(time * 10) * 5;
+                    ctx.filter = 'saturate(2.2) contrast(1.3) hue-rotate(140deg)';
+                    scale = 1.05 + Math.sin(time * 4) * 0.03;
                     break;
+
                 case 'retro_wave':
-                    // Purple/pink hues, gentle glow, slow movement
-                    ctx.filter = `saturate(1.5) contrast(1.2) brightness(1.1) hue-rotate(${Math.sin(time * 0.4) * 15 + 280}deg) drop-shadow(0 0 8px rgba(255,100,200,0.6))`;
-                    scale = 1 + Math.sin(time * 0.2) * 0.03;
-                    translateX = Math.sin(time * 0.5) * 8;
-                    translateY = Math.cos(time * 0.6) * 7;
+                    ctx.filter = 'saturate(1.8) hue-rotate(-20deg)';
+                    scale = 1.0 + Math.cos(time * 2) * 0.04;
                     break;
+
                 case 'hyperpop':
-                    // Extremely saturated, high contrast, rapid color shifts, quick zooms
-                    ctx.filter = `saturate(5) contrast(2) brightness(1.5) hue-rotate(${Math.sin(time * 10) * 180}deg)`;
-                    scale = 1 + Math.abs(Math.sin(time * 8)) * 0.1;
-                    translateX = Math.sin(time * 25) * 10;
-                    translateY = Math.cos(time * 20) * 10;
-                    break;
-                case 'ghosting':
-                    // Fading trails, subtle movement, desaturated
-                    ctx.filter = `grayscale(0.5) contrast(1.2)`;
-                    ctx.globalAlpha = 0.7 + Math.sin(time * 2) * 0.1; // Make it semi-transparent
-                    scale = 1 + Math.sin(time * 0.7) * 0.02;
-                    translateX = Math.sin(time * 0.9) * 10;
-                    translateY = Math.cos(time * 0.8) * 8;
-                    ctx.drawImage(canvas, 0, 0, width, height); // Draw previous frame for ghosting
+                    ctx.filter = 'saturate(3) contrast(1.8) hue-rotate(45deg)';
+                    scale = 1.1 + Math.sin(time * 12) * 0.08;
                     break;
             }
 
-            // Apply transformations
-            ctx.translate(width / 2 + translateX, height / 2 + translateY);
+            // Применение трансформации кадра
+            ctx.translate(RENDER_WIDTH / 2 + tx, RENDER_HEIGHT / 2 + ty);
             ctx.rotate(rotate);
             ctx.scale(scale, scale);
-            ctx.translate(-(width / 2), -(height / 2));
+            ctx.translate(-RENDER_WIDTH / 2, -RENDER_HEIGHT / 2);
 
-            // Draw image
-            ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
+            ctx.drawImage(img, dx, dy, dw, dh);
         }
 
-        // Initial setup for the canvas
-        function setupCanvas() {
-            canvas.width = 320;
-            canvas.height = 570;
-            ctx.imageSmoothingEnabled = true;
-            ctx.imageSmoothingQuality = 'high';
-        }
-
-        setupCanvas();
-
-        // Initial image load and template select to show something
-        const demoImageUrl = 'https://via.placeholder.com/320x570/000000/FFFFFF?text=PHONK'; // Example placeholder
-        const demoImage = new Image();
-        demoImage.src = demoImageUrl;
-        demoImage.onload = () => {
-            loadedImages.push(demoImage);
-            photoCountDisplay.textContent = `Загружено: 1 фото (демо)`;
-            // Draw initial image to canvas
-            ctx.drawImage(demoImage, 0, 0, canvas.width, canvas.height);
+        // Демо-кадр при загрузке
+        const initImg = new Image();
+        initImg.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="720" height="1280" viewBox="0 0 720 1280"><rect width="100%" height="100%" fill="%23000"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="48" font-weight="900" fill="%23ff0055">ЗАГРУЗИ СВОИ ФОТО</text></svg>';
+        initImg.onload = () => {
+            ctx.drawImage(initImg, 0, 0, RENDER_WIDTH, RENDER_HEIGHT);
         };
     </script>
 </body>
