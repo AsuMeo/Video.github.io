@@ -1,424 +1,107 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>P2P Mega Messenger</title>
-    <!-- Tailwind CSS CDN для стилизации -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        /* Общие стили для темной темы */
-        body {
-            font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif; /* Более современный шрифт */
-            background: #0f172a; /* Tailwind Slate 900 */
-            color: #e2e8f0; /* Tailwind Slate 200 */
-            -webkit-font-smoothing: antialiased; /* Сглаживание шрифтов для лучшего вида */
-            -moz-osx-font-smoothing: grayscale;
-        }
-
-        /* Контейнеры для видео */
-        .video-container {
-            position: relative;
-            border-radius: 1rem; /* Закругленные углы */
-            overflow: hidden;
-            background: #1e293b; /* Tailwind Slate 800 */
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); /* Легкая тень */
-        }
-        video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover; /* Заполнение контейнера видео, обрезая лишнее */
-        }
-        .local-video {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            width: 150px;
-            height: 100px;
-            border: 2px solid #3b82f6; /* Tailwind Blue 500 */
-            z-index: 10;
-        }
-
-        /* Эффект "Glassmorphism" для панелей */
-        .glass {
-            background: rgba(30, 41, 59, 0.7); /* Slate 800 с прозрачностью */
-            backdrop-filter: blur(10px); /* Размытие фона */
-            border: 1px solid rgba(255,255,255,0.1); /* Тонкая белая рамка */
-        }
-        
-        /* Стилизация сообщений чата (в стиле Telegram) */
-        #chatMessages {
-            display: flex; /* Flexbox для расположения сообщений */
-            flex-direction: column;
-            gap: 8px; /* Отступы между сообщениями */
-            padding: 1rem; /* Внутренний отступ окна чата */
-        }
-        .chat-message {
-            max-width: 80%;
-            padding: 0.5rem 0.75rem; /* Более плотные отступы для "пузырей" */
-            border-radius: 0.75rem; /* Закругленные углы */
-            word-wrap: break-word; /* Перенос слов для длинных сообщений */
-            line-height: 1.4; /* Высота строки для лучшей читаемости */
-            font-size: 0.95rem; /* Немного больший размер текста */
-        }
-        .chat-message.self {
-            background-color: #2563eb; /* Tailwind Blue 600 - Ваши сообщения */
-            align-self: flex-end; /* Выравнивание по правому краю */
-            border-bottom-right-radius: 0.25rem; /* Более острый уголок для "хвостика" сообщения */
-        }
-        .chat-message.other {
-            background-color: #334155; /* Tailwind Slate 700 - Сообщения собеседника */
-            align-self: flex-start; /* Выравнивание по левому краю */
-            border-bottom-left-radius: 0.25rem; /* Более острый уголок для "хвостика" сообщения */
-        }
-        .chat-message .user-info {
-            font-size: 0.7rem; /* Меньший шрифт для имени/времени */
-            opacity: 0.7;
-            margin-bottom: 2px;
-            text-align: right; /* Выравнивание для своих сообщений */
-            color: rgba(255,255,255,0.6);
-        }
-        .chat-message.other .user-info {
-             text-align: left; /* Выравнивание для сообщений собеседника */
-        }
-
-        /* Кастомный скроллбар для темной темы */
-        #chatMessages::-webkit-scrollbar {
-            width: 8px;
-            background-color: transparent;
-        }
-        #chatMessages::-webkit-scrollbar-thumb {
-            background-color: #4a5568; /* Tailwind Slate 600 */
-            border-radius: 4px;
-            border: 2px solid #0f172a; /* Цвет фона body */
-        }
-        #chatMessages::-webkit-scrollbar-thumb:hover {
-            background-color: #64748b; /* Tailwind Slate 500 */
-        }
-        /* Стили для Firefox */
-        #chatMessages {
-            scrollbar-width: thin;
-            scrollbar-color: #4a5568 #0f172a;
-        }
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#17212b">
+<title>Wave — защищённый P2P-мессенджер</title>
+<style>
+:root{color-scheme:dark;--bg:#0e1621;--side:#17212b;--head:#17212b;--panel:#202b36;--line:#0e1621;--text:#f5f5f5;--muted:#7f91a4;--blue:#2aabee;--blue2:#229ed9;--green:#4fae4e;--danger:#e65b65;--bubble:#182533;--mine:#2b5278;--input:#242f3d;--shadow:0 12px 36px #0007}
+*{box-sizing:border-box}html,body{height:100%;margin:0}body{font:14px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);overflow:hidden}button,input,textarea{font:inherit}.hidden{display:none!important}button{color:inherit}.app{height:100%;display:grid;grid-template-columns:370px minmax(0,1fr)}
+.sidebar{min-width:0;background:var(--side);border-right:1px solid #0a1018;display:flex;flex-direction:column;z-index:10}.side-head{height:58px;display:flex;align-items:center;gap:12px;padding:0 13px;border-bottom:1px solid #101923}.hamb,.icon{border:0;background:transparent;border-radius:50%;cursor:pointer;display:grid;place-items:center}.hamb{width:42px;height:42px;font-size:20px;color:#aebac6}.hamb:hover,.icon:hover{background:#ffffff0d}.search{flex:1;height:40px;border-radius:22px;background:#242f3d;display:flex;align-items:center;padding:0 14px;gap:9px;color:#6f8092}.search input{min-width:0;flex:1;background:transparent;border:0;outline:0;color:#fff}.search input::placeholder{color:#6f8092}
+.profile{display:flex;align-items:center;gap:12px;padding:14px 16px;background:#202b36;border-bottom:1px solid #101923}.avatar{width:48px;height:48px;flex:none;border-radius:50%;display:grid;place-items:center;background:linear-gradient(145deg,#52b8e9,#367cc2);font-size:17px;font-weight:700;color:#fff;position:relative}.avatar.small{width:42px;height:42px;font-size:14px}.status-dot{position:absolute;width:12px;height:12px;border:2px solid var(--side);border-radius:50%;background:#55c55a;right:0;bottom:1px}.profile-info{min-width:0;flex:1}.profile-name{font-weight:600;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.profile-sub{color:var(--muted);font-size:13px;margin-top:2px}.new-room{border:0;background:var(--blue2);width:42px;height:42px;border-radius:50%;font-size:23px;cursor:pointer;box-shadow:0 5px 15px #0004}.new-room:hover{background:var(--blue)}
+.room-box{padding:12px 15px;border-bottom:1px solid #101923}.room-label{font-size:12px;color:var(--blue);font-weight:600;text-transform:uppercase}.room-id{font:13px ui-monospace,SFMono-Regular,Consolas,monospace;margin:5px 0 9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.room-actions{display:flex;gap:8px}.mini{border:0;border-radius:7px;padding:7px 10px;background:#2b3948;cursor:pointer}.mini:hover{background:#344558}.mini.red{color:#ff7f88}.section-title{padding:12px 16px 7px;color:#708398;font-size:12px;text-transform:uppercase;font-weight:600}.people{overflow:auto;flex:1}.person{display:flex;align-items:center;gap:11px;padding:9px 14px;cursor:default}.person:hover{background:#202b36}.person-meta{min-width:0;flex:1}.person-name{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.person-state{color:var(--blue);font-size:13px}.empty-list{color:var(--muted);padding:15px;text-align:center}.side-foot{display:flex;border-top:1px solid #101923}.side-foot button{flex:1;border:0;background:transparent;padding:13px 8px;color:#8fa2b6;cursor:pointer}.side-foot button:hover{background:#202b36;color:#fff}
+.main{min-width:0;display:flex;flex-direction:column;background-color:#0e1621;background-image:radial-gradient(circle at 24px 24px,#ffffff07 2px,transparent 2px),radial-gradient(circle at 5px 35px,#ffffff05 1px,transparent 1px);background-size:56px 56px}.chat-head{height:58px;flex:none;display:flex;align-items:center;gap:12px;padding:0 15px;background:var(--head);box-shadow:0 1px 4px #0004;z-index:2}.mobile-back{display:none}.chat-info{min-width:0;flex:1}.chat-title{font-weight:600;font-size:15px}.chat-sub{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.head-actions{display:flex}.icon{width:42px;height:42px;font-size:19px;color:#aebac6}.icon:disabled{opacity:.3;cursor:not-allowed}.icon:disabled:hover{background:transparent}
+.welcome{margin:auto;width:min(92%,610px);text-align:center}.welcome-icon{width:92px;height:92px;margin:auto;border-radius:50%;display:grid;place-items:center;background:linear-gradient(145deg,#38afe9,#2377b6);font-size:40px;box-shadow:0 13px 35px #0005}.welcome h1{font-size:27px;margin:20px 0 7px}.welcome p{color:#9bacbd;font-size:15px;max-width:560px;margin:0 auto 22px}.welcome-actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}.btn{border:0;border-radius:9px;padding:10px 17px;background:#2b3948;cursor:pointer;font-weight:600}.btn:hover{background:#354659}.btn.primary{background:var(--blue2)}.btn.primary:hover{background:var(--blue)}.btn.danger{background:#59313a;color:#ffadb3}.btn:disabled{opacity:.45;cursor:not-allowed}.security-note{font-size:12px!important;margin-top:19px!important;color:#75879a!important}
+.chat{flex:1;min-height:0;display:flex;flex-direction:column}.messages{flex:1;overflow:auto;padding:18px max(16px,calc((100% - 880px)/2));scroll-behavior:smooth}.date-pill,.system{width:max-content;max-width:90%;margin:8px auto;padding:5px 11px;border-radius:14px;background:#182533d9;color:#a9bac9;font-size:12px;text-align:center}.message{display:flex;align-items:flex-end;gap:7px;margin:5px 0;max-width:min(76%,680px)}.message.mine{margin-left:auto;flex-direction:row-reverse}.msg-avatar{width:31px;height:31px;border-radius:50%;display:grid;place-items:center;background:#368ac2;font-size:11px;font-weight:700;flex:none}.bubble{position:relative;background:var(--bubble);border-radius:10px 10px 10px 3px;padding:7px 9px 5px;box-shadow:0 1px 2px #0005;min-width:85px;overflow-wrap:anywhere}.mine .bubble{background:var(--mine);border-radius:10px 10px 3px 10px}.sender{color:#55b7e8;font-size:12px;font-weight:700;margin-bottom:2px}.mine .sender{color:#a7d9f4}.msg-text{white-space:pre-wrap;font-size:14.5px}.msg-time{float:right;margin:6px 0 0 9px;font-size:10px;color:#87a0b4}.mine .msg-time{color:#a8c6dc}.ticks{color:#53bdeb;margin-left:3px}.composer-wrap{padding:8px max(10px,calc((100% - 910px)/2)) max(8px,env(safe-area-inset-bottom));flex:none}.composer{display:flex;align-items:flex-end;gap:6px}.input-box{flex:1;display:flex;align-items:flex-end;background:var(--input);border-radius:12px;padding:4px 7px 4px 11px;box-shadow:0 1px 3px #0004}.input-box textarea{flex:1;resize:none;max-height:130px;min-height:40px;padding:10px 4px;background:transparent;border:0;outline:0;color:#fff}.input-box textarea::placeholder{color:#77899b}.attach{width:38px;height:40px;border:0;background:transparent;color:#8496a8;font-size:20px;cursor:pointer}.send{width:48px;height:48px;flex:none;border:0;border-radius:50%;background:var(--blue2);font-size:20px;cursor:pointer;box-shadow:0 3px 9px #0005}.send:hover{background:var(--blue)}.send:disabled{opacity:.5}
+.scrim{display:none}.toastbox{position:fixed;right:16px;bottom:16px;z-index:80;display:flex;flex-direction:column;gap:7px}.toast{max-width:360px;background:#263443;border-radius:9px;padding:10px 14px;box-shadow:var(--shadow);animation:toast .2s ease}@keyframes toast{from{transform:translateY(8px);opacity:0}}
+dialog{width:min(92vw,510px);padding:0;border:0;border-radius:13px;background:#202b36;color:#fff;box-shadow:var(--shadow)}dialog::backdrop{background:#0009}.modal{padding:22px}.modal h2{font-size:20px;margin:0 0 7px}.modal p{color:#9cafc0}.field{display:block;margin:14px 0}.field span{display:block;font-size:12px;color:#8fa2b4;margin-bottom:5px}.field input,.field textarea{width:100%;border:1px solid #354556;border-radius:8px;background:#17212b;color:#fff;padding:10px 11px;outline:0}.field input:focus,.field textarea:focus{border-color:var(--blue)}.field textarea{height:150px;resize:vertical;font:11px/1.35 ui-monospace,monospace}.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}.tabs{display:flex;background:#17212b;padding:4px;border-radius:9px;margin:15px 0}.tab{flex:1;border:0;border-radius:7px;background:transparent;padding:8px;cursor:pointer}.tab.on{background:#2b3948}.hint{font-size:12px!important}.error{color:#ff8790!important}.ok{color:#66d58a!important}code{background:#17212b;padding:2px 5px;border-radius:4px}
+.call{position:fixed;inset:0;z-index:60;background:#080c12}.remote-video{width:100%;height:100%;object-fit:cover}.local-video{position:absolute;right:18px;top:18px;width:min(27vw,260px);aspect-ratio:9/13;object-fit:cover;border-radius:13px;background:#111b25;box-shadow:var(--shadow);border:1px solid #ffffff33}.call-shade{position:absolute;inset:0;background:linear-gradient(#0009,transparent 28%,transparent 65%,#000c);pointer-events:none}.audio-bg{position:absolute;inset:0;display:grid;place-items:center;background:radial-gradient(circle at center,#245a7d,#0c1520 60%)}.big-avatar{width:150px;height:150px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(145deg,#4eb8eb,#286eab);font-size:50px;font-weight:700;box-shadow:0 20px 50px #0006}.call-title{position:absolute;top:24px;left:25px;font-size:21px;font-weight:600}.call-state{position:absolute;top:55px;left:25px;color:#d1dbe4}.call-controls{position:absolute;bottom:max(28px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);display:flex;gap:14px}.call-btn{width:58px;height:58px;border-radius:50%;border:0;background:#ffffff26;backdrop-filter:blur(10px);font-size:21px;cursor:pointer}.call-btn.off{background:#fff;color:#17212b}.call-btn.hang{background:#e34f5f;transform:rotate(135deg)}
+@media(max-width:760px){.app{grid-template-columns:1fr}.sidebar{position:fixed;inset:0 14% 0 0;transform:translateX(-105%);transition:.2s;box-shadow:var(--shadow)}.sidebar.open{transform:none}.scrim.open{display:block;position:fixed;inset:0;z-index:9;background:#0008}.mobile-back{display:grid}.chat-head{padding-left:6px}.messages{padding:12px 8px}.message{max-width:88%}.welcome{padding:20px}.welcome h1{font-size:23px}.local-video{width:34vw}.head-actions .icon{width:38px}.composer-wrap{padding-inline:6px}}
+</style>
 </head>
-<body class="h-screen flex flex-col p-4">
+<body>
+<div class="app">
+<aside class="sidebar" id="sidebar">
+  <div class="side-head"><button class="hamb" id="menuInfo" title="Меню">☰</button><label class="search">⌕<input id="peopleSearch" placeholder="Поиск"></label></div>
+  <div class="profile"><div class="avatar" id="myAvatar">Я<span class="status-dot"></span></div><div class="profile-info"><div class="profile-name" id="myNameLabel">Защищённый мессенджер</div><div class="profile-sub">Firebase · WebRTC · E2EE</div></div><button class="new-room" id="newRoom" title="Создать комнату">＋</button></div>
+  <div class="room-box hidden" id="roomBox"><div class="room-label">Защищённая комната</div><div class="room-id" id="roomId">—</div><div class="room-actions"><button class="mini" id="copyInvite">🔗 Пригласить</button><button class="mini red" id="leaveRoom">Выйти</button></div></div>
+  <div class="section-title">Участники · <span id="peopleCount">0</span></div><div class="people" id="people"><div class="empty-list">Создайте комнату или войдите по ссылке</div></div>
+  <div class="side-foot"><button id="joinRoom">Войти</button><button id="settings">Настройки</button><button id="security">Безопасность</button></div>
+</aside><div class="scrim" id="scrim"></div>
+<main class="main">
+  <header class="chat-head"><button class="icon mobile-back" id="openSide">☰</button><div class="chat-info"><div class="chat-title" id="chatTitle">Wave</div><div class="chat-sub" id="chatSub">защищённый P2P-мессенджер</div></div><div class="head-actions"><button class="icon" id="audioCall" title="Аудиозвонок" disabled>☎</button><button class="icon" id="videoCall" title="Видеозвонок" disabled>▣</button><button class="icon" id="copyTop" title="Ссылка-приглашение" disabled>⋮</button></div></header>
+  <section class="welcome" id="welcome"><div class="welcome-icon">➤</div><h1>Wave Messenger</h1><p>Личные комнаты со сквозным шифрованием сообщений и P2P-аудио/видеозвонками. Firebase используется только для доставки шифротекста и WebRTC-сигналинга.</p><div class="welcome-actions"><button class="btn primary" id="welcomeNew">Создать комнату</button><button class="btn" id="welcomeJoin">Войти по ссылке</button></div><p class="security-note">Ключ комнаты хранится после символа # в ссылке и не отправляется GitHub Pages.</p></section>
+  <section class="chat hidden" id="chat"><div class="messages" id="messages"><div class="date-pill">Сегодня</div></div><div class="composer-wrap"><form class="composer" id="composer"><div class="input-box"><button type="button" class="attach" title="Файлы в этой версии отключены">⌕</button><textarea id="message" rows="1" maxlength="4000" placeholder="Сообщение"></textarea></div><button class="send" id="send" title="Отправить">➤</button></form></div></section>
+</main></div>
 
-    <!-- Header -->
-    <header class="flex justify-between items-center mb-6 glass p-4 rounded-2xl">
-        <h1 class="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">P2P Messenger</h1>
-        <div id="roomInfo" class="hidden flex items-center gap-2">
-            <span class="text-sm opacity-70">Комната:</span>
-            <code id="roomIdDisplay" class="bg-slate-800 px-2 py-1 rounded">---</code>
-            <button id="copyLink" class="text-xs bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded transition">Копировать ссылку</button>
-        </div>
-    </header>
+<section class="call hidden" id="call"><video class="remote-video" id="remoteVideo" autoplay playsinline></video><div class="audio-bg hidden" id="audioBg"><div class="big-avatar" id="callAvatar">?</div></div><video class="local-video" id="localVideo" autoplay playsinline muted></video><div class="call-shade"></div><div class="call-title" id="callTitle">Собеседник</div><div class="call-state" id="callState">Соединение…</div><div class="call-controls"><button class="call-btn" id="mute" title="Микрофон">🎙</button><button class="call-btn" id="camera" title="Камера">▣</button><button class="call-btn hang" id="hang" title="Завершить">☎</button></div></section>
+<div class="toastbox" id="toasts"></div>
 
-    <!-- Main Content -->
-    <main class="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-6 overflow-hidden">
-        
-        <!-- Video Section -->
-        <div class="lg:col-span-2 flex flex-col gap-4">
-            <div class="video-container flex-1 relative">
-                <video id="remoteVideo" autoplay playsinline class="rounded-xl"></video>
-                <video id="localVideo" autoplay playsinline muted class="local-video rounded-lg shadow-2xl"></video>
-                
-                <!-- Controls -->
-                <div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-4">
-                    <button id="toggleMic" class="p-4 rounded-full bg-slate-700 hover:bg-slate-600 transition shadow-lg text-2xl">🎤</button>
-                    <button id="toggleCam" class="p-4 rounded-full bg-slate-700 hover:bg-slate-600 transition shadow-lg text-2xl">📹</button>
-                    <button id="hangup" class="p-4 rounded-full bg-red-500 hover:bg-red-600 transition shadow-lg text-2xl">📞</button>
-                </div>
-            </div>
-        </div>
+<dialog id="roomDialog"><div class="modal"><h2>Защищённая комната</h2><div class="tabs"><button class="tab on" id="createTab">Создать</button><button class="tab" id="joinTab">Войти</button></div><div id="createPane"><p>Создадим случайный ID и 256-битный ключ. Отправьте приглашение собеседнику доверенным способом.</p></div><div id="joinPane" class="hidden"><label class="field"><span>Ссылка-приглашение или ID комнаты</span><input id="invite" autocomplete="off" placeholder="https://…/#room=…&key=…"></label><label class="field"><span>Ключ, если указан только ID</span><input id="keyInput" autocomplete="off" placeholder="Секретный ключ"></label></div><label class="field"><span>Ваше имя</span><input id="nameInput" maxlength="40" autocomplete="nickname" placeholder="Например, Алекс"></label><p class="hint error hidden" id="roomError"></p><div class="modal-actions"><button class="btn" data-close="roomDialog">Отмена</button><button class="btn primary" id="roomGo">Создать</button></div></div></dialog>
 
-        <!-- Chat Section -->
-        <div class="glass rounded-2xl flex flex-col overflow-hidden h-full">
-            <div class="p-4 border-b border-white/10 font-bold text-center">P2P Чат (Шифрованный)</div>
-            <div id="chatMessages" class="flex-1 overflow-y-auto">
-                <div class="text-sm opacity-50 text-center italic mt-4">Создайте комнату или подключитесь, чтобы начать чат</div>
-            </div>
-            <div class="p-4 flex gap-2 border-t border-white/10">
-                <input id="chatInput" type="text" placeholder="Сообщение..." class="flex-1 bg-slate-800 border-none rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none text-white">
-                <button id="sendBtn" class="bg-blue-600 p-2 rounded-lg hover:bg-blue-700 transition">➡️</button>
-            </div>
-        </div>
-    </main>
+<dialog id="settingsDialog"><div class="modal"><h2>Firebase</h2><p>Конфигурация уже встроена. В проекте должны быть включены <b>Authentication → Anonymous</b> и <b>Realtime Database</b>.</p><label class="field"><span>Текущая конфигурация</span><textarea id="configBox" readonly></textarea></label><p class="hint">Рекомендуемые правила Realtime Database:</p><label class="field"><textarea id="rulesBox" readonly></textarea></label><p class="hint" id="fbState">Подключение…</p><div class="modal-actions"><button class="btn" id="copyRules">Копировать rules</button><button class="btn primary" data-close="settingsDialog">Закрыть</button></div></div></dialog>
 
-    <!-- Welcome Modal -->
-    <div id="setupModal" class="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-        <div class="glass p-8 rounded-3xl max-w-md w-full text-center">
-            <h2 class="text-2xl font-bold mb-6">Добро пожаловать</h2>
-            <button id="createBtn" class="w-full bg-blue-600 hover:bg-blue-700 py-3 rounded-xl font-bold mb-4 transition">Создать новую комнату</button>
-            <div class="text-sm opacity-50 mb-4">ИЛИ</div>
-            <input id="joinInput" type="text" placeholder="ID комнаты" class="w-full bg-slate-800 border-none rounded-xl px-4 py-3 mb-2 text-center outline-none text-white">
-            <button id="joinBtn" class="w-full bg-emerald-600 hover:bg-emerald-700 py-3 rounded-xl font-bold transition">Присоединиться</button>
-        </div>
-    </div>
+<dialog id="securityDialog"><div class="modal"><h2>Безопасность</h2><p>Текст, имена участников и WebRTC-сигналинг шифруются в браузере алгоритмом <b>AES-256-GCM</b>. Звонки защищены обязательным для WebRTC шифрованием <b>DTLS-SRTP</b>.</p><p>Firebase всё ещё видит IP подключения, ID комнаты, случайные ID пользователей и время активности. При прямом P2P-звонке собеседник может определить ваш IP. Для сокрытия IP нужен собственный TURN-сервер и <code>iceTransportPolicy: "relay"</code>.</p><p class="hint">Это клиентское приложение без независимого аудита. Для критичных данных используйте проверенный мессенджер.</p><div class="modal-actions"><button class="btn primary" data-close="securityDialog">Понятно</button></div></div></dialog>
 
-    <!-- Firebase SDK -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-        import { getDatabase, ref, set, onValue, push, update, onChildAdded, remove } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
+<dialog id="incoming"><div class="modal"><h2 id="incomingTitle">Входящий звонок</h2><p id="incomingText">Собеседник звонит вам</p><div class="modal-actions"><button class="btn danger" id="decline">Отклонить</button><button class="btn primary" id="accept">Принять</button></div></div></dialog>
 
-        // === ВАША КОНФИГУРАЦИЯ FIREBASE ===
-        const firebaseConfig = {
-            apiKey: "AIzaSyBm0mIvHVznIeF2PoFk6dtdaiT5r877wyA",
-            authDomain: "meow-874ce.firebaseapp.com",
-            databaseURL: "https://meow-874ce-default-rtdb.europe-west1.firebasedatabase.app",
-            projectId: "meow-874ce",
-            storageBucket: "meow-874ce.firebasestorage.app",
-            messagingSenderId: "471541334599",
-            appId: "1:471541334599:web:567af3e7dbe70a37572762"
-        };
+<script type="module">
+import{initializeApp}from'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
+import{getAuth,signInAnonymously,onAuthStateChanged}from'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
+import{getDatabase,ref,set,push,remove,onValue,onChildAdded,onDisconnect,serverTimestamp,query,limitToLast}from'https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js';
 
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-
-        // WebRTC конфигурация (STUN-серверы)
-        const servers = {
-            iceServers: [
-                { urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302'] }
-            ],
-            iceCandidatePoolSize: 10,
-        };
-
-        let pc = null; 
-        let localStream = null;
-        let remoteStream = null;
-        let dataChannel = null;
-        let currentRoomId = null; // Для отслеживания текущей комнаты
-
-        // Элементы UI
-        const localVid = document.getElementById('localVideo');
-        const remoteVid = document.getElementById('remoteVideo');
-        const chatMessagesContainer = document.getElementById('chatMessages'); 
-        const chatInput = document.getElementById('chatInput');
-        const setupModal = document.getElementById('setupModal');
-
-        // Создание нового RTCPeerConnection
-        function createPeerConnection() {
-            pc = new RTCPeerConnection(servers);
-            if (localStream) {
-                localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
-            }
-            if (!remoteStream) remoteStream = new MediaStream();
-            if (!remoteVid.srcObject) remoteVid.srcObject = remoteStream; // Инициализация remoteVideo
-            
-            pc.ontrack = event => {
-                event.streams[0].getTracks().forEach(track => remoteStream.addTrack(track));
-                remoteVid.srcObject = remoteStream; // Обновляем srcObject
-            };
-        }
-
-        // 1. Инициализация камеры и микрофона
-        async function initMedia() {
-            try {
-                localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-                localVid.srcObject = localStream;
-                createPeerConnection(); // Создаем PeerConnection после получения потока
-            } catch (error) {
-                console.error("Ошибка доступа к камере/микрофону:", error);
-                alert("Не удалось получить доступ к камере или микрофону. Убедитесь, что разрешили доступ.");
-            }
-        }
-
-        // 2. Функция создания комнаты
-        async function createRoom() {
-            const roomRef = push(ref(db, 'rooms')); // Создаем уникальный ID комнаты
-            const roomId = roomRef.key;
-            currentRoomId = roomId;
-            
-            setupDataChannel(); // Создаем Data Channel для инициатора звонка
-
-            const offerDescription = await pc.createOffer();
-            await pc.setLocalDescription(offerDescription);
-
-            const offer = {
-                sdp: offerDescription.sdp,
-                type: offerDescription.type,
-            };
-
-            await set(ref(db, `rooms/${roomId}`), { offer }); // Записываем offer в Firebase
-            
-            // Слушаем ответ (answer) от другого пользователя
-            onValue(ref(db, `rooms/${roomId}/answer`), async (snapshot) => {
-                const data = snapshot.val();
-                if (data && !pc.currentRemoteDescription) {
-                    const answerDescription = new RTCSessionDescription(data);
-                    await pc.setRemoteDescription(answerDescription);
-                }
-            });
-
-            handleICE(roomId); // Обрабатываем ICE кандидатов
-            showUI(roomId); // Показываем UI для звонка
-        }
-
-        // 3. Функция подключения к комнате
-        async function joinRoom(roomId) {
-            currentRoomId = roomId;
-            const roomRef = ref(db, `rooms/${roomId}`);
-            const snapshot = await new Promise(resolve => onValue(roomRef, resolve, { onlyOnce: true }));
-            
-            if (!snapshot.exists()) return alert('Комната не найдена');
-
-            // Когда подключаемся к комнате, ожидаем, что Data Channel будет создан инициатором
-            pc.ondatachannel = (event) => {
-                dataChannel = event.channel;
-                setupDataChannelEvents();
-            };
-
-            const data = snapshot.val();
-            const offerDescription = data.offer;
-            await pc.setRemoteDescription(new RTCSessionDescription(offerDescription)); // Устанавливаем удаленный offer
-
-            const answerDescription = await pc.createAnswer();
-            await pc.setLocalDescription(answerDescription);
-
-            const answer = {
-                type: answerDescription.type,
-                sdp: answerDescription.sdp,
-            };
-
-            await update(ref(db, `rooms/${roomId}`), { answer }); // Отправляем наш answer в Firebase
-            
-            handleICE(roomId); // Обрабатываем ICE кандидатов
-            showUI(roomId); // Показываем UI для звонка
-        }
-
-        // 4. Обработка ICE кандидатов (для установки прямого P2P соединения)
-        function handleICE(roomId) {
-            const iceCandidatesRef = ref(db, `rooms/${roomId}/candidates`);
-            
-            pc.onicecandidate = event => {
-                if (event.candidate) {
-                    push(iceCandidatesRef, event.candidate.toJSON()); // Отправляем свои кандидаты в Firebase
-                }
-            };
-
-            onChildAdded(iceCandidatesRef, snapshot => {
-                const data = snapshot.val();
-                if (data) {
-                    pc.addIceCandidate(new RTCIceCandidate(data)); // Добавляем кандидаты собеседника
-                }
-            });
-        }
-
-        // 5. Data Channel (для текстового чата)
-        function setupDataChannel() {
-            dataChannel = pc.createDataChannel('chat');
-            setupDataChannelEvents();
-        }
-
-        function setupDataChannelEvents() {
-            dataChannel.onopen = () => addChatMessage('Система', 'Соединение установлено!');
-            dataChannel.onmessage = e => addChatMessage('Собеседник', e.data);
-            dataChannel.onclose = () => addChatMessage('Система', 'Соединение чата закрыто.');
-            dataChannel.onerror = (error) => console.error("Data Channel Error:", error);
-        }
-
-        function addChatMessage(user, text) {
-            const div = document.createElement('div');
-            div.className = `chat-message ${user === 'Вы' ? 'self' : 'other'}`;
-            div.innerHTML = `<div class="user-info">${user === 'Вы' ? 'Вы' : 'Собеседник'} - ${new Date().toLocaleTimeString()}</div><div>${text}</div>`;
-            chatMessagesContainer.appendChild(div);
-            chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight; // Прокрутка вниз
-        }
-
-        // Вспомогательные функции для UI
-        function showUI(roomId) {
-            setupModal.classList.add('hidden');
-            document.getElementById('roomInfo').classList.remove('hidden');
-            document.getElementById('roomIdDisplay').innerText = roomId;
-            window.history.pushState({}, '', `?room=${roomId}`); // Обновляем URL
-            // Удаляем начальное сообщение чата "Создайте комнату..."
-            const initialChatMsg = chatMessagesContainer.querySelector('.italic');
-            if(initialChatMsg) initialChatMsg.remove();
-        }
-
-        // Обработчики кнопок
-        document.getElementById('createBtn').onclick = async () => {
-            await initMedia();
-            createRoom();
-        };
-
-        document.getElementById('joinBtn').onclick = async () => {
-            const id = document.getElementById('joinInput').value.trim();
-            if (id) {
-                await initMedia();
-                joinRoom(id);
-            } else {
-                alert('Пожалуйста, введите ID комнаты.');
-            }
-        };
-
-        document.getElementById('sendBtn').onclick = () => {
-            const msg = chatInput.value.trim();
-            if (msg && dataChannel && dataChannel.readyState === 'open') {
-                dataChannel.send(msg);
-                addChatMessage('Вы', msg);
-                chatInput.value = '';
-            } else if (!dataChannel || dataChannel.readyState !== 'open') {
-                alert('Чат не подключен. Дождитесь соединения.');
-            }
-        };
-
-        document.getElementById('copyLink').onclick = () => {
-            navigator.clipboard.writeText(window.location.href);
-            // Визуальный фидбек
-            const copyButton = document.getElementById('copyLink');
-            const originalText = copyButton.innerText;
-            copyButton.innerText = 'Скопировано!';
-            setTimeout(() => { copyButton.innerText = originalText; }, 1500);
-        };
-
-        // Управление медиа
-        document.getElementById('toggleMic').onclick = () => {
-            if (localStream) {
-                const audioTrack = localStream.getAudioTracks()[0];
-                if (audioTrack) {
-                    audioTrack.enabled = !audioTrack.enabled;
-                    document.getElementById('toggleMic').classList.toggle('bg-red-500'); 
-                    document.getElementById('toggleMic').innerText = audioTrack.enabled ? '🎤' : '🔇';
-                }
-            }
-        };
-
-        document.getElementById('toggleCam').onclick = () => {
-            if (localStream) {
-                const videoTrack = localStream.getVideoTracks()[0];
-                if (videoTrack) {
-                    videoTrack.enabled = !videoTrack.enabled;
-                    document.getElementById('toggleCam').classList.toggle('bg-red-500'); 
-                    document.getElementById('toggleCam').innerText = videoTrack.enabled ? '📹' : '📸';
-                }
-            }
-        };
-
-        document.getElementById('hangup').onclick = () => {
-            if (pc) {
-                pc.close();
-            }
-            if (localStream) {
-                localStream.getTracks().forEach(track => track.stop());
-            }
-            // Можно очистить данные комнаты из Firebase, но это сложнее, если нужно, чтобы
-            // другой пользователь еще мог подключиться. Для простоты перезагружаем страницу.
-            // if (currentRoomId) {
-            //     remove(ref(db, `rooms/${currentRoomId}`)); 
-            // }
-            location.reload(); // Перезагружаем страницу, чтобы сбросить состояние
-        };
-
-        // Авто-вход по ссылке (если в URL есть параметр "room")
-        const urlParams = new URLSearchParams(window.location.search);
-        const urlRoomId = urlParams.get('room');
-        if (urlRoomId) {
-            document.getElementById('joinInput').value = urlRoomId;
-            // Можно автоматически вызвать joinRoom, но лучше, чтобы пользователь сам нажал кнопку.
-            // document.getElementById('joinBtn').click();
-        }
-
-    </script>
+const firebaseConfig={apiKey:"AIzaSyBm0mIvHVznIeF2PoFk6dtdaiT5r877wyA",authDomain:"meow-874ce.firebaseapp.com",databaseURL:"https://meow-874ce-default-rtdb.europe-west1.firebasedatabase.app",projectId:"meow-874ce",storageBucket:"meow-874ce.firebasestorage.app",messagingSenderId:"471541334599",appId:"1:471541334599:web:567af3e7dbe70a37572762"};
+const RULES=`{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "rooms": {
+      "$room": {
+        ".read": "auth != null",
+        "members": { "$uid": { ".write": "auth != null && auth.uid === $uid" } },
+        "messages": { "$id": { ".write": "auth != null && !data.exists()" } },
+        "signals": { "$id": { ".write": "auth != null" } }
+      }
+    }
+  }
+}`;
+const $=s=>document.querySelector(s),E={sidebar:$('#sidebar'),scrim:$('#scrim'),people:$('#people'),count:$('#peopleCount'),roomBox:$('#roomBox'),roomId:$('#roomId'),welcome:$('#welcome'),chat:$('#chat'),messages:$('#messages'),message:$('#message'),send:$('#send'),title:$('#chatTitle'),sub:$('#chatSub'),audio:$('#audioCall'),video:$('#videoCall'),copyTop:$('#copyTop'),call:$('#call'),remote:$('#remoteVideo'),local:$('#localVideo'),audioBg:$('#audioBg'),callTitle:$('#callTitle'),callState:$('#callState')};
+$('#configBox').value=JSON.stringify(firebaseConfig,null,2);$('#rulesBox').value=RULES;
+let app,auth,db,user,room='',secret='',key,myName='Гость',joined=false,unsubs=[],members=new Map(),seen=new Set();
+let pc,stream,activeCall,incomingCall,candidateCache=new Map();const te=new TextEncoder,td=new TextDecoder;
+const iceServers=[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'}];
+function toast(t){let x=document.createElement('div');x.className='toast';x.textContent=t;$('#toasts').append(x);setTimeout(()=>x.remove(),3500)}
+function bytes(n){let a=new Uint8Array(n);crypto.getRandomValues(a);return a}function b64(a){let s='';a.forEach(v=>s+=String.fromCharCode(v));return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')}function ub64(s){s=s.replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';let d=atob(s),a=new Uint8Array(d.length);for(let i=0;i<d.length;i++)a[i]=d.charCodeAt(i);return a}
+function initials(s){return(s||'?').trim().split(/\s+/).slice(0,2).map(x=>x[0]).join('').toUpperCase()||'?'}function safeRoom(s){return(s||'').trim().replace(/[^\w-]/g,'')}function time(v){return new Intl.DateTimeFormat('ru',{hour:'2-digit',minute:'2-digit'}).format(v||Date.now())}
+async function derive(s,r){let m=await crypto.subtle.importKey('raw',ub64(s),'HKDF',false,['deriveKey']);return crypto.subtle.deriveKey({name:'HKDF',hash:'SHA-256',salt:te.encode('wave:'+r),info:te.encode('wave-e2ee-v2')},m,{name:'AES-GCM',length:256},false,['encrypt','decrypt'])}
+async function seal(v){let iv=bytes(12),data=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,te.encode(JSON.stringify(v)));return{v:2,iv:b64(iv),ct:b64(new Uint8Array(data))}}async function open(p){let data=await crypto.subtle.decrypt({name:'AES-GCM',iv:ub64(p.iv)},key,ub64(p.ct));return JSON.parse(td.decode(data))}
+function inviteUrl(){let u=new URL(location.href);u.hash=new URLSearchParams({room,key:secret});return u.toString()}async function copy(t){try{await navigator.clipboard.writeText(t);toast('Скопировано')}catch{prompt('Скопируйте:',t)}}
+function openSidebar(){E.sidebar.classList.add('open');E.scrim.classList.add('open')}function closeSidebar(){E.sidebar.classList.remove('open');E.scrim.classList.remove('open')}
+try{app=initializeApp(firebaseConfig);auth=getAuth(app);db=getDatabase(app);await signInAnonymously(auth);onAuthStateChanged(auth,u=>{user=u;if(u){$('#fbState').textContent='✓ Firebase подключён';$('#fbState').className='hint ok';autoJoin()}})}catch(e){console.error(e);$('#fbState').textContent='Ошибка: '+e.message;$('#fbState').className='hint error';toast('Ошибка Firebase. Проверьте Authentication и Database Rules')}
+function autoJoin(){if(joined||!user)return;let p=new URLSearchParams(location.hash.slice(1));if(p.get('room')&&p.get('key')){setTab(false);$('#invite').value=location.href;showRoom(false)}}
+function setTab(create){$('#createTab').classList.toggle('on',create);$('#joinTab').classList.toggle('on',!create);$('#createPane').classList.toggle('hidden',!create);$('#joinPane').classList.toggle('hidden',create);$('#roomGo').textContent=create?'Создать':'Войти';$('#roomGo').dataset.mode=create?'create':'join'}
+function showRoom(create){if(!user)return toast('Firebase ещё подключается');setTab(create);$('#nameInput').value=localStorage.getItem('wave.name')||'';$('#roomError').classList.add('hidden');if(!$('#roomDialog').open)$('#roomDialog').showModal()}
+async function enter(r,s,n){try{room=safeRoom(r);secret=s.trim();if(room.length<6)throw Error('Некорректный ID комнаты');if(ub64(secret).length<16)throw Error('Некорректный ключ');key=await derive(secret,room);myName=(n.trim()||'Гость').slice(0,40);localStorage.setItem('wave.name',myName);let profile=await seal({name:myName}),mr=ref(db,`rooms/${room}/members/${user.uid}`);await set(mr,{profile,online:true,at:serverTimestamp()});await onDisconnect(mr).remove();joined=true;history.replaceState(null,'',inviteUrl());$('#myAvatar').childNodes[0].nodeValue=initials(myName);$('#myNameLabel').textContent=myName;E.roomBox.classList.remove('hidden');E.roomId.textContent=room;E.welcome.classList.add('hidden');E.chat.classList.remove('hidden');E.messages.innerHTML='<div class="date-pill">Сегодня</div>';E.title.textContent='Защищённая комната';E.sub.textContent='🔒 сквозное шифрование включено';E.copyTop.disabled=false;seen.clear();listen();$('#roomDialog').close();closeSidebar();toast('Вы вошли в комнату');setTimeout(()=>E.message.focus(),100)}catch(e){console.error(e);$('#roomError').textContent=e.message||'Ошибка подключения';$('#roomError').classList.remove('hidden')}}
+function listen(){unsubs.push(onValue(ref(db,`rooms/${room}/members`),async snap=>{let arr=[];for(let[id,v]of Object.entries(snap.val()||{})){try{let p=await open(v.profile);arr.push({id,name:p.name||'Гость'})}catch{arr.push({id,name:'Неизвестный'})}}if(!joined)return;members=new Map(arr.map(x=>[x.id,x]));renderPeople()}));unsubs.push(onChildAdded(query(ref(db,`rooms/${room}/messages`),limitToLast(250)),async s=>{if(seen.has(s.key))return;seen.add(s.key);let v=s.val();try{let m=await open(v.packet);renderMessage(v.sender,m.name,m.text,v.at)}catch(e){console.warn(e)}}));unsubs.push(onChildAdded(ref(db,`rooms/${room}/signals`),async s=>{let v=s.val();if(!joined||v.to!==user.uid)return;try{let d=await open(v.packet);await remove(s.ref);await signal(v.from,d)}catch(e){console.warn(e);remove(s.ref).catch(()=>{})}}))}
+function renderPeople(){let q=$('#peopleSearch').value.trim().toLowerCase(),arr=[...members.values()].filter(p=>p.name.toLowerCase().includes(q));E.people.replaceChildren();E.count.textContent=members.size;if(!arr.length){E.people.innerHTML='<div class="empty-list">Никого не найдено</div>'}for(let p of arr){let row=document.createElement('div');row.className='person';let a=document.createElement('div');a.className='avatar small';a.textContent=initials(p.name);let d=document.createElement('div');d.className='person-meta';let n=document.createElement('div');n.className='person-name';n.textContent=p.name+(p.id===user.uid?' (вы)':'');let s=document.createElement('div');s.className='person-state';s.textContent=p.id===user.uid?'это устройство':'в сети';d.append(n,s);row.append(a,d);E.people.append(row)}let peers=[...members.keys()].filter(x=>x!==user.uid);E.audio.disabled=E.video.disabled=!peers.length;E.sub.textContent=`🔒 ${members.size} участник${members.size===1?'':'а'} · E2EE`}
+function renderMessage(sender,name,text,at){let mine=sender===user.uid,row=document.createElement('div');row.className='message'+(mine?' mine':'');let a=document.createElement('div');a.className='msg-avatar';a.textContent=initials(name);let b=document.createElement('div');b.className='bubble';let h=document.createElement('div');h.className='sender';h.textContent=mine?'Вы':name;let t=document.createElement('div');t.className='msg-text';t.textContent=text;let tm=document.createElement('span');tm.className='msg-time';tm.textContent=time(at);if(mine){let tick=document.createElement('span');tick.className='ticks';tick.textContent=' ✓✓';tm.append(tick)}b.append(h,t,tm);row.append(a,b);E.messages.append(row);E.messages.scrollTop=E.messages.scrollHeight}
+async function sendMessage(){let text=E.message.value.trim();if(!text||!joined)return;E.send.disabled=true;try{await push(ref(db,`rooms/${room}/messages`),{sender:user.uid,packet:await seal({name:myName,text}),at:serverTimestamp()});E.message.value='';resize()}catch(e){console.error(e);toast('Сообщение не отправлено')}finally{E.send.disabled=false}}
+async function leave(){if(!joined)return;await endCall(false);unsubs.forEach(f=>f());unsubs=[];try{await remove(ref(db,`rooms/${room}/members/${user.uid}`))}catch{}joined=false;members.clear();room=secret='';key=null;history.replaceState(null,'',location.pathname+location.search);E.roomBox.classList.add('hidden');E.chat.classList.add('hidden');E.welcome.classList.remove('hidden');E.people.innerHTML='<div class="empty-list">Создайте комнату или войдите по ссылке</div>';E.count.textContent='0';E.title.textContent='Wave';E.sub.textContent='защищённый P2P-мессенджер';E.audio.disabled=E.video.disabled=E.copyTop.disabled=true;closeSidebar()}
+async function sendSignal(to,kind,body={},id=activeCall?.id){await push(ref(db,`rooms/${room}/signals`),{from:user.uid,to,packet:await seal({kind,body,id}),at:serverTimestamp()})}function peer(){return[...members.values()].find(x=>x.id!==user.uid)}
+function createPC(to){pc=new RTCPeerConnection({iceServers});pc.onicecandidate=e=>{if(e.candidate&&activeCall)sendSignal(to,'candidate',{candidate:e.candidate.toJSON()}).catch(console.error)};pc.ontrack=e=>E.remote.srcObject=e.streams[0]||new MediaStream([e.track]);pc.onconnectionstatechange=()=>{if(!pc)return;E.callState.textContent=({new:'Подготовка…',connecting:'Соединение…',connected:'Защищённый P2P-звонок',disconnected:'Связь прервана…',failed:'Не удалось соединиться',closed:'Завершено'})[pc.connectionState]||pc.connectionState;if(pc.connectionState==='failed')toast('Нужен TURN-сервер: прямое соединение недоступно')};return pc}
+async function media(video){return navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true},video:video?{width:{ideal:1280},height:{ideal:720},facingMode:'user'}:false})}
+function showCall(name,mode){E.call.classList.remove('hidden');E.callTitle.textContent=name;E.callState.textContent='Подготовка…';E.audioBg.classList.toggle('hidden',mode==='video');E.local.classList.toggle('hidden',mode!=='video');$('#camera').classList.toggle('hidden',mode!=='video');$('#callAvatar').textContent=initials(name)}
+async function startCall(video){let p=peer();if(!p)return toast('Нет собеседника в комнате');if(activeCall)return;try{activeCall={id:b64(bytes(12)),to:p.id,mode:video?'video':'audio'};showCall(p.name,activeCall.mode);stream=await media(video);E.local.srcObject=stream;createPC(p.id);stream.getTracks().forEach(t=>pc.addTrack(t,stream));let offer=await pc.createOffer();await pc.setLocalDescription(offer);await sendSignal(p.id,'offer',{description:pc.localDescription,mode:activeCall.mode});E.callState.textContent='Вызов…'}catch(e){console.error(e);toast('Разрешите доступ к микрофону/камере');await endCall(false)}}
+async function signal(from,s){if(s.kind==='offer'){if(activeCall||incomingCall){await sendSignal(from,'busy',{},s.id);return}incomingCall={from,id:s.id,description:s.body.description,mode:s.body.mode};let n=members.get(from)?.name||'Собеседник';$('#incomingTitle').textContent=s.body.mode==='video'?'Входящий видеозвонок':'Входящий аудиозвонок';$('#incomingText').textContent=n+' звонит вам';$('#incoming').showModal();return}if(s.kind==='candidate'){if(activeCall?.id===s.id&&pc?.remoteDescription){try{await pc.addIceCandidate(s.body.candidate)}catch(e){console.warn(e)}}else{let a=candidateCache.get(s.id)||[];a.push(s.body.candidate);candidateCache.set(s.id,a)}return}if(!activeCall||activeCall.id!==s.id)return;if(s.kind==='answer'){await pc.setRemoteDescription(s.body.description);await flush(s.id)}if(s.kind==='bye'){toast('Звонок завершён');await endCall(false)}if(s.kind==='decline'){toast('Звонок отклонён');await endCall(false)}if(s.kind==='busy'){toast('Собеседник занят');await endCall(false)}}
+async function flush(id){for(let c of candidateCache.get(id)||[])try{await pc.addIceCandidate(c)}catch(e){console.warn(e)}candidateCache.delete(id)}
+async function accept(){let i=incomingCall;if(!i)return;incomingCall=null;$('#incoming').close();try{activeCall={id:i.id,to:i.from,mode:i.mode};let n=members.get(i.from)?.name||'Собеседник';showCall(n,i.mode);stream=await media(i.mode==='video');E.local.srcObject=stream;createPC(i.from);stream.getTracks().forEach(t=>pc.addTrack(t,stream));await pc.setRemoteDescription(i.description);await flush(i.id);let answer=await pc.createAnswer();await pc.setLocalDescription(answer);await sendSignal(i.from,'answer',{description:pc.localDescription})}catch(e){console.error(e);toast('Не удалось принять звонок');await sendSignal(i.from,'decline',{},i.id).catch(()=>{});await endCall(false)}}
+async function decline(){let i=incomingCall;if(!i)return;incomingCall=null;$('#incoming').close();await sendSignal(i.from,'decline',{},i.id)}async function endCall(notify=true){let c=activeCall;if(notify&&c)await sendSignal(c.to,'bye',{},c.id).catch(()=>{});activeCall=null;if(pc){pc.ontrack=pc.onicecandidate=null;pc.close();pc=null}if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}E.remote.srcObject=E.local.srcObject=null;E.call.classList.add('hidden');$('#mute').classList.remove('off');$('#camera').classList.remove('off')}
+function resize(){E.message.style.height='auto';E.message.style.height=Math.min(E.message.scrollHeight,130)+'px'}
+$('#composer').onsubmit=e=>{e.preventDefault();sendMessage()};E.message.oninput=resize;E.message.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage()}};$('#newRoom').onclick=$('#welcomeNew').onclick=()=>showRoom(true);$('#joinRoom').onclick=$('#welcomeJoin').onclick=()=>showRoom(false);$('#createTab').onclick=()=>setTab(true);$('#joinTab').onclick=()=>setTab(false);
+$('#roomGo').onclick=()=>{let n=$('#nameInput').value||'Гость';if($('#roomGo').dataset.mode==='create')enter(b64(bytes(9)),b64(bytes(32)),n);else{let raw=$('#invite').value.trim(),r=raw,k=$('#keyInput').value.trim();try{let u=new URL(raw,location.href),p=new URLSearchParams(u.hash.slice(1));r=p.get('room')||raw;k=p.get('key')||k}catch{}enter(r,k,n)}};
+$('#copyInvite').onclick=E.copyTop.onclick=()=>copy(inviteUrl());$('#leaveRoom').onclick=leave;$('#peopleSearch').oninput=renderPeople;$('#openSide').onclick=openSidebar;E.scrim.onclick=closeSidebar;$('#menuInfo').onclick=()=>toast('Wave: комнаты, E2EE-сообщения и P2P-звонки');$('#settings').onclick=()=>$('#settingsDialog').showModal();$('#security').onclick=()=>$('#securityDialog').showModal();$('#copyRules').onclick=()=>copy(RULES);document.querySelectorAll('[data-close]').forEach(x=>x.onclick=()=>document.getElementById(x.dataset.close).close());
+E.audio.onclick=()=>startCall(false);E.video.onclick=()=>startCall(true);$('#accept').onclick=accept;$('#decline').onclick=decline;$('#hang').onclick=()=>endCall(true);$('#mute').onclick=()=>{let t=stream?.getAudioTracks()[0];if(t){t.enabled=!t.enabled;$('#mute').classList.toggle('off',!t.enabled);$('#mute').textContent=t.enabled?'🎙':'🔇'}};$('#camera').onclick=()=>{let t=stream?.getVideoTracks()[0];if(t){t.enabled=!t.enabled;$('#camera').classList.toggle('off',!t.enabled);$('#camera').textContent=t.enabled?'▣':'⊘'}};window.addEventListener('hashchange',autoJoin);window.addEventListener('beforeunload',()=>stream?.getTracks().forEach(t=>t.stop()));
+</script>
 </body>
-    </html>
+</html>
