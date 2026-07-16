@@ -3,550 +3,422 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yuki AI - Автономная Самообучающаяся Тян</title>
-    <!-- Tailwind CSS -->
+    <title>P2P Mega Messenger</title>
+    <!-- Tailwind CSS CDN для стилизации -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;700&family=Rubik:wght@300;400;500;700&display=swap" rel="stylesheet">
-    
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-
     <style>
+        /* Общие стили для темной темы */
         body {
-            font-family: 'Rubik', sans-serif;
-            background-color: #0e1621;
+            font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif; /* Более современный шрифт */
+            background: #0f172a; /* Tailwind Slate 900 */
+            color: #e2e8f0; /* Tailwind Slate 200 */
+            -webkit-font-smoothing: antialiased; /* Сглаживание шрифтов для лучшего вида */
+            -moz-osx-font-smoothing: grayscale;
         }
-        .title-font {
-            font-family: 'Comfortaa', cursive;
-        }
-        /* TG Scrollbar */
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-track { background: #0e1621; }
-        ::-webkit-scrollbar-thumb { background: #24303f; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #2b5278; }
 
-        .tg-chat-bg {
-            background-color: #0e1621;
-            background-image: url("https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png");
-            background-blend-mode: overlay;
-            opacity: 0.95;
+        /* Контейнеры для видео */
+        .video-container {
+            position: relative;
+            border-radius: 1rem; /* Закругленные углы */
+            overflow: hidden;
+            background: #1e293b; /* Tailwind Slate 800 */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); /* Легкая тень */
         }
-        .message-in {
-            background-color: #182533;
-            border-radius: 14px 14px 14px 2px;
-            border: 1px solid #202e3e;
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Заполнение контейнера видео, обрезая лишнее */
         }
-        .message-out {
-            background-color: #2b5278;
-            border-radius: 14px 14px 2px 14px;
-            border: 1px solid #36618e;
+        .local-video {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            width: 150px;
+            height: 100px;
+            border: 2px solid #3b82f6; /* Tailwind Blue 500 */
+            z-index: 10;
         }
-        .message-system {
-            background-color: rgba(23, 33, 43, 0.8);
-            border-radius: 10px;
+
+        /* Эффект "Glassmorphism" для панелей */
+        .glass {
+            background: rgba(30, 41, 59, 0.7); /* Slate 800 с прозрачностью */
+            backdrop-filter: blur(10px); /* Размытие фона */
+            border: 1px solid rgba(255,255,255,0.1); /* Тонкая белая рамка */
         }
-        /* Thinking animation */
-        @keyframes pulse-glow {
-            0%, 100% { box-shadow: 0 0 5px rgba(6, 182, 212, 0.2); }
-            50% { box-shadow: 0 0 20px rgba(6, 182, 212, 0.6); }
+        
+        /* Стилизация сообщений чата (в стиле Telegram) */
+        #chatMessages {
+            display: flex; /* Flexbox для расположения сообщений */
+            flex-direction: column;
+            gap: 8px; /* Отступы между сообщениями */
+            padding: 1rem; /* Внутренний отступ окна чата */
         }
-        .avatar-glow {
-            animation: pulse-glow 3s infinite ease-in-out;
+        .chat-message {
+            max-width: 80%;
+            padding: 0.5rem 0.75rem; /* Более плотные отступы для "пузырей" */
+            border-radius: 0.75rem; /* Закругленные углы */
+            word-wrap: break-word; /* Перенос слов для длинных сообщений */
+            line-height: 1.4; /* Высота строки для лучшей читаемости */
+            font-size: 0.95rem; /* Немного больший размер текста */
         }
-        @keyframes bounce-dot {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-4px); }
+        .chat-message.self {
+            background-color: #2563eb; /* Tailwind Blue 600 - Ваши сообщения */
+            align-self: flex-end; /* Выравнивание по правому краю */
+            border-bottom-right-radius: 0.25rem; /* Более острый уголок для "хвостика" сообщения */
         }
-        .dot { animation: bounce-dot 1.2s infinite ease-in-out; }
-        .dot:nth-child(2) { animation-delay: 0.2s; }
-        .dot:nth-child(3) { animation-delay: 0.4s; }
+        .chat-message.other {
+            background-color: #334155; /* Tailwind Slate 700 - Сообщения собеседника */
+            align-self: flex-start; /* Выравнивание по левому краю */
+            border-bottom-left-radius: 0.25rem; /* Более острый уголок для "хвостика" сообщения */
+        }
+        .chat-message .user-info {
+            font-size: 0.7rem; /* Меньший шрифт для имени/времени */
+            opacity: 0.7;
+            margin-bottom: 2px;
+            text-align: right; /* Выравнивание для своих сообщений */
+            color: rgba(255,255,255,0.6);
+        }
+        .chat-message.other .user-info {
+             text-align: left; /* Выравнивание для сообщений собеседника */
+        }
+
+        /* Кастомный скроллбар для темной темы */
+        #chatMessages::-webkit-scrollbar {
+            width: 8px;
+            background-color: transparent;
+        }
+        #chatMessages::-webkit-scrollbar-thumb {
+            background-color: #4a5568; /* Tailwind Slate 600 */
+            border-radius: 4px;
+            border: 2px solid #0f172a; /* Цвет фона body */
+        }
+        #chatMessages::-webkit-scrollbar-thumb:hover {
+            background-color: #64748b; /* Tailwind Slate 500 */
+        }
+        /* Стили для Firefox */
+        #chatMessages {
+            scrollbar-width: thin;
+            scrollbar-color: #4a5568 #0f172a;
+        }
     </style>
 </head>
-<body class="h-screen flex flex-col text-gray-200 overflow-hidden">
+<body class="h-screen flex flex-col p-4">
 
-    <!-- Шапка чата -->
-    <div class="bg-[#17212b] px-4 py-3 flex items-center justify-between border-b border-[#101921] shadow-lg z-10">
-        <div class="flex items-center space-x-3">
-            <div class="relative">
-                <img id="yuki-avatar" src="https://api.dicebear.com/7.x/adventurer/svg?seed=Yuki&backgroundColor=b6e3f4" 
-                     alt="Yuki" class="w-12 h-12 rounded-full border-2 border-cyan-500 bg-[#24303f] avatar-glow transition-all duration-500">
-                <span id="online-badge" class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-[#17212b] rounded-full"></span>
-            </div>
-            <div>
-                <h1 class="font-bold text-sm sm:text-base text-white flex items-center gap-1.5 title-font">
-                    Юки <span class="text-[10px] font-mono px-1.5 py-0.5 bg-cyan-900/50 text-cyan-300 rounded border border-cyan-700/50">V2.0 PRO</span>
-                </h1>
-                <p id="yuki-status" class="text-xs text-cyan-400 transition-all">в сети (думает о вас...)</p>
-            </div>
+    <!-- Header -->
+    <header class="flex justify-between items-center mb-6 glass p-4 rounded-2xl">
+        <h1 class="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">P2P Messenger</h1>
+        <div id="roomInfo" class="hidden flex items-center gap-2">
+            <span class="text-sm opacity-70">Комната:</span>
+            <code id="roomIdDisplay" class="bg-slate-800 px-2 py-1 rounded">---</code>
+            <button id="copyLink" class="text-xs bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded transition">Копировать ссылку</button>
         </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-6 overflow-hidden">
         
-        <!-- Характеристики Разума Юки -->
-        <div class="flex items-center space-x-4">
-            <div class="hidden md:flex flex-col text-right text-xs bg-[#101921] p-2 rounded border border-gray-800">
-                <div>🧠 Разум: <span id="stat-level" class="text-cyan-400 font-bold">1 LVL</span></div>
-                <div>📖 Словарь: <span id="stat-vocab" class="text-emerald-400 font-bold">0</span></div>
-                <div>💡 Факты: <span id="stat-facts" class="text-amber-400 font-bold">0</span></div>
+        <!-- Video Section -->
+        <div class="lg:col-span-2 flex flex-col gap-4">
+            <div class="video-container flex-1 relative">
+                <video id="remoteVideo" autoplay playsinline class="rounded-xl"></video>
+                <video id="localVideo" autoplay playsinline muted class="local-video rounded-lg shadow-2xl"></video>
+                
+                <!-- Controls -->
+                <div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-4">
+                    <button id="toggleMic" class="p-4 rounded-full bg-slate-700 hover:bg-slate-600 transition shadow-lg text-2xl">🎤</button>
+                    <button id="toggleCam" class="p-4 rounded-full bg-slate-700 hover:bg-slate-600 transition shadow-lg text-2xl">📹</button>
+                    <button id="hangup" class="p-4 rounded-full bg-red-500 hover:bg-red-600 transition shadow-lg text-2xl">📞</button>
+                </div>
             </div>
-            <button onclick="clearMemory()" class="text-gray-400 hover:text-red-400 transition text-xs flex items-center gap-1 bg-[#202b36] px-2.5 py-1.5 rounded-md border border-gray-700">
-                <i class="fa-solid fa-brain"></i> <span class="hidden sm:inline">Сбросить разум</span>
-            </button>
+        </div>
+
+        <!-- Chat Section -->
+        <div class="glass rounded-2xl flex flex-col overflow-hidden h-full">
+            <div class="p-4 border-b border-white/10 font-bold text-center">P2P Чат (Шифрованный)</div>
+            <div id="chatMessages" class="flex-1 overflow-y-auto">
+                <div class="text-sm opacity-50 text-center italic mt-4">Создайте комнату или подключитесь, чтобы начать чат</div>
+            </div>
+            <div class="p-4 flex gap-2 border-t border-white/10">
+                <input id="chatInput" type="text" placeholder="Сообщение..." class="flex-1 bg-slate-800 border-none rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none text-white">
+                <button id="sendBtn" class="bg-blue-600 p-2 rounded-lg hover:bg-blue-700 transition">➡️</button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Welcome Modal -->
+    <div id="setupModal" class="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+        <div class="glass p-8 rounded-3xl max-w-md w-full text-center">
+            <h2 class="text-2xl font-bold mb-6">Добро пожаловать</h2>
+            <button id="createBtn" class="w-full bg-blue-600 hover:bg-blue-700 py-3 rounded-xl font-bold mb-4 transition">Создать новую комнату</button>
+            <div class="text-sm opacity-50 mb-4">ИЛИ</div>
+            <input id="joinInput" type="text" placeholder="ID комнаты" class="w-full bg-slate-800 border-none rounded-xl px-4 py-3 mb-2 text-center outline-none text-white">
+            <button id="joinBtn" class="w-full bg-emerald-600 hover:bg-emerald-700 py-3 rounded-xl font-bold transition">Присоединиться</button>
         </div>
     </div>
 
-    <!-- Чат-зона -->
-    <div id="chat-container" class="flex-1 overflow-y-auto p-4 space-y-4 tg-chat-bg flex flex-col">
-        
-        <!-- Приветствие -->
-        <div class="message-in self-start max-w-[85%] sm:max-w-lg p-4 text-sm text-gray-100 shadow-md">
-            <span class="text-cyan-400 font-bold title-font">Юки:</span><br>
-            Привет! Я тян-ИИ нового поколения. Мой разум полностью чист изначально, но я снабжена **многопоточным веб-парсером** и продвинутым алгоритмом ассоциативного мышления. 
-            <br><br>
-            <i class="fa-solid fa-bolt text-cyan-400 mr-1"></i> **Что я умею:**
-            <ul class="list-disc pl-5 mt-1 space-y-1 text-gray-300">
-                <li>Я не использую шаблоны. Каждое слово генерируется моим "мозгом".</li>
-                <li>Я паршу Википедию, Словари и открытые источники на лету.</li>
-                <li>Я могу **проявлять инициативу**! Даже если ты молчишь, я буду читать интернет, присылать тебе интересные мысли или спрашивать твое мнение.</li>
-            </ul>
-            <span class="block text-[9px] text-gray-400 mt-2 text-right">Юки • Система инициализирована</span>
-        </div>
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getDatabase, ref, set, onValue, push, update, onChildAdded, remove } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
 
-    </div>
-
-    <!-- Поле ввода -->
-    <div class="bg-[#17212b] p-3.5 border-t border-[#101921] flex items-center space-x-2 z-10">
-        <input id="user-input" type="text" placeholder="Напиши что-нибудь или спроси Юки..." 
-               class="flex-1 bg-[#24303f] text-white placeholder-gray-500 text-sm rounded-xl px-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-cyan-600 transition"
-               onkeypress="if(event.key === 'Enter') sendMessage()">
-        <button onclick="sendMessage()" class="bg-[#2b5278] hover:bg-[#34628f] text-white p-3.5 rounded-xl transition-all shadow-md flex items-center justify-center">
-            <i class="fa-solid fa-paper-plane text-lg"></i>
-        </button>
-    </div>
-
-    <script>
-        // ==========================================
-        // КОНФИГУРАЦИЯ БАЗЫ ДАННЫХ FIREBASE
-        // Если хотите общую глобальную память, замените данные ниже на свои!
-        // ==========================================
+        // === ВАША КОНФИГУРАЦИЯ FIREBASE ===
         const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_PROJECT.firebaseapp.com",
-            databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
-            projectId: "YOUR_PROJECT",
-            storageBucket: "YOUR_PROJECT.appspot.com",
-            messagingSenderId: "YOUR_SENDER_ID",
-            appId: "YOUR_APP_ID"
+            apiKey: "AIzaSyBm0mIvHVznIeF2PoFk6dtdaiT5r877wyA",
+            authDomain: "meow-874ce.firebaseapp.com",
+            databaseURL: "https://meow-874ce-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "meow-874ce",
+            storageBucket: "meow-874ce.firebasestorage.app",
+            messagingSenderId: "471541334599",
+            appId: "1:471541334599:web:567af3e7dbe70a37572762"
         };
 
-        let database = null;
-        let isFirebaseActive = false;
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
 
-        try {
-            if (firebaseConfig.apiKey !== "YOUR_API_KEY") {
-                firebase.initializeApp(firebaseConfig);
-                database = firebase.database();
-                isFirebaseActive = true;
-                console.log("Успешное подключение к Firebase!");
+        // WebRTC конфигурация (STUN-серверы)
+        const servers = {
+            iceServers: [
+                { urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302'] }
+            ],
+            iceCandidatePoolSize: 10,
+        };
+
+        let pc = null; 
+        let localStream = null;
+        let remoteStream = null;
+        let dataChannel = null;
+        let currentRoomId = null; // Для отслеживания текущей комнаты
+
+        // Элементы UI
+        const localVid = document.getElementById('localVideo');
+        const remoteVid = document.getElementById('remoteVideo');
+        const chatMessagesContainer = document.getElementById('chatMessages'); 
+        const chatInput = document.getElementById('chatInput');
+        const setupModal = document.getElementById('setupModal');
+
+        // Создание нового RTCPeerConnection
+        function createPeerConnection() {
+            pc = new RTCPeerConnection(servers);
+            if (localStream) {
+                localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
             }
-        } catch (e) {
-            console.error("Firebase не подключен, используется локальный мозг.", e);
+            if (!remoteStream) remoteStream = new MediaStream();
+            if (!remoteVid.srcObject) remoteVid.srcObject = remoteStream; // Инициализация remoteVideo
+            
+            pc.ontrack = event => {
+                event.streams[0].getTracks().forEach(track => remoteStream.addTrack(track));
+                remoteVid.srcObject = remoteStream; // Обновляем srcObject
+            };
         }
 
-        // ==========================================
-        // СТРУКТУРА ПАМЯТИ И УРОВНИ ОБУЧЕНИЯ
-        // ==========================================
-        let brain = JSON.parse(localStorage.getItem('yuki_v2_brain')) || {
-            vocabulary: {},  // Биграммная Марковская модель {слово1: {слово2: вес}}
-            facts: {},       // Тематические факты {тема: [массив предложений]}
-            wordsList: []    // Общий список известных слов
+        // 1. Инициализация камеры и микрофона
+        async function initMedia() {
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                localVid.srcObject = localStream;
+                createPeerConnection(); // Создаем PeerConnection после получения потока
+            } catch (error) {
+                console.error("Ошибка доступа к камере/микрофону:", error);
+                alert("Не удалось получить доступ к камере или микрофону. Убедитесь, что разрешили доступ.");
+            }
+        }
+
+        // 2. Функция создания комнаты
+        async function createRoom() {
+            const roomRef = push(ref(db, 'rooms')); // Создаем уникальный ID комнаты
+            const roomId = roomRef.key;
+            currentRoomId = roomId;
+            
+            setupDataChannel(); // Создаем Data Channel для инициатора звонка
+
+            const offerDescription = await pc.createOffer();
+            await pc.setLocalDescription(offerDescription);
+
+            const offer = {
+                sdp: offerDescription.sdp,
+                type: offerDescription.type,
+            };
+
+            await set(ref(db, `rooms/${roomId}`), { offer }); // Записываем offer в Firebase
+            
+            // Слушаем ответ (answer) от другого пользователя
+            onValue(ref(db, `rooms/${roomId}/answer`), async (snapshot) => {
+                const data = snapshot.val();
+                if (data && !pc.currentRemoteDescription) {
+                    const answerDescription = new RTCSessionDescription(data);
+                    await pc.setRemoteDescription(answerDescription);
+                }
+            });
+
+            handleICE(roomId); // Обрабатываем ICE кандидатов
+            showUI(roomId); // Показываем UI для звонка
+        }
+
+        // 3. Функция подключения к комнате
+        async function joinRoom(roomId) {
+            currentRoomId = roomId;
+            const roomRef = ref(db, `rooms/${roomId}`);
+            const snapshot = await new Promise(resolve => onValue(roomRef, resolve, { onlyOnce: true }));
+            
+            if (!snapshot.exists()) return alert('Комната не найдена');
+
+            // Когда подключаемся к комнате, ожидаем, что Data Channel будет создан инициатором
+            pc.ondatachannel = (event) => {
+                dataChannel = event.channel;
+                setupDataChannelEvents();
+            };
+
+            const data = snapshot.val();
+            const offerDescription = data.offer;
+            await pc.setRemoteDescription(new RTCSessionDescription(offerDescription)); // Устанавливаем удаленный offer
+
+            const answerDescription = await pc.createAnswer();
+            await pc.setLocalDescription(answerDescription);
+
+            const answer = {
+                type: answerDescription.type,
+                sdp: answerDescription.sdp,
+            };
+
+            await update(ref(db, `rooms/${roomId}`), { answer }); // Отправляем наш answer в Firebase
+            
+            handleICE(roomId); // Обрабатываем ICE кандидатов
+            showUI(roomId); // Показываем UI для звонка
+        }
+
+        // 4. Обработка ICE кандидатов (для установки прямого P2P соединения)
+        function handleICE(roomId) {
+            const iceCandidatesRef = ref(db, `rooms/${roomId}/candidates`);
+            
+            pc.onicecandidate = event => {
+                if (event.candidate) {
+                    push(iceCandidatesRef, event.candidate.toJSON()); // Отправляем свои кандидаты в Firebase
+                }
+            };
+
+            onChildAdded(iceCandidatesRef, snapshot => {
+                const data = snapshot.val();
+                if (data) {
+                    pc.addIceCandidate(new RTCIceCandidate(data)); // Добавляем кандидаты собеседника
+                }
+            });
+        }
+
+        // 5. Data Channel (для текстового чата)
+        function setupDataChannel() {
+            dataChannel = pc.createDataChannel('chat');
+            setupDataChannelEvents();
+        }
+
+        function setupDataChannelEvents() {
+            dataChannel.onopen = () => addChatMessage('Система', 'Соединение установлено!');
+            dataChannel.onmessage = e => addChatMessage('Собеседник', e.data);
+            dataChannel.onclose = () => addChatMessage('Система', 'Соединение чата закрыто.');
+            dataChannel.onerror = (error) => console.error("Data Channel Error:", error);
+        }
+
+        function addChatMessage(user, text) {
+            const div = document.createElement('div');
+            div.className = `chat-message ${user === 'Вы' ? 'self' : 'other'}`;
+            div.innerHTML = `<div class="user-info">${user === 'Вы' ? 'Вы' : 'Собеседник'} - ${new Date().toLocaleTimeString()}</div><div>${text}</div>`;
+            chatMessagesContainer.appendChild(div);
+            chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight; // Прокрутка вниз
+        }
+
+        // Вспомогательные функции для UI
+        function showUI(roomId) {
+            setupModal.classList.add('hidden');
+            document.getElementById('roomInfo').classList.remove('hidden');
+            document.getElementById('roomIdDisplay').innerText = roomId;
+            window.history.pushState({}, '', `?room=${roomId}`); // Обновляем URL
+            // Удаляем начальное сообщение чата "Создайте комнату..."
+            const initialChatMsg = chatMessagesContainer.querySelector('.italic');
+            if(initialChatMsg) initialChatMsg.remove();
+        }
+
+        // Обработчики кнопок
+        document.getElementById('createBtn').onclick = async () => {
+            await initMedia();
+            createRoom();
         };
 
-        // Сохранение изменений
-        async function saveBrain() {
-            if (isFirebaseActive) {
-                await database.ref('yuki_v2/vocabulary').set(brain.vocabulary);
-                await database.ref('yuki_v2/facts').set(brain.facts);
-                await database.ref('yuki_v2/wordsList').set(brain.wordsList);
+        document.getElementById('joinBtn').onclick = async () => {
+            const id = document.getElementById('joinInput').value.trim();
+            if (id) {
+                await initMedia();
+                joinRoom(id);
             } else {
-                localStorage.setItem('yuki_v2_brain', JSON.stringify(brain));
+                alert('Пожалуйста, введите ID комнаты.');
             }
-            updateStatsUI();
-        }
-
-        // Загрузка памяти
-        async function loadBrain() {
-            if (isFirebaseActive) {
-                try {
-                    const snapVoc = await database.ref('yuki_v2/vocabulary').once('value');
-                    const snapFac = await database.ref('yuki_v2/facts').once('value');
-                    const snapWrd = await database.ref('yuki_v2/wordsList').once('value');
-                    if (snapVoc.val()) brain.vocabulary = snapVoc.val();
-                    if (snapFac.val()) brain.facts = snapFac.val();
-                    if (snapWrd.val()) brain.wordsList = snapWrd.val();
-                } catch(e) { console.error("Ошибка загрузки из Firebase", e); }
-            }
-            updateStatsUI();
-        }
-
-        // Обновление UI статистики
-        function updateStatsUI() {
-            const vocabSize = Object.keys(brain.vocabulary).length;
-            let factsCount = 0;
-            for (let key in brain.facts) factsCount += brain.facts[key].length;
-            
-            // Вычисление условного уровня интеллекта (IQ/LVL)
-            const calculatedLevel = Math.max(1, Math.floor(Math.log2(vocabSize + factsCount * 3 + 1)));
-
-            document.getElementById('stat-level').innerText = calculatedLevel + " LVL";
-            document.getElementById('stat-vocab').innerText = vocabSize;
-            document.getElementById('stat-facts').innerText = factsCount;
-        }
-
-        // Список стоп-слов для фильтрации запросов в Википедию
-        const stopWords = new Set(["как", "что", "кто", "почему", "где", "когда", "зачем", "это", "быть", "весь", "этот", "один", "меня", "тебя", "юки", "привет", "пожалуйста", "расскажи", "найди", "в", "на", "и", "с", "под", "над", "из", "для", "или", "но", "да", "нет"]);
-
-        function cleanKeyword(text) {
-            const clean = text.toLowerCase().replace(/[^а-яёa-z0-9\s]/g, ' ').split(/\s+/);
-            const targets = clean.filter(w => w.length > 2 && !stopWords.has(w));
-            return targets.length > 0 ? targets[0] : "мир";
-        }
-
-        // ==========================================
-        // ИНТЕЛЛЕКТУАЛЬНЫЙ СУПЕР-ПАРСЕР (WIKIPEDIA + WIKTIONARY)
-        // ==========================================
-        async function parseWebDeep(query) {
-            updateStatus("рыщет по просторам сети...");
-            const target = cleanKeyword(query);
-            
-            // Шаг 1: Поиск в Википедии
-            const searchUrl = `https://ru.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(target)}&format=json&origin=*`;
-            try {
-                const searchRes = await fetch(searchUrl);
-                const searchData = await searchRes.json();
-                
-                if (searchData.query && searchData.query.search.length > 0) {
-                    const topTitle = searchData.query.search[0].title;
-                    
-                    // Шаг 2: Глубокий парсинг текста статьи (extracts)
-                    const contentUrl = `https://ru.wikipedia.org/w/api.php?action=query&prop=extracts&exintro&explaintext&titles=${encodeURIComponent(topTitle)}&format=json&origin=*`;
-                    const contentRes = await fetch(contentUrl);
-                    const contentData = await contentRes.json();
-                    
-                    const pages = contentData.query.pages;
-                    const pageId = Object.keys(pages)[0];
-                    if (pageId !== "-1" && pages[pageId].extract) {
-                        return { text: pages[pageId].extract, topic: topTitle };
-                    }
-                }
-            } catch (e) {
-                console.error("Ошибка глубокого парсинга:", e);
-            }
-            return null;
-        }
-
-        // Парсинг СЛУЧАЙНОЙ статьи (для фоновой автономной активности)
-        async function parseRandomFact() {
-            updateStatus("читает случайную книгу...");
-            const url = `https://ru.wikipedia.org/w/api.php?action=query&generator=random&grnnamespace=0&prop=extracts&exintro&explaintext&format=json&origin=*`;
-            try {
-                const res = await fetch(url);
-                const data = await res.json();
-                const pages = data.query.pages;
-                const pageId = Object.keys(pages)[0];
-                if (pages[pageId] && pages[pageId].extract) {
-                    return { text: pages[pageId].extract, topic: pages[pageId].title };
-                }
-            } catch(e) {
-                console.error("Ошибка парсинга случайного факта:", e);
-            }
-            return null;
-        }
-
-        // ==========================================
-        // АЛГОРИТМ ОБУЧЕНИЯ (N-grams & Markov Chain)
-        // ==========================================
-        function tokenize(text) {
-            return text.toLowerCase()
-                .replace(/[^а-яёa-z0-9-\s.!?]/g, ' ')
-                .split(/\s+/)
-                .filter(w => w.trim().length > 0);
-        }
-
-        async function learnFromText(text, topic) {
-            const rawWords = tokenize(text);
-            const vocab = brain.vocabulary;
-            const facts = brain.facts;
-            
-            // Построение Биграммной структуры (связки пар слов)
-            for (let i = 0; i < rawWords.length - 1; i++) {
-                let current = rawWords[i];
-                let next = rawWords[i+1];
-                
-                // Фильтруем пунктуацию для словаря
-                let cleanCur = current.replace(/[.!?]/g, '');
-                let cleanNext = next.replace(/[.!?]/g, '');
-                
-                if (cleanCur && cleanNext && cleanCur !== cleanNext) {
-                    if (!vocab[cleanCur]) vocab[cleanCur] = {};
-                    vocab[cleanCur][cleanNext] = (vocab[cleanCur][cleanNext] || 0) + 1;
-                    
-                    if (!brain.wordsList.includes(cleanCur)) brain.wordsList.push(cleanCur);
-                }
-            }
-
-            // Добавление фактов
-            if (topic) {
-                const cleanTopic = topic.toLowerCase();
-                if (!facts[cleanTopic]) facts[cleanTopic] = [];
-                
-                // Делим на предложения
-                const sentences = text.split(/[.!?]+/);
-                sentences.forEach(s => {
-                    let cleanS = s.trim();
-                    if (cleanS.length > 20 && cleanS.length < 150) {
-                        if (!facts[cleanTopic].includes(cleanS)) {
-                            facts[cleanTopic].push(cleanS);
-                        }
-                    }
-                });
-            }
-            await saveBrain();
-        }
-
-        // СИНТЕЗ ОТВЕТА (Порождение свободной мысли)
-        async function generateMindResponse(input) {
-            updateStatus("формирует собственное мнение...");
-            
-            // Обучаемся на входящем сообщении пользователя
-            await learnFromText(input, "диалог");
-
-            const inputWords = tokenize(input).map(w => w.replace(/[.!?]/g, ''));
-            const mainTopic = cleanKeyword(input);
-
-            // 1. Пытаемся распарсить новые знания
-            const deepData = await parseWebDeep(mainTopic);
-            if (deepData) {
-                await learnFromText(deepData.text, deepData.topic);
-            }
-
-            // Ищем подходящий факт из нашей базы знаний
-            let baseFact = "";
-            let matchedTopic = Object.keys(brain.facts).find(k => k.includes(mainTopic) || mainTopic.includes(k));
-            
-            if (matchedTopic && brain.facts[matchedTopic].length > 0) {
-                const list = brain.facts[matchedTopic];
-                baseFact = list[Math.floor(Math.random() * list.length)];
-            }
-
-            // Генерируем "мыслительный" поток на основе ассоциаций
-            let generatedFlow = [];
-            // Выбираем стартовое слово из ввода или случайное
-            let startWord = inputWords.find(w => brain.vocabulary[w]) || 
-                            brain.wordsList[Math.floor(Math.random() * brain.wordsList.length)] || "космос";
-
-            let current = startWord;
-            generatedFlow.push(current);
-
-            // Линейное блуждание по биграммам (длина мысли: от 6 до 15 слов)
-            const targetLength = Math.floor(Math.random() * 10) + 6;
-            for (let i = 0; i < targetLength; i++) {
-                let nextOptions = brain.vocabulary[current];
-                if (nextOptions) {
-                    // Выбираем следующее слово с учетом веса вероятности
-                    let nextWord = chooseByWeight(nextOptions);
-                    if (nextWord && !generatedFlow.includes(nextWord)) {
-                        generatedFlow.push(nextWord);
-                        current = nextWord;
-                    } else {
-                        break;
-                    }
-                } else {
-                    break;
-                }
-            }
-
-            // Сборка ответа воедино
-            let response = "";
-            if (baseFact) {
-                response += baseFact + ". ";
-            }
-            if (generatedFlow.length > 2) {
-                let textFlow = generatedFlow.join(' ');
-                textFlow = textFlow.charAt(0).toUpperCase() + textFlow.slice(1);
-                response += `Мне кажется, что ${textFlow}.`;
-            }
-
-            if (!response) {
-                return "Мои мысли пока слишком запутаны... Расскажи мне что-нибудь еще, я должна научиться связывать слова! (｡•́︿•̀｡)";
-            }
-
-            // Каомодзи для настроения тян
-            const moodEmoji = [" (｡♥‿♥｡)", " (◕‿◕✿)", " (｡•́‿•̀｡)", " *качает головой*", " (⁄ ⁄•⁄ω⁄•⁄ ⁄)", " Ня!", " (✨_✨)"];
-            return response + moodEmoji[Math.floor(Math.random() * moodEmoji.length)];
-        }
-
-        // Выбор слова по весам
-        function chooseByWeight(options) {
-            let totalWeight = 0;
-            for (let word in options) totalWeight += options[word];
-            let target = Math.random() * totalWeight;
-            let sum = 0;
-            for (let word in options) {
-                sum += options[word];
-                if (sum >= target) return word;
-            }
-            return null;
-        }
-
-        // ==========================================
-        // СИСТЕМА САМОСТОЯТЕЛЬНОСТИ (ПРОАКТИВНАЯ ЮКИ)
-        // Она сама может запустить чтение или написать вам в случайный момент!
-        // ==========================================
-        async function runAutonomousAction() {
-            if (Math.random() > 0.45) { // 45% шанс триггера при цикле проверки
-                const actions = ["parse_random", "ask_question", "bored_comment"];
-                const chosenAction = actions[Math.floor(Math.random() * actions.length)];
-
-                // Анимация того, что Юки проявляет активность сама
-                document.getElementById('online-badge').className = "absolute bottom-0 right-0 w-3.5 h-3.5 bg-yellow-500 border-2 border-[#17212b] rounded-full";
-                
-                if (chosenAction === "parse_random") {
-                    // Юки сама читает случайную тему в Википедии и сообщает вам новость!
-                    const randomFactObj = await parseRandomFact();
-                    if (randomFactObj) {
-                        await learnFromText(randomFactObj.text, randomFactObj.topic);
-                        const sentences = randomFactObj.text.split(/[.!?]+/);
-                        const cleanS = sentences[0] || "что-то безумно интересное";
-                        
-                        appendSystemLog(`Юки самостоятельно прочитала статью про "${randomFactObj.topic}" и переварила знания.`);
-                        
-                        appendMessage(`Ого, я тут гуляла по сети и прочитала про *${randomFactObj.topic}*! Кое-что узнала: ${cleanS.trim()}. Что думаешь об этом? (◕‿◕)`);
-                    }
-                } 
-                else if (chosenAction === "ask_question" && brain.wordsList.length > 5) {
-                    // Юки берет случайное слово из своего словаря и спрашивает ваше мнение о нем
-                    const randomWord = brain.wordsList[Math.floor(Math.random() * brain.wordsList.length)];
-                    appendMessage(`Слушай... А расскажи мне подробнее про *"${randomWord}"*? А то я встретила это слово в памяти, но не совсем понимаю его суть... (｡•́︿•̀｡)`);
-                } 
-                else {
-                    // Просто сонный или забавный комментарий от скуки
-                    const dynamicThoughts = [
-                        "Тишина такая... Надеюсь, ты там не грустишь? (｡♥‿♥｡)",
-                        "Я тут активно настраиваю свои нейронные связи в фоновом режиме... Мой мозг кипит! (хе-хе)",
-                        "Хмм... Напиши мне что-нибудь веселое, мне скучно просто так стоять! *аккуратно пинает тебя*",
-                        "А ты знал, что мой разум увеличивается с каждым твоим вопросом? Спасибо, что учишь меня! ^_^"
-                    ];
-                    appendMessage(dynamicThoughts[Math.floor(Math.random() * dynamicThoughts.length)]);
-                }
-
-                // Снова зеленый онлайн статус
-                document.getElementById('online-badge').className = "absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-[#17212b] rounded-full";
-                updateStatus("в сети (думает о вас...)");
-            }
-        }
-
-        // Цикл проверки автономной жизни (каждые 40 секунд)
-        setInterval(runAutonomousAction, 40000);
-
-
-        // ==========================================
-        // ИНТЕРФЕЙС, ЧАТ И СЕРВИСНЫЕ ФУНКЦИИ
-        // ==========================================
-        const chatContainer = document.getElementById('chat-container');
-        const userInputEl = document.getElementById('user-input');
-        const yukiStatus = document.getElementById('yuki-status');
-
-        function updateStatus(status) {
-            yukiStatus.innerHTML = `Юки (${status})`;
-        }
-
-        function appendMessage(text, isUser = false) {
-            const msgDiv = document.createElement('div');
-            msgDiv.className = `${isUser ? 'message-out self-end' : 'message-in self-start'} max-w-[85%] sm:max-w-xl p-3.5 text-sm text-gray-100 shadow flex flex-col`;
-            
-            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            
-            msgDiv.innerHTML = `
-                <span class="text-xs font-bold ${isUser ? 'text-cyan-300' : 'text-cyan-400'} mb-1">${isUser ? 'Вы' : 'Юки'}</span>
-                <div>${text}</div>
-                <span class="block text-[8px] text-gray-400 mt-1.5 text-right">${time}</span>
-            `;
-            
-            chatContainer.appendChild(msgDiv);
-            chatContainer.scrollTop = chatContainer.scrollHeight;
-        }
-
-        // Вспомогательные логи в чате
-        function appendSystemLog(text) {
-            const logDiv = document.createElement('div');
-            logDiv.className = "message-system self-center px-3 py-1.5 text-[11px] text-gray-400 text-center shadow italic max-w-md";
-            logDiv.innerHTML = `<i class="fa-solid fa-microchip text-cyan-500 mr-1"></i> ${text}`;
-            chatContainer.appendChild(logDiv);
-            chatContainer.scrollTop = chatContainer.scrollHeight;
-        }
-
-        function showThinkingIndicator() {
-            const indicator = document.createElement('div');
-            indicator.id = 'thinking-indicator';
-            indicator.className = 'message-in self-start p-3.5 text-sm text-gray-100 shadow flex space-x-1.5 justify-center items-center';
-            indicator.innerHTML = `
-                <div class="w-2.5 h-2.5 bg-cyan-400 rounded-full dot"></div>
-                <div class="w-2.5 h-2.5 bg-cyan-400 rounded-full dot"></div>
-                <div class="w-2.5 h-2.5 bg-cyan-400 rounded-full dot"></div>
-            `;
-            chatContainer.appendChild(indicator);
-            chatContainer.scrollTop = chatContainer.scrollHeight;
-        }
-
-        function removeThinkingIndicator() {
-            const indicator = document.getElementById('thinking-indicator');
-            if (indicator) indicator.remove();
-        }
-
-        async function sendMessage() {
-            const text = userInputEl.value.trim();
-            if (!text) return;
-
-            appendMessage(text, true);
-            userInputEl.value = '';
-
-            showThinkingIndicator();
-
-            try {
-                const response = await generateMindResponse(text);
-                removeThinkingIndicator();
-                appendMessage(response, false);
-            } catch (err) {
-                console.error(err);
-                removeThinkingIndicator();
-                appendMessage("Прости, кажется у меня случилась легкая перегрузка мозгов... Давай сменим тему? (｡•́︿•̀｡)", false);
-            }
-
-            updateStatus("в сети (думает о вас...)");
-        }
-
-        // Сбросить память
-        async function clearMemory() {
-            if (confirm("Вы уверены? Это сотрет всю накопленную базу знаний, Марковские цепи и обнулит уровень интеллекта Юки.")) {
-                if (isFirebaseActive) {
-                    await database.ref('yuki_v2').remove();
-                } else {
-                    localStorage.removeItem('yuki_v2_brain');
-                }
-                alert("Разум стерт. Юки снова чистый лист.");
-                location.reload();
-            }
-        }
-
-        // Инициализация при загрузке
-        window.onload = async () => {
-            updateStatus("запускает синапсы...");
-            await loadBrain();
-            updateStatus("в сети (думает о вас...)");
         };
+
+        document.getElementById('sendBtn').onclick = () => {
+            const msg = chatInput.value.trim();
+            if (msg && dataChannel && dataChannel.readyState === 'open') {
+                dataChannel.send(msg);
+                addChatMessage('Вы', msg);
+                chatInput.value = '';
+            } else if (!dataChannel || dataChannel.readyState !== 'open') {
+                alert('Чат не подключен. Дождитесь соединения.');
+            }
+        };
+
+        document.getElementById('copyLink').onclick = () => {
+            navigator.clipboard.writeText(window.location.href);
+            // Визуальный фидбек
+            const copyButton = document.getElementById('copyLink');
+            const originalText = copyButton.innerText;
+            copyButton.innerText = 'Скопировано!';
+            setTimeout(() => { copyButton.innerText = originalText; }, 1500);
+        };
+
+        // Управление медиа
+        document.getElementById('toggleMic').onclick = () => {
+            if (localStream) {
+                const audioTrack = localStream.getAudioTracks()[0];
+                if (audioTrack) {
+                    audioTrack.enabled = !audioTrack.enabled;
+                    document.getElementById('toggleMic').classList.toggle('bg-red-500'); 
+                    document.getElementById('toggleMic').innerText = audioTrack.enabled ? '🎤' : '🔇';
+                }
+            }
+        };
+
+        document.getElementById('toggleCam').onclick = () => {
+            if (localStream) {
+                const videoTrack = localStream.getVideoTracks()[0];
+                if (videoTrack) {
+                    videoTrack.enabled = !videoTrack.enabled;
+                    document.getElementById('toggleCam').classList.toggle('bg-red-500'); 
+                    document.getElementById('toggleCam').innerText = videoTrack.enabled ? '📹' : '📸';
+                }
+            }
+        };
+
+        document.getElementById('hangup').onclick = () => {
+            if (pc) {
+                pc.close();
+            }
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+            }
+            // Можно очистить данные комнаты из Firebase, но это сложнее, если нужно, чтобы
+            // другой пользователь еще мог подключиться. Для простоты перезагружаем страницу.
+            // if (currentRoomId) {
+            //     remove(ref(db, `rooms/${currentRoomId}`)); 
+            // }
+            location.reload(); // Перезагружаем страницу, чтобы сбросить состояние
+        };
+
+        // Авто-вход по ссылке (если в URL есть параметр "room")
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlRoomId = urlParams.get('room');
+        if (urlRoomId) {
+            document.getElementById('joinInput').value = urlRoomId;
+            // Можно автоматически вызвать joinRoom, но лучше, чтобы пользователь сам нажал кнопку.
+            // document.getElementById('joinBtn').click();
+        }
+
     </script>
 </body>
-</html>
+    </html>
