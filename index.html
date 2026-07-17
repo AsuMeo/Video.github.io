@@ -6,7 +6,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>БЛОКРАН SURVIVAL: МУЛЬТИПЛЕЕР</title>
+<title>БЛОКРАН SURVIVAL: РЕАЛТАЙМ МУЛЬТИПЛЕЕР</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Rubik:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
@@ -22,7 +22,7 @@
     width: 100%; 
     height: 100%; 
     overflow: hidden; 
-    background: #080a10; 
+    background: #06080f; 
     font-family: 'Rubik', sans-serif;
     position: fixed;
   }
@@ -35,7 +35,7 @@
     image-rendering: pixelated; 
   }
 
-  /* ---------- AUTH STYLE ---------- */
+  /* ---------- AUTH ---------- */
   #auth {
     position: fixed; 
     inset: 0; 
@@ -43,116 +43,118 @@
     display: flex; 
     align-items: center; 
     justify-content: center;
-    background: radial-gradient(1200px 700px at 50% -10%, #1b2b5e 0%, #0a1030 45%, #05070f 100%);
-    transition: opacity .5s;
+    background: radial-gradient(1200px 700px at 50% -10%, #1a234a 0%, #070a1e 50%, #030408 100%);
+    transition: opacity .4s;
   }
   #auth.hidden { opacity: 0; pointer-events: none; }
   .auth-card {
     width: min(440px, 94vw); 
-    padding: 24px; 
-    border-radius: 20px;
-    background: rgba(13, 20, 46, 0.85); 
-    backdrop-filter: blur(14px);
-    border: 1px solid rgba(120, 160, 255, 0.25);
-    box-shadow: 0 0 50px rgba(60, 110, 255, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    padding: 26px; 
+    border-radius: 24px;
+    background: rgba(10, 15, 36, 0.88); 
+    backdrop-filter: blur(18px);
+    border: 1px solid rgba(100, 150, 255, 0.3);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.15);
     text-align: center; 
-    color: #dfe8ff;
+    color: #e2eaff;
   }
-  .logo { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 8px; }
+  .logo { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 10px; }
   .logo h1 { 
     font-family: 'Press Start 2P', monospace; 
-    font-size: 16px; 
-    letter-spacing: 1px;
-    background: linear-gradient(180deg, #8ecbff, #4f7cff 60%, #b96bff); 
+    font-size: 15px; 
+    letter-spacing: 0.5px;
+    background: linear-gradient(180deg, #9ae2ff, #3b82f6 60%, #a855f7); 
     -webkit-background-clip: text; 
     background-clip: text; 
     color: transparent;
-    filter: drop-shadow(0 0 10px rgba(90, 140, 255, 0.4)); 
+    filter: drop-shadow(0 0 12px rgba(59, 130, 246, 0.5)); 
   }
-  .tagline { font-size: 11px; color: #8fa3d9; margin-bottom: 16px; }
-  .field { margin-bottom: 10px; text-align: left; }
-  .field label { display: block; font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: #7f93c9; margin-bottom: 4px; }
+  .tagline { font-size: 11px; color: #8fa5e2; margin-bottom: 18px; }
+  .field { margin-bottom: 12px; text-align: left; }
+  .field label { display: block; font-size: 9px; letter-spacing: 1.2px; text-transform: uppercase; color: #7f95d1; margin-bottom: 5px; }
   .field input {
     width: 100%; 
-    padding: 10px 12px; 
-    border-radius: 10px; 
-    border: 1px solid rgba(120, 160, 255, 0.25);
-    background: rgba(6, 10, 28, 0.8); 
-    color: #eaf1ff; 
-    font-size: 13px; 
+    padding: 12px 14px; 
+    border-radius: 12px; 
+    border: 1px solid rgba(100, 150, 255, 0.25);
+    background: rgba(4, 7, 20, 0.85); 
+    color: #f0f5ff; 
+    font-size: 14px; 
     font-family: 'Rubik'; 
     outline: none; 
-    transition: .2s;
+    transition: border-color 0.2s, box-shadow 0.2s;
   }
-  .field input:focus { border-color: #5f8dff; box-shadow: 0 0 0 3px rgba(95, 141, 255, 0.2); }
+  .field input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25); }
   .btn {
     width: 100%; 
-    padding: 12px; 
+    padding: 13px; 
     border: none; 
-    border-radius: 10px; 
+    border-radius: 12px; 
     cursor: pointer; 
     font-family: 'Rubik'; 
     font-weight: 800;
     font-size: 13px; 
     color: #fff; 
-    transition: .15s; 
+    transition: transform 0.1s, filter 0.2s; 
     margin-top: 4px;
   }
   .btn:active { transform: scale(.97); }
-  .btn-primary { background: linear-gradient(135deg, #3f7bff, #7b4dff); box-shadow: 0 4px 14px rgba(80, 110, 255, 0.35); }
-  .btn-ghost { background: transparent; border: 1px solid rgba(120, 160, 255, 0.3); color: #a9bcff; margin-top: 6px; }
-  #authErr { min-height: 14px; color: #ff7d92; font-size: 11px; margin-top: 6px; }
-  .hint { margin-top: 10px; font-size: 10px; color: #6f83b8; line-height: 1.4; }
+  .btn-primary { background: linear-gradient(135deg, #2563eb, #7c3aed); box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); }
+  .btn-primary:hover { filter: brightness(1.1); }
+  .btn-ghost { background: transparent; border: 1px solid rgba(100, 150, 255, 0.35); color: #adc4ff; margin-top: 8px; }
+  .btn-ghost:hover { background: rgba(59, 130, 246, 0.1); }
+  #authErr { min-height: 14px; color: #f87171; font-size: 11px; margin-top: 8px; }
+  .hint { margin-top: 12px; font-size: 10px; color: #6d80b0; line-height: 1.5; }
   .spin { display: inline-block; width: 12px; height: 12px; border: 2px solid #fff3; border-top-color: #fff; border-radius: 50%; animation: sp 1s linear infinite; vertical-align: -2px; }
   @keyframes sp { to { transform: rotate(360deg); } }
 
-  /* ---------- HUD STYLE ---------- */
+  /* ---------- HUD ---------- */
   #hud { position: absolute; inset: 0; z-index: 20; pointer-events: none; display: none; }
   #hud.on { display: block; }
   
   #topbar {
     position: absolute; 
-    top: 10px; 
-    left: 12px; 
+    top: 12px; 
+    left: 14px; 
     display: flex; 
     flex-direction: column; 
     gap: 4px;
-    color: #eaf1ff; 
-    text-shadow: 0 2px 4px #000;
+    color: #f0f5ff; 
+    text-shadow: 0 2px 4px rgba(0,0,0,0.85);
   }
   #playerStats { display: flex; align-items: center; gap: 8px; }
-  #hpBarWrap { width: 140px; height: 14px; background: rgba(0,0,0,0.6); border: 1px solid #fff2; border-radius: 4px; overflow: hidden; position: relative; }
-  #hpBarFill { height: 100%; width: 100%; background: linear-gradient(90deg, #ef4444, #f87171); transition: width 0.2s; }
-  #hpTxt { position: absolute; inset: 0; text-align: center; font-size: 9px; font-weight: 800; line-height: 12px; color: #fff; }
+  #hpBarWrap { width: 130px; height: 13px; background: rgba(0,0,0,0.65); border: 1px solid rgba(255,255,255,0.15); border-radius: 4px; overflow: hidden; position: relative; }
+  #hpBarFill { height: 100%; width: 100%; background: linear-gradient(90deg, #dc2626, #f87171); transition: width 0.2s; }
+  #hpTxt { position: absolute; inset: 0; text-align: center; font-size: 8px; font-weight: 800; line-height: 11px; color: #fff; }
   
-  #xpBarWrap { width: 140px; height: 6px; background: rgba(0,0,0,0.6); border: 1px solid #fff1; border-radius: 3px; overflow: hidden; }
-  #xpBarFill { height: 100%; width: 0%; background: #22c55e; transition: width 0.3s; }
-  #levelBadge { background: #eab308; color: #000; font-weight: 800; font-size: 10px; padding: 2px 6px; border-radius: 4px; text-shadow: none; }
+  #xpBarWrap { width: 130px; height: 5px; background: rgba(0,0,0,0.65); border: 1px solid rgba(255,255,255,0.08); border-radius: 3px; overflow: hidden; }
+  #xpBarFill { height: 100%; width: 0%; background: #10b981; transition: width 0.3s; }
+  #levelBadge { background: #f59e0b; color: #000; font-weight: 800; font-size: 9px; padding: 2px 5px; border-radius: 4px; text-shadow: none; }
 
-  #stats { font-size: 11px; color: #c9d7ff; display: flex; gap: 10px; margin-top: 2px; }
+  #stats { font-size: 11px; color: #cbd5e1; display: flex; gap: 10px; margin-top: 2px; }
   #stats b { color: #fff; }
 
-  /* Inventory Hotbar */
+  /* Hotbar UI */
   #hotbarWrap {
     position: absolute; 
-    bottom: 12px; 
+    bottom: 14px; 
     left: 50%; 
     transform: translateX(-50%);
     display: flex; 
-    gap: 4px; 
-    background: rgba(8, 12, 28, 0.9); 
-    border: 2px solid rgba(130, 165, 255, 0.25);
+    gap: 5px; 
+    background: rgba(6, 10, 24, 0.9); 
+    border: 2px solid rgba(100, 140, 255, 0.3);
     padding: 5px; 
-    border-radius: 12px; 
+    border-radius: 14px; 
     pointer-events: auto; 
     z-index: 30;
   }
   .hot-slot {
-    width: 42px; 
-    height: 42px; 
-    background: rgba(20, 28, 55, 0.8); 
-    border: 2px solid #4a5d85;
-    border-radius: 8px; 
+    width: 44px; 
+    height: 44px; 
+    background: rgba(15, 23, 42, 0.85); 
+    border: 2px solid #475569;
+    border-radius: 10px; 
     display: flex; 
     flex-direction: column; 
     align-items: center; 
@@ -161,143 +163,146 @@
     cursor: pointer; 
     transition: transform 0.1s, border-color 0.15s;
   }
-  .hot-slot.active { border-color: #f59e0b; background: rgba(245, 158, 11, 0.15); transform: scale(1.05); }
+  .hot-slot.active { border-color: #f59e0b; background: rgba(245, 158, 11, 0.15); transform: scale(1.06); }
   .hot-slot .icon-mock { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
   .hot-slot .count { position: absolute; bottom: 1px; right: 3px; font-size: 9px; font-weight: 800; color: #fff; text-shadow: 1px 1px 2px #000; }
-  .hot-slot .key-num { position: absolute; top: 1px; left: 2px; font-size: 8px; color: #7f93c9; }
+  .hot-slot .key-num { position: absolute; top: 1px; left: 2px; font-size: 8px; color: #94a3b8; }
 
   /* Mobile HUD Interaction Mode Buttons */
   #mobileInteractionMode {
     position: absolute; 
-    bottom: 64px; 
+    bottom: 68px; 
     left: 50%; 
     transform: translateX(-50%);
     display: flex; 
-    gap: 10px; 
+    gap: 8px; 
     pointer-events: auto; 
     z-index: 30;
   }
   .mode-btn {
     padding: 8px 14px; 
-    border-radius: 10px; 
-    border: 1.5px solid rgba(130, 165, 255, 0.4);
-    background: rgba(10, 16, 40, 0.85); 
+    border-radius: 12px; 
+    border: 1.5px solid rgba(100, 150, 255, 0.35);
+    background: rgba(8, 12, 30, 0.85); 
     color: #fff; 
-    font-size: 11px; 
+    font-size: 10px; 
     font-weight: 800;
     display: flex; 
     align-items: center; 
     gap: 6px; 
     cursor: pointer;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    transition: transform 0.1s, background-color 0.2s;
   }
   .mode-btn.active {
     background: #f59e0b; 
     border-color: #fff; 
     color: #000;
   }
+  .mode-btn:active { transform: scale(0.95); }
 
   /* Level 10 Active Spell Button */
   #activeSkillBtn {
     position: absolute; 
-    bottom: 12px; 
+    bottom: 14px; 
     right: 130px; 
-    width: 50px; 
-    height: 50px; 
+    width: 48px; 
+    height: 48px; 
     border-radius: 50%;
-    background: radial-gradient(#b96bff, #7b4dff); 
+    background: radial-gradient(#c084fc, #7c3aed); 
     border: 2px solid #fff; 
     color: #fff;
-    font-size: 20px; 
+    font-size: 18px; 
     display: none; 
     align-items: center; 
     justify-content: center; 
     cursor: pointer;
-    box-shadow: 0 0 14px rgba(185, 107, 255, 0.7); 
+    box-shadow: 0 0 14px rgba(124, 58, 237, 0.75); 
     pointer-events: auto; 
     transition: transform 0.1s;
     z-index: 35;
   }
   #activeSkillBtn:active { transform: scale(0.9); }
 
-  /* Camera Controls */
+  /* Camera & Function Buttons Top */
   #camControls {
     position: absolute; 
-    top: 10px; 
+    top: 12px; 
     left: 50%; 
     transform: translateX(-50%);
     display: flex; 
-    gap: 4px; 
+    gap: 5px; 
     pointer-events: auto; 
     z-index: 30;
   }
   .hud-btn {
-    width: 36px; 
-    height: 36px; 
-    border-radius: 8px; 
-    border: 1px solid rgba(130,165,255,.3);
-    background: rgba(10,16,40,.8); 
+    width: 34px; 
+    height: 34px; 
+    border-radius: 9px; 
+    border: 1px solid rgba(100, 150, 255, 0.25);
+    background: rgba(8, 12, 30, 0.8); 
     color: #fff; 
-    font-size: 13px; 
+    font-size: 12px; 
     font-weight: 800; 
     cursor: pointer;
     display: flex; 
     align-items: center; 
     justify-content: center; 
-    backdrop-filter: blur(6px);
-    transition: transform 0.1s;
+    backdrop-filter: blur(8px);
+    transition: transform 0.1s, background-color 0.2s;
   }
   .hud-btn:active { transform: scale(0.92); }
-  #craftToggleBtn { background: linear-gradient(135deg, #10b981, #047857); border-color: #34d399; }
+  #craftToggleBtn { background: linear-gradient(135deg, #059669, #047857); border-color: #34d399; }
 
   /* Leaderboard */
   #board {
     position: absolute; 
-    top: 10px; 
-    right: 12px; 
-    min-width: 170px; 
-    max-width: 210px;
-    background: rgba(8, 12, 30, 0.75); 
+    top: 12px; 
+    right: 14px; 
+    min-width: 160px; 
+    max-width: 200px;
+    background: rgba(6, 10, 24, 0.75); 
     backdrop-filter: blur(6px);
-    border: 1px solid rgba(130, 165, 255, 0.2); 
-    border-radius: 12px; 
+    border: 1px solid rgba(100, 150, 255, 0.15); 
+    border-radius: 14px; 
     padding: 8px 10px; 
-    color: #dfe8ff;
+    color: #e2eaff;
   }
-  #board h3 { font-size: 9px; letter-spacing: 0.5px; text-transform: uppercase; color: #8fa3d9; margin-bottom: 4px; display: flex; justify-content: space-between; }
-  .brow { display: flex; justify-content: space-between; gap: 8px; font-size: 11px; padding: 2px 1px; }
-  .brow.me { background: rgba(95, 141, 255, 0.15); border-radius: 4px; }
-  .brow .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 110px; }
-  .brow .bl { font-weight: 800; color: #8ef0b2; }
+  #board h3 { font-size: 8px; letter-spacing: 0.5px; text-transform: uppercase; color: #94a3b8; margin-bottom: 5px; }
+  .brow { display: flex; justify-content: space-between; gap: 6px; font-size: 11px; padding: 2px 0; }
+  .brow.me { background: rgba(59, 130, 246, 0.15); border-radius: 4px; padding-left: 4px; padding-right: 4px; }
+  .brow .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100px; }
+  .brow .bl { font-weight: 800; color: #10b981; }
 
   #toast {
     position: absolute; 
     top: 15%; 
     left: 50%; 
     transform: translateX(-50%); 
-    padding: 10px 20px; 
-    border-radius: 10px;
-    background: rgba(10, 16, 40, 0.9); 
-    border: 1px solid rgba(130, 165, 255, 0.3); 
+    padding: 10px 18px; 
+    border-radius: 12px;
+    background: rgba(8, 12, 30, 0.9); 
+    border: 1px solid rgba(100, 150, 255, 0.3); 
     color: #fff; 
     font-weight: 600; 
-    font-size: 13px;
+    font-size: 12px;
     opacity: 0; 
     transition: opacity .3s; 
     text-align: center; 
     max-width: 80vw; 
     pointer-events: none;
+    z-index: 45;
   }
   #toast.show { opacity: 1; }
   #trackName {
     position: absolute; 
-    top: 150px; 
-    right: 12px; 
-    font-size: 9px; 
+    top: 145px; 
+    right: 14px; 
+    font-size: 8px; 
     font-weight: bold;
     color: #ffe98a; 
-    background: rgba(10, 16, 40, 0.65); 
-    padding: 3px 8px; 
+    background: rgba(6, 10, 24, 0.6); 
+    padding: 3px 7px; 
     border-radius: 6px;
     pointer-events: none;
   }
@@ -305,14 +310,14 @@
   /* Chat window */
   #chat {
     position: absolute; 
-    bottom: 15px; 
-    left: 12px; 
-    width: 250px; 
-    height: 130px;
-    background: rgba(10, 16, 40, 0.6); 
-    border: 1px solid rgba(130, 165, 255, 0.2);
-    border-radius: 12px; 
-    backdrop-filter: blur(6px); 
+    bottom: 14px; 
+    left: 14px; 
+    width: 240px; 
+    height: 120px;
+    background: rgba(6, 10, 24, 0.55); 
+    border: 1px solid rgba(100, 150, 255, 0.15);
+    border-radius: 14px; 
+    backdrop-filter: blur(8px); 
     display: flex; 
     flex-direction: column;
     pointer-events: auto; 
@@ -320,55 +325,55 @@
     transition: opacity 0.3s;
   }
   #chat.hidden { opacity: 0; pointer-events: none; }
-  #chatMsgs { flex: 1; overflow-y: auto; padding: 6px; font-size: 10px; display: flex; flex-direction: column; gap: 3px; }
+  #chatMsgs { flex: 1; overflow-y: auto; padding: 6px; font-size: 9px; display: flex; flex-direction: column; gap: 3px; }
   #chatInput {
-    background: rgba(6, 10, 28, 0.85); 
+    background: rgba(4, 7, 20, 0.85); 
     border: none; 
-    border-top: 1px solid rgba(130, 165, 255, 0.2);
+    border-top: 1px solid rgba(100, 150, 255, 0.15);
     padding: 6px 10px; 
     color: #fff; 
     font-size: 11px; 
-    border-radius: 0 0 12px 12px; 
+    border-radius: 0 0 14px 14px; 
     outline: none;
   }
 
   /* Craft Panel */
   #craftPanel {
     position: absolute; 
-    top: 60px; 
-    left: 12px; 
-    width: 240px; 
-    max-height: calc(100vh - 220px);
-    background: rgba(12, 18, 38, 0.94); 
+    top: 55px; 
+    left: 14px; 
+    width: 230px; 
+    max-height: calc(100vh - 210px);
+    background: rgba(8, 12, 30, 0.95); 
     border: 2px solid rgba(16, 185, 129, 0.4);
-    border-radius: 14px; 
-    backdrop-filter: blur(8px); 
+    border-radius: 16px; 
+    backdrop-filter: blur(10px); 
     display: none; 
     flex-direction: column;
     pointer-events: auto; 
     z-index: 28; 
-    box-shadow: 0 8px 25px rgba(0,0,0,0.5); 
+    box-shadow: 0 8px 30px rgba(0,0,0,0.6); 
     overflow: hidden;
   }
   #craftPanel.open { display: flex; }
-  .craft-header { background: rgba(16, 185, 129, 0.15); padding: 8px 12px; font-size: 9px; font-family: 'Press Start 2P'; color: #34d399; }
+  .craft-header { background: rgba(16, 185, 129, 0.12); padding: 8px 12px; font-size: 8px; font-family: 'Press Start 2P'; color: #34d399; }
   .recipe-list { overflow-y: auto; padding: 6px; display: flex; flex-direction: column; gap: 4px; }
   .recipe-item {
     background: rgba(255,255,255,0.02); 
-    border: 1px solid rgba(255,255,255,0.06); 
-    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.05); 
+    border-radius: 8px;
     padding: 6px; 
     display: flex; 
     justify-content: space-between; 
     align-items: center;
   }
   .recipe-info { display: flex; align-items: center; gap: 6px; }
-  .recipe-icon { font-size: 16px; }
+  .recipe-icon { font-size: 15px; }
   .recipe-name { font-size: 11px; font-weight: 800; color: #fff; }
   .recipe-cost { font-size: 9px; color: #94a3b8; }
   .recipe-btn {
     padding: 4px 8px; 
-    border-radius: 4px; 
+    border-radius: 5px; 
     font-size: 9px; 
     font-weight: 800; 
     cursor: pointer;
@@ -387,15 +392,15 @@
     align-items: center; 
     justify-content: center;
     background: rgba(3, 5, 15, 0.85); 
-    backdrop-filter: blur(6px);
+    backdrop-filter: blur(8px);
   }
   #bookOverlay.open { display: flex; }
   .book-container {
-    width: min(680px, 96vw); 
-    height: min(420px, 80vh);
+    width: min(660px, 96vw); 
+    height: min(400px, 80vh);
     background: #3e2723; 
     border: 4px solid #2d1a12; 
-    border-radius: 12px;
+    border-radius: 16px;
     display: flex; 
     flex-direction: column; 
     overflow: hidden;
@@ -417,7 +422,7 @@
   .book-page p { font-size: 11px; line-height: 1.4; margin-bottom: 8px; }
   
   .skin-card {
-    background: rgba(62, 39, 35, 0.06); 
+    background: rgba(62, 39, 35, 0.05); 
     border: 1px solid #5d4037; 
     border-radius: 8px;
     padding: 6px; 
@@ -445,26 +450,26 @@
   .tbtn {
     position: absolute; 
     bottom: 12px; 
-    width: 60px; 
-    height: 60px; 
+    width: 58px; 
+    height: 58px; 
     border-radius: 14px; 
     pointer-events: auto;
-    background: rgba(20,30,70,0.5); 
-    border: 1.5px solid rgba(140,175,255,0.4); 
+    background: rgba(15, 23, 42, 0.55); 
+    border: 1.5px solid rgba(140,175,255,0.3); 
     color: #fff; 
-    font-size: 22px;
+    font-size: 20px;
     display: flex; 
     align-items: center; 
     justify-content: center; 
     backdrop-filter: blur(4px);
   }
-  .tbtn.act { background: rgba(95,141,255,0.5); }
-  #tLeft { left: 12px; } 
-  #tRight { left: 82px; }
-  #tJump { right: 12px; width: 72px; height: 72px; border-radius: 50%; font-size: 26px; background: rgba(60,180,120,0.35); border-color: rgba(120,255,170,0.45); }
+  .tbtn.act { background: rgba(59, 130, 246, 0.5); border-color: #fff; }
+  #tLeft { left: 14px; } 
+  #tRight { left: 80px; }
+  #tJump { right: 14px; width: 68px; height: 68px; border-radius: 50%; font-size: 24px; background: rgba(16, 185, 129, 0.35); border-color: rgba(52, 211, 153, 0.45); }
   
   #vignette { position: fixed; inset: 0; z-index: 10; pointer-events: none; background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,10,0.55) 100%); }
-  #loading { position: fixed; inset: 0; z-index: 80; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 10px; background: #080c14; color: #8fa3d9; font-size: 13px; }
+  #loading { position: fixed; inset: 0; z-index: 80; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 10px; background: #05070a; color: #8fa3d9; font-size: 12px; }
 </style>
 </head>
 <body>
@@ -487,7 +492,7 @@
     </div>
     <div id="stats">
       <span>🪙 <b id="coinsCount">0</b></span>
-      <span style="color: #ffe98a;">🍂 <b id="seasonLabel">ЛЕТО</b></span>
+      <span style="color: #ffe98a;">🍁 <b id="seasonLabel">ЛЕТО</b></span>
       <span>👥 <b id="online">1</b></span>
     </div>
   </div>
@@ -503,14 +508,14 @@
     <button class="hud-btn" id="chatToggleBtn" title="Чат">💬</button>
   </div>
 
-  <!-- Mobile Interaction mode: Mine vs Build -->
+  <!-- Mobile Interaction mode -->
   <div id="mobileInteractionMode">
-    <button class="mode-btn active" id="modeMineBtn">⛏️ ДОБЫЧА</button>
+    <button class="mode-btn active" id="modeMineBtn">⛏️ ДОБЫЧА / ТЕЛЕПОРТ</button>
     <button class="mode-btn" id="modeBuildBtn">🧱 СТРОЙКА</button>
   </div>
 
   <div id="craftPanel">
-    <div class="craft-header">🛠️ КРАФТ ВЕРСТАКА</div>
+    <div class="craft-header">🛠️ КРАФТ ВЕРСТАК</div>
     <div class="recipe-list" id="recipeListContainer"></div>
   </div>
 
@@ -518,7 +523,7 @@
   <div id="hotbarWrap"></div>
 
   <!-- Super Spell Level 10 Button -->
-  <button id="activeSkillBtn" title="Супер Огненный Удар!">🔥</button>
+  <button id="activeSkillBtn" title="Огненный Взрыв!">🔥</button>
 
   <div id="chat">
     <div id="chatMsgs"></div>
@@ -526,7 +531,7 @@
   </div>
 
   <div id="board">
-    <h3>🏆 Лидеры Мира</h3>
+    <h3>🏆 Игроки мира</h3>
     <div id="boardRows"></div>
   </div>
   <div id="toast"></div>
@@ -550,7 +555,7 @@
       <div class="book-page divider" id="bookLeftPage"></div>
       <div class="book-page" id="bookRightPage">
         <h3>👗 ГАРДЕРОБ СКИНОВ</h3>
-        <p style="font-size: 11px; margin-bottom: 8px;">Собирай 🪙 монеты с монстров и жил, покупай скины для мультиплеера!</p>
+        <p style="font-size: 10px; margin-bottom: 8px;">Добывайте монеты из жил золота и монстров, разблокируйте уникальный внешний вид!</p>
         <div id="skinsShopContainer"></div>
       </div>
     </div>
@@ -570,15 +575,15 @@
           <stop offset="0" stop-color="#6ee7ff"/><stop offset=".55" stop-color="#4f7cff"/><stop offset="1" stop-color="#b96bff"/>
         </linearGradient></defs>
         <rect x="4" y="26" width="18" height="18" rx="3" fill="url(#lg)"/>
-        <rect x="26" y="26" width="18" height="18" rx="3" fill="#39d98a"/>
-        <rect x="15" y="4" width="18" height="18" rx="3" fill="#ffd94f"/>
+        <rect x="26" y="26" width="18" height="18" rx="3" fill="#10b981"/>
+        <rect x="15" y="4" width="18" height="18" rx="3" fill="#fbbf24"/>
       </svg>
       <h1>БЛОКРАН SURVIVAL</h1>
     </div>
-    <div class="tagline">Мультиплеерная Sandbox-выживалка. СТРОЙТЕ И КОПАЙТЕ С ДРУЗЬЯМИ! 🌍</div>
+    <div class="tagline">Песочница с телепортацией, падением сакуры и совместным выживанием! 🌲</div>
     <div class="field">
       <label>Никнейм</label>
-      <input id="nick" maxlength="14" placeholder="Имя персонажа" autocomplete="off">
+      <input id="nick" maxlength="14" placeholder="Имя игрока" autocomplete="off">
     </div>
     <div class="field">
       <label>Электронная почта</label>
@@ -591,15 +596,14 @@
     <button class="btn btn-primary" id="loginBtn">ВОЙТИ В ИГРУ</button>
     <button class="btn btn-ghost" id="regBtn">СОЗДАТЬ АККАУНТ</button>
     <div id="authErr"></div>
-    <div class="hint">🎯 Нажмите 📺 для полноэкранного режима на Android!<br>
-    ⛏️ В режиме «Добыча» зажмите палец на блоке для разрушения. <br>
-    🧱 В режиме «Стройка» коснитесь экрана, чтобы разместить блок из Хотбара!</div>
+    <div class="hint">📺 Нажмите кнопку 📺 в игре для полноэкранного режима на Android!<br>
+    ⚡ В режиме «Добыча» нажмите на пустое место (воздух) для активации ТЕЛЕПОРТАЦИИ!</div>
   </div>
 </div>
 
 <div id="loading">
   <div class="spin" style="width: 24px; height: 24px; border-width: 3px"></div>
-  <div id="loadTxt">ГЕНЕРАЦИЯ БЕЗГРАНИЧНОЙ ВСЕЛЕННОЙ…</div>
+  <div id="loadTxt">ГЕНЕРАЦИЯ БЕЗГРАНИЧНОЙ ВСЕЛЕННОЙ БЛОКОВ…</div>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -723,7 +727,6 @@ const Audio8 = {
     for (let i=0;i<len;i++) d[i] = Math.random()*2-1;
     this.noiseBuf = buf;
 
-    // Шум атмосферного дождя
     const rainBufLen = this.ctx.sampleRate * 2;
     const rainBuf = this.ctx.createBuffer(1, rainBufLen, this.ctx.sampleRate);
     const rd = rainBuf.getChannelData(0);
@@ -766,7 +769,7 @@ const Audio8 = {
     { name:'💎 Мистические Копи', bpm:60, wave:'sine', vol:.4,
       mel:[67,74,79,0,74,67,0,0, 66,73,78,0,73,66,0,0, 64,71,76,0,71,64,0,0, 62,69,74,0,69,62,0,0],
       bass:[31,0,31,0,30,0,30,0, 28,0,28,0,26,0,26,0] },
-    { name:'🔥 Опасная Ночь (Борьба)', bpm:115, wave:'sawtooth', vol:.07,
+    { name:'🔥 Опасная Ночь', bpm:115, wave:'sawtooth', vol:.07,
       mel:[60,60,63,60,65,60,67,0, 60,60,63,60,67,65,63,0, 58,58,61,58,63,58,65,0, 58,58,61,58,65,63,61,0],
       bass:[36,36,36,36,36,36,36,36, 34,34,34,34,34,34,34,34] }
   ],
@@ -862,12 +865,12 @@ const backWorld = new Uint16Array(WW * WH);
 const B = {
   AIR: 0, GRASS: 1, DIRT: 2, STONE: 3, COAL: 4, IRON: 5, GOLD: 6, DIAMOND: 7,
   WOOD: 8, LEAVES: 9, STONE_BRICK: 10, WOOD_PLANK: 11, TORCH: 12, LAVA: 13,
-  WATER: 14, SAND: 15, GRASS_TALL: 16
+  WATER: 14, SAND: 15, GRASS_TALL: 16, SAKURA_LEAVES: 17
 };
 
 const TILES_INFO = {
   [B.AIR]: { solid: false, mineTime: 0, color: 'transparent' },
-  [B.GRASS]: { solid: true, mineTime: 250, color: '#34d399', bg: '#2b1e15' },
+  [B.GRASS]: { solid: true, mineTime: 250, color: '#10b981', bg: '#2b1e15' },
   [B.DIRT]: { solid: true, mineTime: 200, color: '#78350f' },
   [B.STONE]: { solid: true, mineTime: 550, color: '#4b5563' },
   [B.COAL]: { solid: true, mineTime: 600, color: '#111827' },
@@ -882,7 +885,8 @@ const TILES_INFO = {
   [B.LAVA]: { solid: false, mineTime: 9999, color: '#ef4444', hazard: true, light: [255,40,0, 0.9] },
   [B.WATER]: { solid: false, mineTime: 9999, color: '#2563eb' },
   [B.SAND]: { solid: true, mineTime: 180, color: '#fef08a' },
-  [B.GRASS_TALL]: { solid: false, mineTime: 10, color: '#10b981' }
+  [B.GRASS_TALL]: { solid: false, mineTime: 10, color: '#10b981' },
+  [B.SAKURA_LEAVES]: { solid: false, mineTime: 90, color: '#f472b6' }
 };
 
 function blockAt(tx, ty) {
@@ -899,8 +903,11 @@ function solidAt(tx, ty) {
   return TILES_INFO[b] ? TILES_INFO[b].solid : false;
 }
 
+// Хранилище сгенерированных деревьев для падающих листьев сакуры
+const spawnedTrees = [];
+
 function generateSurvivalWorld() {
-  const R = mulberry32(2026);
+  const R = mulberry32(3030);
   const noise = (x) => Math.sin(x * 0.055) * 6 + Math.cos(x * 0.11) * 2;
 
   const skyLimit = 35;
@@ -973,25 +980,33 @@ function generateSurvivalWorld() {
     }
   }
 
-  // Спавн деревьев
+  // Спавн обычных и сакуровых деревьев (на втором слое - блоки проходят)
   for (let x = 5; x < WW - 5; x += 10 + Math.round(R() * 8)) {
     let surfaceY = -1;
     for (let y = 0; y < WH; y++) {
       if (blockAt(x, y) === B.GRASS) { surfaceY = y; break; }
     }
     if (surfaceY !== -1) {
+      const isSakura = R() < 0.35;
       const treeHeight = 5 + Math.round(R() * 3);
+      
+      // Ствол
       for (let ty = 1; ty <= treeHeight; ty++) {
         setBlock(x, surfaceY - ty, B.WOOD);
       }
+      
+      // Листва (обычная или сакура)
+      const leafBlock = isSakura ? B.SAKURA_LEAVES : B.LEAVES;
       const ly = surfaceY - treeHeight;
       for (let ldx = -2; ldx <= 2; ldx++) {
         for (let ldy = -2; ldy <= 2; ldy++) {
           if (Math.abs(ldx) + Math.abs(ldy) <= 3) {
-            setBlock(x + ldx, ly + ldy, B.LEAVES);
+            setBlock(x + ldx, ly + ldy, leafBlock);
           }
         }
       }
+
+      spawnedTrees.push({ x: x, y: ly, isSakura: isSakura });
     }
   }
 
@@ -1045,8 +1060,11 @@ const particles = [];
 const damageTexts = [];
 let screenShake = 0;
 
+// Телепортационный объект анимации
+let teleportAnim = null;
+
 function spawnP(x, y, vx, vy, life, color, size, grav){
-  if (particles.length > 150) particles.shift();
+  if (particles.length > 250) particles.shift();
   particles.push({ x, y, vx, vy, life, maxLife: life, color, size, grav: grav ?? 0.22 });
 }
 function textPop(x, y, text, color) {
@@ -1448,7 +1466,7 @@ function joinNet(){
     $('online').textContent = seen.size + 1;
   });
 
-  // ПОЛНОЦЕННАЯ РЕАЛТАЙМ СИНХРОНИЗАЦИЯ БЛОКОВ МЕЖДУ ВСЕМИ ИГРОКАМИ
+  // РЕАЛТАЙМ СИНХРОНИЗАЦИЯ БЛОКОВ МЕЖДУ ИГРОКАМИ
   db.ref('world_tiles').on('child_added', syncTileFromNet);
   db.ref('world_tiles').on('child_changed', syncTileFromNet);
   db.ref('world_tiles').on('child_removed', snap => {
@@ -1575,7 +1593,7 @@ function renderHotbar() {
       if (typeof slot.type === 'string') {
         const icons = {
           'pickaxe_wood': '⛏️', 'sword_wood': '⚔️',
-          'pickaxe_iron': '🔘⛏️', 'sword_iron': '🔘⚔️',
+          'pickaxe_iron': '🔩⛏️', 'sword_iron': '🔩⚔️',
           'heal_potion': '🧪'
         };
         inner = `<span class="icon-mock">${icons[slot.type] || '🛠️'}</span>`;
@@ -1584,7 +1602,7 @@ function renderHotbar() {
           [B.GRASS]: '🌱', [B.DIRT]: '🟫', [B.STONE]: '🪨', [B.COAL]: '🌑',
           [B.IRON]: '🧲', [B.GOLD]: '🟡', [B.DIAMOND]: '💎', [B.WOOD]: '🪵',
           [B.LEAVES]: '🍃', [B.STONE_BRICK]: '🧱', [B.WOOD_PLANK]: '🪵',
-          [B.TORCH]: '🕯️', [B.SAND]: '🟡', [B.GRASS_TALL]: '🌿'
+          [B.TORCH]: '🕯️', [B.SAND]: '🟡', [B.GRASS_TALL]: '🌿', [B.SAKURA_LEAVES]: '🌸'
         };
         inner = `<span class="icon-mock">${emoji[slot.type] || '📦'}</span>`;
       }
@@ -1642,7 +1660,7 @@ $('musBtn').onclick = () => { Audio8.init(); Audio8.nextTrack(); };
 $('chatToggleBtn').onclick = () => { $('chat').classList.toggle('hidden'); };
 
 /* ============================================================
-   ОБРАБОТКА ТАПОВ И КЛИКОВ ПО БЛОКАМ С ДВУХ РЕЖИМОВ
+   ОБРАБОТКА ТАПОВ И ТЕЛЕПОРТАЦИИ
    ============================================================ */
 const interactionInput = { x: 0, y: 0, isDown: false, targetBlock: { tx: 0, ty: 0 }, mineProgress: 0 };
 
@@ -1668,12 +1686,8 @@ function handleInputStart(e) {
   const tx = Math.floor(coords.x / TILE);
   const ty = Math.floor(coords.y / TILE);
 
-  const dist = Math.hypot((P.x + P.w/2) - (tx * TILE + 16), (P.y + P.h/2) - (ty * TILE + 16));
-  if (dist > 180) return; // Слишком далеко
-
+  // Пьем лечебное зелье в любой момент
   const activeTool = getActiveTool();
-
-  // Пьем лечебное зелье
   if (activeTool === 'heal_potion') {
     P.hp = Math.min(P.maxHp, P.hp + 50);
     Audio8.lvlUp();
@@ -1701,12 +1715,43 @@ function handleInputStart(e) {
   }
 
   if (!hitMob) {
+    const block = blockAt(tx, ty);
+
     if (activeInteractionMode === 'mine') {
-      interactionInput.targetBlock = { tx, ty };
-      interactionInput.isDown = true;
+      if (block === B.AIR) {
+        // МЕХАНИКА ТЕЛЕПОРТА (Клик на воздух в режиме добычи)
+        if (!teleportAnim) {
+          const targetX = tx * TILE + TILE / 2 - P.w / 2;
+          const targetY = ty * TILE + TILE / 2 - P.h / 2;
+
+          // Проверим, не телепортируемся ли мы внутрь твердого блока
+          if (!solidAt(tx, ty)) {
+            teleportAnim = {
+              sx: P.x, sy: P.y,
+              tx: targetX, ty: targetY,
+              px: P.x, py: P.y,
+              progress: 0,
+              duration: 20 // кадров
+            };
+            Audio8.jump();
+            // Частицы на старте телепорта
+            for (let i = 0; i < 15; i++) {
+              spawnP(P.x + P.w/2, P.y + P.h/2, (Math.random()-0.5)*6, (Math.random()-0.5)*6, 20, '#60a5fa', 3, 0);
+            }
+          }
+        }
+      } else {
+        // Добыча блока в пределах досягаемости
+        const dist = Math.hypot((P.x + P.w/2) - (tx * TILE + 16), (P.y + P.h/2) - (ty * TILE + 16));
+        if (dist <= 180) {
+          interactionInput.targetBlock = { tx, ty };
+          interactionInput.isDown = true;
+        }
+      }
     } else {
-      // Режим СТРОЙКИ
-      if (blockAt(tx, ty) === B.AIR || blockAt(tx, ty) === B.GRASS_TALL) {
+      // Режим СТРОЙКИ (ставим блоки в пределах досягаемости)
+      const dist = Math.hypot((P.x + P.w/2) - (tx * TILE + 16), (P.y + P.h/2) - (ty * TILE + 16));
+      if (dist <= 180 && (block === B.AIR || block === B.GRASS_TALL)) {
         const slot = P.inventory[P.activeHotbarSlot];
         if (slot && typeof slot.type === 'number') {
           // Локальная замена + отправка изменений в Firebase Realtime
@@ -1725,7 +1770,6 @@ function handleInputStart(e) {
 }
 
 function handleInputMove(e) {
-  if (!interactionInput.isDown) return;
   const coords = getCanvasInputCoords(e);
   interactionInput.x = coords.x;
   interactionInput.y = coords.y;
@@ -1736,7 +1780,6 @@ function handleInputEnd() {
   interactionInput.mineProgress = 0;
 }
 
-// Применяем как для ПК, так и для Андроид устройств
 cv.addEventListener('mousedown', handleInputStart);
 cv.addEventListener('mousemove', handleInputMove);
 window.addEventListener('mouseup', handleInputEnd);
@@ -1821,26 +1864,26 @@ $('activeSkillBtn').onclick = () => {
 let currentGuidePage = 0;
 const GUIDE_PAGES = [
   {
-    title: '🌿 Выживание на сервере',
-    content: `Приветствуем в мире БЛОКРАН SURVIVAL!<br><br>
-    Кооперируйтесь со своими друзьями, стройте базы и замки в режиме реального времени.<br>
+    title: '🌿 Мультиплеерный мир',
+    content: `Добро пожаловать в живой мир БЛОКРАН SURVIVAL!<br><br>
+    Здесь вы можете исследовать бесконечные пещеры и строить города в реальном времени с друзьями.<br>
     • Используйте <b>джойстик внизу</b> для бега.<br>
-    • В режиме <b>«Добыча»</b> зажимайте пальцем блок, чтобы разрушить.<br>
-    • В режиме <b>«Стройка»</b> просто жмите пальцем в пустоту, чтобы установить блок!`
+    • В режиме <b>«Добыча»</b> зажимайте пальцем блок, чтобы его сломать.<br>
+    • <b>ТЕЛЕПОРТАЦИЯ:</b> Нажмите пальцем в любую пустую воздушную точку на экране в режиме добычи, чтобы мгновенно переместиться туда!`
   },
   {
-    title: '🛠️ Крафт и Верстаки',
-    content: `Откройте меню верстака кнопкой <b>[🛠️]</b> сверху!<br><br>
-    • Срубайте Дерево на поверхности.<br>
-    • Раскалывайте Камни и Кирпичи в шахтах.<br>
-    • Собирайте уголь для факелов, чтобы вы не затерялись в вечной темноте подземелий!`
+    title: '🌸 Сакура и Живая Природа',
+    content: `Мир наполнен красивой живой атмосферой:<br><br>
+    • По поверхности раскинулись деревья цветущей розовой Сакуры.<br>
+    • С ветвей плавно опадают прекрасные розовые лепестки.<br>
+    • На заднем плане простираются живописные цепи гор, а в небе пролетают облака.`
   },
   {
-    title: '🧟 Прогресс и Опасности',
-    content: `Ночью на поверхности спавнятся Зомби и Глаза.<br><br>
-    • Убивайте монстров для получения ценного опыта и монет.<br>
-    • <b>Уровень 10</b> дает колоссальную силу Огненного Спелла (кнопка 🔥).<br>
-    • Здоровье повышается с каждым полученным уровнем.`
+    title: '⚔️ Монстры и Опасности',
+    content: `Опасайтесь заходить глубоко в шахты без факелов и выходить на поверхность ночью!<br><br>
+    • Ночью пробуждаются Зомби и Демонические Летающие Глаза.<br>
+    • Наносите им удары Мечом или другими инструментами.<br>
+    • Убивайте монстров, повышайте уровень и монеты для покупки скинов!`
   }
 ];
 
@@ -1975,6 +2018,47 @@ function drawSkyBackground() {
       const sy = seedR() * vh * 0.75;
       ctx.fillRect(sx, sy, 1.5, 1.5);
     }
+  }
+}
+
+// Параллакс цепи гор (Мягкие тени)
+function drawParallaxMountains() {
+  const isNightTime = weather.timeOfDay > 0.35 && weather.timeOfDay < 0.65;
+  const col1 = isNightTime ? 'rgba(15, 23, 42, 0.4)' : 'rgba(100, 116, 139, 0.25)';
+  const col2 = isNightTime ? 'rgba(7, 10, 18, 0.55)' : 'rgba(71, 85, 105, 0.4)';
+
+  const drawLayer = (offsetFactor, color, heightOffset) => {
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(0, vh);
+    const startX = Math.floor(cam.x * offsetFactor);
+    for (let x = 0; x <= vw; x += 30) {
+      const worldX = startX + x;
+      const y = vh - heightOffset - Math.sin(worldX * 0.0035) * 45 - Math.cos(worldX * 0.001) * 20;
+      ctx.lineTo(x, y);
+    }
+    ctx.lineTo(vw, vh);
+    ctx.closePath();
+    ctx.fill();
+  };
+
+  drawLayer(0.1, col1, 120);
+  drawLayer(0.25, col2, 60);
+}
+
+// Процедурные пушистые облака
+function drawProceduralClouds() {
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.18)';
+  const count = 5;
+  for (let i = 0; i < count; i++) {
+    const cx = (i * 350 + performance.now() * 0.03 - cam.x * 0.15) % (vw + 160) - 80;
+    const cy = 40 + Math.sin(performance.now() * 0.001 + i) * 15;
+    ctx.beginPath();
+    ctx.arc(cx, cy, 18, 0, 7);
+    ctx.arc(cx + 20, cy - 8, 24, 0, 7);
+    ctx.arc(cx + 42, cy, 18, 0, 7);
+    ctx.closePath();
+    ctx.fill();
   }
 }
 
@@ -2204,10 +2288,53 @@ let lastTs = 0, acc = 0;
 function stepGame() {
   const now = performance.now();
   updateDynamicWeatherAndSeasons(now);
-  stepPlayer();
+
+  // Обновление телепортации (если идет анимация)
+  if (teleportAnim) {
+    teleportAnim.progress += 1;
+    const t = teleportAnim.progress / teleportAnim.duration;
+    
+    // Кубическое сглаживание к финишу
+    const ease = 1 - Math.pow(1 - t, 3);
+    P.x = lerp(teleportAnim.sx, teleportAnim.tx, ease);
+    P.y = lerp(teleportAnim.sy, teleportAnim.ty, ease);
+
+    // Оставляем шлейф частиц по траектории телепорта
+    if (Math.random() < 0.6) {
+      spawnP(P.x + P.w/2, P.y + P.h/2, (Math.random()-0.5)*3, (Math.random()-0.5)*3, 15, '#60a5fa', 2, 0);
+    }
+
+    if (teleportAnim.progress >= teleportAnim.duration) {
+      P.x = teleportAnim.tx;
+      P.y = teleportAnim.ty;
+      P.vx = 0; P.vy = 0;
+      teleportAnim = null;
+      // Взрыв частиц в конечной точке
+      for (let i = 0; i < 20; i++) {
+        spawnP(P.x + P.w/2, P.y + P.h/2, (Math.random()-0.5)*6, (Math.random()-0.5)*6, 25, '#34d399', 3, 0.05);
+      }
+      saveProgressExact();
+    }
+  } else {
+    // Обычная физика, если не телепортируемся
+    stepPlayer();
+  }
+
   updateMobs();
   updateMining();
   smoothRemotes();
+
+  // Падающие розовые листья сакуры от процедурных сакур
+  if (Math.random() < 0.12) {
+    const sTrees = spawnedTrees.filter(tr => tr.isSakura);
+    if (sTrees.length > 0) {
+      const chosen = sTrees[Math.floor(Math.random() * sTrees.length)];
+      // Рандомизируем радиус кроны сакуры
+      const leafX = chosen.x * TILE + (Math.random() - 0.5) * 64;
+      const leafY = chosen.y * TILE + (Math.random() - 0.5) * 32;
+      spawnP(leafX, leafY, -0.4 + Math.random() * 0.8, 0.6 + Math.random() * 0.5, 120, '#f472b6', 2.5, 0.02);
+    }
+  }
 
   for (let i = particles.length - 1; i >= 0; i--) {
     const p = particles[i];
@@ -2233,6 +2360,8 @@ function loop(ts) {
   }
 
   drawSkyBackground();
+  drawParallaxMountains();
+  drawProceduralClouds();
   drawBlocks();
   drawAmbientWeather();
 
@@ -2250,14 +2379,27 @@ function loop(ts) {
 
   drawPlayer(P.x - cam.x, P.y - cam.y, P.dir, MY_NAME, P.activeSkin, true);
 
+  // Отрисовка расширяющегося портального кольца во время анимации
+  if (teleportAnim) {
+    const cx = teleportAnim.px - cam.x + P.w/2;
+    const cy = teleportAnim.py - cam.y + P.h/2;
+    const radius = 10 + (teleportAnim.progress * 4.5);
+    ctx.strokeStyle = 'rgba(96, 165, 250, ' + (1 - teleportAnim.progress / teleportAnim.duration) + ')';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+
   drawParticles();
   drawDamageTexts();
   drawLighting();
 }
 
 async function startGame() {
-  $('auth').classList.add('hidden');
+  // НЕМЕДЛЕННО СКРЫВАЕМ ОКОШКО ЗАГРУЗКИ во избежание бесконечного зависания!
   $('loading').classList.add('hidden');
+  $('auth').classList.add('hidden');
   $('hud').classList.add('on');
 
   const local = localStorage.getItem('blockran_survival_save_v2');
@@ -2275,7 +2417,11 @@ async function startGame() {
     } catch(e){}
   } else {
     try {
-      const snap = await db.ref('saves/' + MY_UID).once('value');
+      // Пытаемся получить данные с базы, но с жестким таймаутом, чтобы игра не зависла
+      const snap = await Promise.race([
+        db.ref('saves/' + MY_UID).once('value'),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 2500))
+      ]);
       const d = snap.val();
       if (d) {
         P.hp = d.hp || 100;
