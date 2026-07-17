@@ -6,7 +6,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>БЛОКРАН SURVIVAL: РЕАЛТАЙМ МУЛЬТИПЛЕЕР</title>
+<title>БЛОКРАН SURVIVAL: ОБЩИЙ МИР</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Rubik:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
@@ -603,7 +603,7 @@
 
 <div id="loading">
   <div class="spin" style="width: 24px; height: 24px; border-width: 3px"></div>
-  <div id="loadTxt">ГЕНЕРАЦИЯ БЕЗГРАНИЧНОЙ ВСЕЛЕННОЙ БЛОКОВ…</div>
+  <div id="loadTxt">СИНХРОНИЗАЦИЯ ОБЩЕГО МУЛЬТИПЛЕЕРНОГО МИРА…</div>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -906,8 +906,9 @@ function solidAt(tx, ty) {
 // Хранилище сгенерированных деревьев для падающих листьев сакуры
 const spawnedTrees = [];
 
-function generateSurvivalWorld() {
-  const R = mulberry32(3030);
+// ГЕНЕРАЦИЯ ОДНОГО БОЛЬШОГО МИРА НА ОСНОВЕ СИДА ИЗ FIREBASE
+function generateSharedWorld(sharedSeed) {
+  const R = mulberry32(sharedSeed);
   const noise = (x) => Math.sin(x * 0.055) * 6 + Math.cos(x * 0.11) * 2;
 
   const skyLimit = 35;
@@ -980,7 +981,8 @@ function generateSurvivalWorld() {
     }
   }
 
-  // Спавн обычных и сакуровых деревьев (на втором слое - блоки проходят)
+  // Спавн обычных и сакуровых деревьев
+  spawnedTrees.length = 0;
   for (let x = 5; x < WW - 5; x += 10 + Math.round(R() * 8)) {
     let surfaceY = -1;
     for (let y = 0; y < WH; y++) {
@@ -995,7 +997,7 @@ function generateSurvivalWorld() {
         setBlock(x, surfaceY - ty, B.WOOD);
       }
       
-      // Листва (обычная или сакура)
+      // Листва
       const leafBlock = isSakura ? B.SAKURA_LEAVES : B.LEAVES;
       const ly = surfaceY - treeHeight;
       for (let ldx = -2; ldx <= 2; ldx++) {
@@ -1019,7 +1021,6 @@ function generateSurvivalWorld() {
     }
   }
 }
-generateSurvivalWorld();
 </script>
 
 <script>
@@ -1686,7 +1687,6 @@ function handleInputStart(e) {
   const tx = Math.floor(coords.x / TILE);
   const ty = Math.floor(coords.y / TILE);
 
-  // Пьем лечебное зелье в любой момент
   const activeTool = getActiveTool();
   if (activeTool === 'heal_potion') {
     P.hp = Math.min(P.maxHp, P.hp + 50);
@@ -1719,29 +1719,26 @@ function handleInputStart(e) {
 
     if (activeInteractionMode === 'mine') {
       if (block === B.AIR) {
-        // МЕХАНИКА ТЕЛЕПОРТА (Клик на воздух в режиме добычи)
+        // ТЕЛЕПОРТ
         if (!teleportAnim) {
           const targetX = tx * TILE + TILE / 2 - P.w / 2;
           const targetY = ty * TILE + TILE / 2 - P.h / 2;
 
-          // Проверим, не телепортируемся ли мы внутрь твердого блока
           if (!solidAt(tx, ty)) {
             teleportAnim = {
               sx: P.x, sy: P.y,
               tx: targetX, ty: targetY,
               px: P.x, py: P.y,
               progress: 0,
-              duration: 20 // кадров
+              duration: 20
             };
             Audio8.jump();
-            // Частицы на старте телепорта
             for (let i = 0; i < 15; i++) {
               spawnP(P.x + P.w/2, P.y + P.h/2, (Math.random()-0.5)*6, (Math.random()-0.5)*6, 20, '#60a5fa', 3, 0);
             }
           }
         }
       } else {
-        // Добыча блока в пределах досягаемости
         const dist = Math.hypot((P.x + P.w/2) - (tx * TILE + 16), (P.y + P.h/2) - (ty * TILE + 16));
         if (dist <= 180) {
           interactionInput.targetBlock = { tx, ty };
@@ -1749,12 +1746,11 @@ function handleInputStart(e) {
         }
       }
     } else {
-      // Режим СТРОЙКИ (ставим блоки в пределах досягаемости)
+      // СТРОЙКА
       const dist = Math.hypot((P.x + P.w/2) - (tx * TILE + 16), (P.y + P.h/2) - (ty * TILE + 16));
       if (dist <= 180 && (block === B.AIR || block === B.GRASS_TALL)) {
         const slot = P.inventory[P.activeHotbarSlot];
         if (slot && typeof slot.type === 'number') {
-          // Локальная замена + отправка изменений в Firebase Realtime
           setBlock(tx, ty, slot.type);
           db.ref(`world_tiles/${tx}_${ty}`).set(slot.type);
           Audio8.placeBlock();
@@ -1808,7 +1804,6 @@ function updateMining() {
       }
 
       if (interactionInput.mineProgress >= info.mineTime) {
-        // Разрушение локально + синхронизация с Firebase в реалтайме
         setBlock(tx, ty, B.AIR);
         db.ref(`world_tiles/${tx}_${ty}`).set(B.AIR);
         Audio8.breakBlock();
@@ -1825,7 +1820,6 @@ function updateMining() {
   }
 }
 
-// Спелл уничтожения пласта 10 уровня
 $('activeSkillBtn').onclick = () => {
   if (P.level < 10) return;
   Audio8.skill();
@@ -1864,12 +1858,12 @@ $('activeSkillBtn').onclick = () => {
 let currentGuidePage = 0;
 const GUIDE_PAGES = [
   {
-    title: '🌿 Мультиплеерный мир',
-    content: `Добро пожаловать в живой мир БЛОКРАН SURVIVAL!<br><br>
-    Здесь вы можете исследовать бесконечные пещеры и строить города в реальном времени с друзьями.<br>
-    • Используйте <b>джойстик внизу</b> для бега.<br>
-    • В режиме <b>«Добыча»</b> зажимайте пальцем блок, чтобы его сломать.<br>
-    • <b>ТЕЛЕПОРТАЦИЯ:</b> Нажмите пальцем в любую пустую воздушную точку на экране в режиме добычи, чтобы мгновенно переместиться туда!`
+    title: '🌿 Общий мир',
+    content: `Добро пожаловать в единый мир БЛОКРАН SURVIVAL!<br><br>
+    Мы убрали локальную генерацию — теперь вы с друзьями играете в абсолютно одном пространстве.<br>
+    • Сид мира синхронизирован с базой данных.<br>
+    • Все ломания и постройки сохраняются мгновенно на сервере.<br>
+    • В режиме <b>«Добыча»</b> кликайте на пустое место, чтобы быстро <b>ТЕЛЕПОРТИРОВАТЬСЯ</b>!`
   },
   {
     title: '🌸 Сакура и Живая Природа',
@@ -2289,17 +2283,15 @@ function stepGame() {
   const now = performance.now();
   updateDynamicWeatherAndSeasons(now);
 
-  // Обновление телепортации (если идет анимация)
+  // Обновление телепортации
   if (teleportAnim) {
     teleportAnim.progress += 1;
     const t = teleportAnim.progress / teleportAnim.duration;
     
-    // Кубическое сглаживание к финишу
     const ease = 1 - Math.pow(1 - t, 3);
     P.x = lerp(teleportAnim.sx, teleportAnim.tx, ease);
     P.y = lerp(teleportAnim.sy, teleportAnim.ty, ease);
 
-    // Оставляем шлейф частиц по траектории телепорта
     if (Math.random() < 0.6) {
       spawnP(P.x + P.w/2, P.y + P.h/2, (Math.random()-0.5)*3, (Math.random()-0.5)*3, 15, '#60a5fa', 2, 0);
     }
@@ -2309,14 +2301,12 @@ function stepGame() {
       P.y = teleportAnim.ty;
       P.vx = 0; P.vy = 0;
       teleportAnim = null;
-      // Взрыв частиц в конечной точке
       for (let i = 0; i < 20; i++) {
         spawnP(P.x + P.w/2, P.y + P.h/2, (Math.random()-0.5)*6, (Math.random()-0.5)*6, 25, '#34d399', 3, 0.05);
       }
       saveProgressExact();
     }
   } else {
-    // Обычная физика, если не телепортируемся
     stepPlayer();
   }
 
@@ -2329,7 +2319,6 @@ function stepGame() {
     const sTrees = spawnedTrees.filter(tr => tr.isSakura);
     if (sTrees.length > 0) {
       const chosen = sTrees[Math.floor(Math.random() * sTrees.length)];
-      // Рандомизируем радиус кроны сакуры
       const leafX = chosen.x * TILE + (Math.random() - 0.5) * 64;
       const leafY = chosen.y * TILE + (Math.random() - 0.5) * 32;
       spawnP(leafX, leafY, -0.4 + Math.random() * 0.8, 0.6 + Math.random() * 0.5, 120, '#f472b6', 2.5, 0.02);
@@ -2379,7 +2368,6 @@ function loop(ts) {
 
   drawPlayer(P.x - cam.x, P.y - cam.y, P.dir, MY_NAME, P.activeSkin, true);
 
-  // Отрисовка расширяющегося портального кольца во время анимации
   if (teleportAnim) {
     const cx = teleportAnim.px - cam.x + P.w/2;
     const cy = teleportAnim.py - cam.y + P.h/2;
@@ -2397,11 +2385,27 @@ function loop(ts) {
 }
 
 async function startGame() {
-  // НЕМЕДЛЕННО СКРЫВАЕМ ОКОШКО ЗАГРУЗКИ во избежание бесконечного зависания!
-  $('loading').classList.add('hidden');
-  $('auth').classList.add('hidden');
-  $('hud').classList.add('on');
+  try {
+    // 1. ПОЛУЧЕНИЕ ИЛИ ГЕНЕРАЦИЯ ЕДИНОГО СИДА МУЛЬТИПЛЕЕРА
+    const seedRef = db.ref('world_seed');
+    let snapSeed = await seedRef.once('value');
+    let seed = snapSeed.val();
+    
+    if (!seed) {
+      // Если сида нет в базе — мы первый игрок на сервере. Создаем постоянный сид
+      seed = Math.floor(Math.random() * 1000000) + 12345;
+      await seedRef.set(seed);
+    }
+    
+    // Генерируем ландшафт на основе единого сида
+    generateSharedWorld(seed);
 
+  } catch(e) {
+    // Резервная генерация в случае сбоя сети
+    generateSharedWorld(3030);
+  }
+
+  // 2. ЗАГРУЗКА ПЕРСОНАЛЬНОГО ПРОГРЕССА ИГРОКА
   const local = localStorage.getItem('blockran_survival_save_v2');
   if (local) {
     try {
@@ -2417,10 +2421,9 @@ async function startGame() {
     } catch(e){}
   } else {
     try {
-      // Пытаемся получить данные с базы, но с жестким таймаутом, чтобы игра не зависла
       const snap = await Promise.race([
         db.ref('saves/' + MY_UID).once('value'),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 2500))
+        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 2000))
       ]);
       const d = snap.val();
       if (d) {
@@ -2436,11 +2439,16 @@ async function startGame() {
     } catch(e){}
   }
 
+  // 3. СКРЫВАЕМ СТАРТОВЫЙ ЭКРАН И ВКЛЮЧАЕМ ИГРУ
+  $('loading').classList.add('hidden');
+  $('auth').classList.add('hidden');
+  $('hud').classList.add('on');
+
   checkSkillsUnlock();
   renderHotbar();
   joinNet();
   
-  toast(`🌲 Мир загружен! Добро пожаловать, ${MY_NAME}!`, 3000);
+  toast(`🌲 Общий мир загружен! Добро пожаловать, ${MY_NAME}!`, 3000);
   Audio8.init();
   Audio8.playTrack(0);
 
