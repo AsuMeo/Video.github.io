@@ -2,13 +2,13 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"&gt;
-<title>TERRARIA ONLINE — Мультиплеерное Выживание</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>TERRARIA MOBILE — Выживание и Строительство онлайн</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Rubik:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-  html,body { width:100%; height:100%; overflow:hidden; background:#05070f; font-family:'Rubik',sans-serif; user-select:none; }
+  html,body { width:100%; height:100%; overflow:hidden; background:#05070f; font-family:'Rubik',sans-serif; user-select:none; touch-action:none; }
   #game { position:fixed; inset:0; width:100%; height:100%; display:block; image-rendering:pixelated; }
 
   /* ---------- AUTH ---------- */
@@ -19,145 +19,147 @@
   }
   #auth.hidden { opacity:0; pointer-events:none; }
   .auth-card {
-    width:min(420px, 92vw); padding:34px 30px 28px; border-radius:22px;
-    background:rgba(13,20,46,.72); backdrop-filter:blur(14px);
+    width:min(440px, 95vw); padding:24px 20px; border-radius:22px;
+    background:rgba(13,20,46,.85); backdrop-filter:blur(14px);
     border:1px solid rgba(120,160,255,.22);
-    box-shadow:0 0 60px rgba(60,110,255,.18), inset 0 1px 0 rgba(255,255,255,.08);
+    box-shadow:0 0 60px rgba(60,110,255,.18);
     text-align:center; color:#dfe8ff;
   }
   .logo { display:flex; align-items:center; justify-content:center; gap:12px; margin-bottom:6px; }
-  .logo h1 { font-family:'Press Start 2P',monospace; font-size:18px; letter-spacing:2px;
-    background:linear-gradient(180deg,#8ecbff,#4f7cff 60%,#b96bff); -webkit-background-clip:text; background-clip:text; color:transparent;
-    filter:drop-shadow(0 0 12px rgba(90,140,255,.55)); }
-  .tagline { font-size:13px; color:#8fa3d9; margin-bottom:22px; }
-  .field { margin-bottom:12px; text-align:left; }
-  .field label { display:block; font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:#7f93c9; margin-bottom:5px; }
+  .logo h1 { font-family:'Press Start 2P',monospace; font-size:16px; letter-spacing:1px;
+    background:linear-gradient(180deg,#8ecbff,#4f7cff 60%,#b96bff); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .tagline { font-size:12px; color:#8fa3d9; margin-bottom:16px; }
+  .field { margin-bottom:10px; text-align:left; }
+  .field label { display:block; font-size:10px; letter-spacing:1px; text-transform:uppercase; color:#7f93c9; margin-bottom:4px; }
   .field input {
-    width:100%; padding:12px 14px; border-radius:12px; border:1px solid rgba(120,160,255,.25);
-    background:rgba(6,10,28,.75); color:#eaf1ff; font-size:15px; font-family:'Rubik'; outline:none; transition:.2s;
+    width:100%; padding:10px 12px; border-radius:10px; border:1px solid rgba(120,160,255,.25);
+    background:rgba(6,10,28,.75); color:#eaf1ff; font-size:14px; outline:none;
   }
-  .field input:focus { border-color:#5f8dff; box-shadow:0 0 0 3px rgba(95,141,255,.18); }
   .btn {
-    width:100%; padding:13px; border:none; border-radius:12px; cursor:pointer; font-family:'Rubik'; font-weight:800;
-    font-size:15px; letter-spacing:.5px; color:#fff; transition:.15s; margin-top:6px;
+    width:100%; padding:12px; border:none; border-radius:10px; cursor:pointer; font-family:'Rubik'; font-weight:800;
+    font-size:14px; color:#fff; transition:.15s; margin-top:4px;
   }
   .btn:active { transform:scale(.97); }
-  .btn-primary { background:linear-gradient(135deg,#3f7bff,#7b4dff); box-shadow:0 6px 22px rgba(80,110,255,.4); }
-  .btn-primary:hover { filter:brightness(1.12); }
-  .btn-ghost { background:transparent; border:1px solid rgba(120,160,255,.35); color:#a9bcff; margin-top:10px; }
-  .btn-ghost:hover { background:rgba(95,141,255,.1); }
-  #authErr { min-height:18px; color:#ff7d92; font-size:13px; margin-top:10px; }
-  .hint { margin-top:14px; font-size:12px; color:#6f83b8; line-height:1.5; }
-  .spin { display:inline-block; width:14px; height:14px; border:2px solid #fff3; border-top-color:#fff; border-radius:50%; animation:sp 1s linear infinite; vertical-align:-2px; }
+  .btn-primary { background:linear-gradient(135deg,#3f7bff,#7b4dff); box-shadow:0 4px 15px rgba(80,110,255,.3); }
+  .btn-ghost { background:transparent; border:1px solid rgba(120,160,255,.35); color:#a9bcff; margin-top:8px; }
+  #authErr { min-height:16px; color:#ff7d92; font-size:12px; margin-top:6px; }
+  .hint { margin-top:10px; font-size:11px; color:#6f83b8; line-height:1.4; }
+  .spin { display:inline-block; width:12px; height:12px; border:2px solid #fff3; border-top-color:#fff; border-radius:50%; animation:sp 1s linear infinite; }
   @keyframes sp { to { transform:rotate(360deg); } }
 
   /* ---------- HUD ---------- */
   #hud { position:fixed; inset:0; z-index:20; pointer-events:none; display:none; }
   #hud.on { display:block; }
   #topbar {
-    position:absolute; top:10px; left:12px; display:flex; flex-direction:column; gap:6px;
-    color:#eaf1ff; text-shadow:0 2px 6px #000;
+    position:absolute; top:12px; left:12px; display:flex; flex-direction:column; gap:4px;
+    color:#eaf1ff; text-shadow:0 2px 4px #000;
   }
-  #hpBar { display:flex; align-items:center; gap:8px; font-weight:800; font-size:14px; color:#ff5c7a; }
-  #hpWrap { width:140px; height:12px; border-radius:6px; background:rgba(8,12,30,.7); border:1px solid rgba(255,100,100,.3); overflow:hidden; }
-  #hpFill { height:100%; width:100%; background:linear-gradient(90deg,#ff4f67,#ff8597); box-shadow:0 0 10px rgba(255,100,100,.5); transition:width .2s; }
-  #stats { font-size:13px; color:#c9d7ff; display:flex; gap:14px; }
-  #stats b { color:#fff; }
+  #hpBar { display:flex; align-items:center; gap:6px; font-weight:800; font-size:12px; color:#ff5c7a; }
+  #hpWrap { width:120px; height:10px; border-radius:5px; background:rgba(8,12,30,.7); border:1px solid rgba(255,100,100,.3); overflow:hidden; }
+  #hpFill { height:100%; width:100%; background:linear-gradient(90deg,#ff4f67,#ff8597); }
+  #stats { font-size:11px; color:#c9d7ff; display:flex; gap:10px; }
 
-  /* Hotbar UI */
+  /* Hotbar UI (крупный для тач-скрина) */
   #hotbar {
-    position:absolute; bottom:14px; left:50%; transform:translateX(-50%);
-    display:flex; gap:6px; pointer-events:auto; background:rgba(10,16,40,0.85);
-    padding:6px; border-radius:14px; border:2px solid rgba(130,165,255,.35); z-index:30;
+    position:absolute; bottom:12px; left:50%; transform:translateX(-50%);
+    display:flex; gap:8px; pointer-events:auto; background:rgba(10,16,40,0.9);
+    padding:6px; border-radius:14px; border:2px solid rgba(130,165,255,.3); z-index:30;
   }
   .slot {
-    width:48px; height:48px; border-radius:8px; border:2px solid rgba(255,255,255,0.15);
+    width:46px; height:46px; border-radius:8px; border:2px solid rgba(255,255,255,0.15);
     background:rgba(255,255,255,0.05); display:flex; align-items:center; justify-content:center;
-    cursor:pointer; color:#fff; font-size:10px; font-weight:bold; position:relative; transition:0.15s;
+    position:relative; transition:0.1s;
   }
-  .slot.active { border-color:#ffd94f; background:rgba(255,217,79,0.18); transform:scale(1.08); }
-  .slot .icon { width:22px; height:22px; border-radius:3px; }
-  .slot .num { position:absolute; top:2px; left:4px; font-size:9px; color:#8fa3d9; }
+  .slot.active { border-color:#ffd94f; background:rgba(255,217,79,0.22); transform:scale(1.08); }
+  .slot .icon { width:24px; height:24px; border-radius:4px; }
+  .slot .num { position:absolute; bottom:2px; right:4px; font-size:9px; color:#8fa3d9; }
 
-  /* Cam & Audio Controls */
+  /* Настройки камеры/аудио сверху по центру */
   #camControls {
-    position:absolute; top:10px; left:50%; transform:translateX(-50%);
-    display:flex; gap:6px; pointer-events:auto; z-index:30;
+    position:absolute; top:12px; left:50%; transform:translateX(-50%);
+    display:flex; gap:4px; pointer-events:auto; z-index:30;
   }
   .hud-btn {
-    width:42px; height:42px; border-radius:12px; border:1px solid rgba(130,165,255,.35);
-    background:rgba(10,16,40,.82); color:#fff; font-size:15px; font-weight:800; cursor:pointer;
-    display:flex; align-items:center; justify-content:center; backdrop-filter:blur(6px);
-    transition:transform 0.1s, background-color 0.15s; user-select:none; touch-action:manipulation;
+    width:38px; height:38px; border-radius:10px; border:1px solid rgba(130,165,255,.3);
+    background:rgba(10,16,40,.85); color:#fff; font-size:13px; font-weight:800; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; backdrop-filter:blur(4px);
   }
-  .hud-btn:active { transform:scale(0.92); background-color:rgba(95,141,255,.45); }
 
-  /* Leaderboard */
+  /* Таблица лидеров */
   #board {
-    position:absolute; top:10px; right:12px; min-width:190px; max-width:240px;
-    background:rgba(8,12,30,.5); backdrop-filter:blur(6px);
-    border:1px solid rgba(130,165,255,.22); border-radius:14px; padding:10px 12px; color:#dfe8ff;
+    position:absolute; top:12px; right:12px; min-width:160px; max-width:210px;
+    background:rgba(8,12,30,.6); border:1px solid rgba(130,165,255,.2); border-radius:10px; padding:6px 8px; color:#dfe8ff;
   }
-  #board h3 { font-size:11px; letter-spacing:2px; text-transform:uppercase; color:#8fa3d9; margin-bottom:7px; display:flex; justify-content:space-between; }
-  #board h3 span { color:#5f7ac9; font-size:10px; }
-  .brow { display:flex; justify-content:space-between; gap:10px; font-size:13px; padding:3px 2px; border-radius:6px; }
-  .brow.me { background:rgba(95,141,255,.18); }
-  .brow .nm { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:130px; }
-  .brow .bl { font-weight:800; color:#ffd94f; font-variant-numeric:tabular-nums; }
-  .brow i { font-style:normal; color:#7f93c9; margin-right:6px; font-size:11px; }
+  #board h3 { font-size:9px; letter-spacing:1px; text-transform:uppercase; color:#8fa3d9; margin-bottom:4px; }
+  .brow { display:flex; justify-content:space-between; gap:6px; font-size:11px; padding:2px; }
+  .brow.me { background:rgba(95,141,255,.2); border-radius:4px; }
+  .brow .nm { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:100px; }
+  .brow .bl { font-weight:800; color:#ffd94f; }
 
   #toast {
-    position:absolute; top:18%; left:50%; transform:translateX(-50%); padding:12px 24px; border-radius:14px;
-    background:rgba(10,16,40,.85); border:1px solid rgba(130,165,255,.35); color:#fff; font-weight:600; font-size:15px;
-    opacity:0; transition:opacity .3s; text-align:center; max-width:80vw; pointer-events:none; text-shadow:0 1px 3px #000;
+    position:absolute; top:20%; left:50%; transform:translateX(-50%); padding:10px 20px; border-radius:10px;
+    background:rgba(10,16,40,.9); border:1px solid rgba(130,165,255,.3); color:#fff; font-weight:600; font-size:13px;
+    opacity:0; transition:opacity .3s; text-align:center; max-width:85vw; pointer-events:none; z-index:40;
   }
   #toast.show { opacity:1; }
 
   #trackName {
-    position:absolute; top:135px; right:12px; font-size:10px; font-weight:bold;
-    color:#ffe98a; background:rgba(10,16,40,0.65); padding:4px 10px; border-radius:8px;
-    border:1px solid rgba(130,165,255,0.25); pointer-events:none; text-shadow:0 1px 3px #000;
+    position:absolute; top:115px; right:12px; font-size:9px;
+    color:#ffe98a; background:rgba(10,16,40,0.7); padding:3px 8px; border-radius:6px;
+    pointer-events:none;
   }
 
-  /* Touch controls */
-  #touch { position:absolute; inset:0; display:none; }
+  /* ---------- МОБИЛЬНЫЕ КНОПКИ (D-PAD) ---------- */
+  #touch { position:absolute; inset:0; display:none; pointer-events:none; }
   body.touch #touch { display:block; }
   .tbtn {
-    position:absolute; bottom:18px; width:74px; height:74px; border-radius:20px; pointer-events:auto;
-    background:rgba(20,30,70,.4); border:2px solid rgba(140,175,255,.35); color:#fff; font-size:30px;
-    display:flex; align-items:center; justify-content:center; backdrop-filter:blur(4px); user-select:none; touch-action:none;
+    position:absolute; bottom:14px; width:70px; height:70px; border-radius:18px; pointer-events:auto;
+    background:rgba(20,30,70,.45); border:2px solid rgba(140,175,255,.35); color:#fff; font-size:26px;
+    display:flex; align-items:center; justify-content:center; backdrop-filter:blur(3px);
+    touch-action:none; -webkit-user-select:none;
   }
-  .tbtn.act { background:rgba(95,141,255,.45); }
-  #tLeft { left:16px; } #tRight { left:106px; }
-  #tJump { right:16px; width:90px; height:90px; border-radius:50%; font-size:36px; background:rgba(60,180,120,.3); border-color:rgba(120,255,170,.4); }
+  .tbtn.act { background:rgba(95,141,255,.5); }
+  #tLeft { left:16px; } 
+  #tRight { left:100px; }
+  #tJump { right:16px; width:84px; height:84px; border-radius:50%; font-size:32px; background:rgba(60,180,120,.35); border-color:rgba(120,255,170,.4); }
 
-  /* Внутриигровой чат */
+  /* Переключатель мобильных режимов: Копать / Строить */
+  #tModeToggle {
+    position:absolute; bottom:110px; right:20px; width:76px; height:50px; border-radius:12px;
+    background:#ba3c3c; border:2px solid #ff7d7d; color:#fff; font-size:11px; font-weight:800;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
+    pointer-events:auto; touch-action:none;
+  }
+  #tModeToggle.build-active { background:#3cbaba; border-color:#7dffff; }
+
+  /* Чат */
   #chat {
-    position:absolute; bottom:110px; left:16px; width:280px; height:150px;
-    background:rgba(10,16,40,.55); border:1px solid rgba(130,165,255,.22);
-    border-radius:14px; backdrop-filter:blur(6px); display:flex; flex-direction:column;
-    pointer-events:auto; z-index:25; transition: opacity 0.3s, transform 0.3s;
+    position:absolute; bottom:110px; left:16px; width:260px; height:120px;
+    background:rgba(10,16,40,.6); border:1px solid rgba(130,165,255,.2);
+    border-radius:12px; display:flex; flex-direction:column;
+    pointer-events:auto; z-index:25;
   }
-  #chat.hidden { opacity:0; pointer-events:none; transform:translateY(15px); }
-  #chatMsgs { flex:1; overflow-y:auto; padding:8px; font-size:12px; display:flex; flex-direction:column; gap:4px; text-shadow:0 1px 2px #000; }
+  #chat.hidden { display:none; }
+  #chatMsgs { flex:1; overflow-y:auto; padding:6px; font-size:11px; display:flex; flex-direction:column; gap:2px; }
   #chatInput {
-    background:rgba(6,10,28,.8); border:none; border-top:1px solid rgba(130,165,255,.2);
-    padding:8px 10px; color:#fff; font-size:13px; border-radius:0 0 14px 14px; outline:none;
+    background:rgba(6,10,28,.85); border:none; border-top:1px solid rgba(130,165,255,.2);
+    padding:6px 10px; color:#fff; font-size:12px; border-radius:0 0 12px 12px; outline:none;
+    pointer-events:auto;
   }
 
+  /* Поворот экрана */
   #rotate {
-    position:fixed; inset:0; z-index:90; display:none; align-items:center; justify-content:center; flex-direction:column; gap:16px;
-    background:rgba(4,6,16,.94); color:#dfe8ff; text-align:center; padding:20px;
+    position:fixed; inset:0; z-index:90; display:none; align-items:center; justify-content:center; flex-direction:column; gap:12px;
+    background:rgba(4,6,16,.96); color:#dfe8ff; text-align:center; padding:20px;
   }
   body.touch.portrait #rotate { display:flex; }
-  #rotate .ph { font-size:60px; animation:rot 1.6s ease-in-out infinite; }
+  #rotate .ph { font-size:50px; animation:rot 1.6s ease-in-out infinite; }
   @keyframes rot { 0%,20%{transform:rotate(0)} 60%,100%{transform:rotate(90deg)} }
-  #rotate p { font-size:16px; max-width:300px; line-height:1.5; }
+  
   #vignette { position:fixed; inset:0; z-index:10; pointer-events:none;
-    background:radial-gradient(ellipse at center, transparent 55%, rgba(0,0,10,.5) 100%); }
-  #loading { position:fixed; inset:0; z-index:80; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:14px;
-    background:#05070f; color:#8fa3d9; font-size:14px; letter-spacing:1px; transition:opacity .4s; }
-  #loading.hidden { opacity:0; pointer-events:none; }
+    background:radial-gradient(ellipse at center, transparent 60%, rgba(0,0,10,.6) 100%); }
+  #loading { position:fixed; inset:0; z-index:80; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:10px;
+    background:#05070f; color:#8fa3d9; font-size:13px; letter-spacing:1px; }
 </style>
 </head>
 <body>
@@ -174,37 +176,37 @@
     <div id="stats">
       <span>🪙 Монеты: <b id="coinsCount">0</b></span>
       <span>👥 Онлайн: <b id="online">1</b></span>
-      <span>📍 X: <b id="coordX">0</b> Y: <b id="coordY">0</b></span>
+      <span>📍 X:<b id="coordX">0</b> Y:<b id="coordY">0</b></span>
     </div>
   </div>
 
   <div id="camControls">
-    <button class="hud-btn" id="zoomOutBtn" title="Отдалить камеру">🔍−</button>
-    <button class="hud-btn" id="zoomInBtn" title="Приблизить камеру">🔍+</button>
-    <button class="hud-btn" id="fullScrBtn" title="Полный экран">📺</button>
-    <button class="hud-btn" id="musBtn" title="Сменить трек">📻</button>
-    <button class="hud-btn" id="musMuteBtn" title="Музыка">🎵</button>
-    <button class="hud-btn" id="muteBtn" title="Звуки">🔊</button>
-    <button class="hud-btn" id="chatToggleBtn" title="Скрыть/Показать чат">💬</button>
+    <button class="hud-btn" id="zoomOutBtn">🔍−</button>
+    <button class="hud-btn" id="zoomInBtn">🔍+</button>
+    <button class="hud-btn" id="fullScrBtn">📺</button>
+    <button class="hud-btn" id="musBtn">📻</button>
+    <button class="hud-btn" id="musMuteBtn">🎵</button>
+    <button class="hud-btn" id="muteBtn">🔊</button>
+    <button class="hud-btn" id="chatToggleBtn">💬</button>
   </div>
 
-  <!-- Панель Выбора Блоков (HOTBAR) -->
+  <!-- Селектор блоков Hotbar -->
   <div id="hotbar">
-    <div class="slot active" data-type="1"><div class="num">1</div><div class="icon" style="background:#55c34d;"></div></div>
-    <div class="slot" data-type="2"><div class="num">2</div><div class="icon" style="background:#7fa8c9;"></div></div>
-    <div class="slot" data-type="3"><div class="num">3</div><div class="icon" style="background:#8a5a33;"></div></div>
-    <div class="slot" data-type="5"><div class="num">4</div><div class="icon" style="background:#c9b8e8;"></div></div>
-    <div class="slot" data-type="6"><div class="num">5</div><div class="icon" style="background:#ba3c3c;"></div></div>
-    <div class="slot" data-type="7"><div class="num">6</div><div class="icon" style="background:#ffd94f;box-shadow:0 0 8px #ffd94f;"></div></div>
+    <div class="slot active" data-type="1"><div class="icon" style="background:#55c34d;"></div><div class="num">Трава</div></div>
+    <div class="slot" data-type="2"><div class="icon" style="background:#7fa8c9;"></div><div class="num">Камень</div></div>
+    <div class="slot" data-type="3"><div class="icon" style="background:#8a5a33;"></div><div class="num">Дерево</div></div>
+    <div class="slot" data-type="5"><div class="icon" style="background:#c9b8e8;"></div><div class="num">Доски</div></div>
+    <div class="slot" data-type="6"><div class="icon" style="background:#ba3c3c;"></div><div class="num">Кирпич</div></div>
+    <div class="slot" data-type="7"><div class="icon" style="background:#ffd94f;box-shadow:0 0 6px #ffd94f;"></div><div class="num">Факел</div></div>
   </div>
 
-  <div id="chat">
+  <div id="chat" class="hidden">
     <div id="chatMsgs"></div>
-    <input id="chatInput" maxlength="64" placeholder="Нажмите Enter для чата..." autocomplete="off">
+    <input id="chatInput" maxlength="64" placeholder="Тапни сюда для чата..." autocomplete="off">
   </div>
 
   <div id="board">
-    <h3>🏆 Игроки в мире <span id="boardUpd"></span></h3>
+    <h3>🏆 Игроки онлайн</h3>
     <div id="boardRows"></div>
   </div>
   <div id="toast"></div>
@@ -214,13 +216,19 @@
     <div class="tbtn" id="tLeft">◀</div>
     <div class="tbtn" id="tRight">▶</div>
     <div class="tbtn" id="tJump">⤒</div>
+
+    <!-- Мобильная Кнопка Переключения Режимов ЛОМАТЬ / СТРОИТЬ -->
+    <div id="tModeToggle">
+      <span id="tModeIcon" style="font-size:16px;">⛏️</span>
+      <span id="tModeText" style="font-size:9px;">КОПАТЬ</span>
+    </div>
   </div>
 </div>
 
 <div id="auth">
   <div class="auth-card">
     <div class="logo">
-      <svg width="42" height="42" viewBox="0 0 48 48">
+      <svg width="36" height="36" viewBox="0 0 48 48">
         <defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0" stop-color="#6ee7ff"/><stop offset=".55" stop-color="#4f7cff"/><stop offset="1" stop-color="#b96bff"/>
         </linearGradient></defs>
@@ -228,12 +236,12 @@
         <rect x="26" y="26" width="18" height="18" rx="3" fill="#39d98a"/>
         <rect x="15" y="4" width="18" height="18" rx="3" fill="#ffd94f"/>
       </svg>
-      <h1>TERRARIA ONLINE</h1>
+      <h1>TERRARIA MOBILE</h1>
     </div>
-    <div class="tagline">Выживай, копай и строй с другими игроками в реальном времени! 😄</div>
-    <div class="field" id="nickField">
-      <label>Ник (видят все)</label>
-      <input id="nick" maxlength="14" placeholder="Например: Стив" autocomplete="off">
+    <div class="tagline">Онлайн выживание на Android и iOS!</div>
+    <div class="field">
+      <label>Никнейм</label>
+      <input id="nick" maxlength="14" placeholder="Твой ник" autocomplete="off">
     </div>
     <div class="field">
       <label>Почта</label>
@@ -241,21 +249,20 @@
     </div>
     <div class="field">
       <label>Пароль</label>
-      <input id="pass" type="password" placeholder="Минимум 6 символов" autocomplete="current-password">
+      <input id="pass" type="password" placeholder="Мин. 6 символов" autocomplete="current-password">
     </div>
     <button class="btn btn-primary" id="loginBtn">ВОЙТИ</button>
     <button class="btn btn-ghost" id="regBtn">СОЗДАТЬ АККАУНТ</button>
     <div id="authErr"></div>
-    <div class="hint">🏃 A/D — бег · ПРОБЕЛ — прыжок<br>
-    ⛏️ ЛКМ — ломать блок · ПКМ — ставить блок (в радиусе видимости)<br>
-    Цифры 1–6 — переключение блоков на панели горячих клавиш.</div>
+    <div class="hint">📱 Игра разработана только для смартфонов и планшетов.<br>
+    Поверни телефон горизонтально для удобной игры!</div>
   </div>
 </div>
 
-<div id="rotate"><div class="ph">📱</div><p>Поверни телефон горизонтально!</p></div>
-<div id="loading"><div class="spin" style="width:26px;height:26px;border-width:3px"></div><div id="loadTxt">ПОДКЛЮЧЕНИЕ К СЕРВЕРУ МИРА…</div></div>
+<div id="rotate"><div class="ph">📱</div><p>Пожалуйста, поверни телефон горизонтально!</p></div>
+<div id="loading"><div class="spin" style="width:24px;height:24px;border-width:3px"></div><div id="loadTxt">ЗАГРУЗКА МИРА…</div></div>
 
-<!-- FIREBASE COMPAT LIBS -->
+<!-- FIREBASE SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
@@ -280,7 +287,6 @@ const clamp = (v,a,b) => v<a?a:(v>b?b:v);
 const lerp = (a,b,t) => a+(b-a)*t;
 const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
-/* Fullscreen API */
 function toggleFullscreen() {
   const doc = window.document;
   const docEl = doc.documentElement;
@@ -293,14 +299,14 @@ function toggleFullscreen() {
   }
 }
 
-/* AUTHENTICATION */
+/* АВТОРИЗАЦИЯ */
 const AUTH_ERR = {
-  'auth/invalid-email':'Некорректная почта',
+  'auth/invalid-email':'Неверная почта',
   'auth/user-not-found':'Пользователь не найден',
   'auth/wrong-password':'Неверный пароль',
-  'auth/invalid-credential':'Неверные данные входа',
-  'auth/email-already-in-use':'Почта уже используется',
-  'auth/weak-password':'Пароль слишком слабый (мин. 6 символов)'
+  'auth/invalid-credential':'Неверный логин или пароль',
+  'auth/email-already-in-use':'Почта уже занята',
+  'auth/weak-password':'Слишком простой пароль'
 };
 function authError(e){ $('authErr').textContent = AUTH_ERR[e.code] || e.message; }
 function validNick(n){ return /^[A-Za-zА-Яа-яЁё0-9_\-]{2,14}$/.test(n); }
@@ -310,10 +316,11 @@ async function doRegister(){
   if (busyAuth) return;
   const nick = $('nick').value.trim(), email = $('email').value.trim(), pass = $('pass').value;
   $('authErr').textContent = '';
-  if (!validNick(nick)) { $('authErr').textContent = 'Ник: 2–14 символов'; return; }
-  if (!email || !pass) { $('authErr').textContent = 'Заполни все поля'; return; }
-  busyAuth = true; $('regBtn').innerHTML = '<span class="spin"></span> Создаю…';
+  if (!validNick(nick)) { $('authErr').textContent = 'Ник: от 2 до 14 букв или цифр'; return; }
+  if (!email || !pass) { $('authErr').textContent = 'Заполните все поля!'; return; }
+  busyAuth = true; $('regBtn').innerHTML = '<span class="spin"></span> Создание…';
   try {
+    toggleFullscreen();
     const cr = await auth.createUserWithEmailAndPassword(email, pass);
     await db.ref('users/' + cr.user.uid).set({ name: nick, created: firebase.database.ServerValue.TIMESTAMP });
     MY_NAME = nick;
@@ -324,9 +331,10 @@ async function doLogin(){
   if (busyAuth) return;
   const email = $('email').value.trim(), pass = $('pass').value;
   $('authErr').textContent = '';
-  if (!email || !pass) { $('authErr').textContent = 'Введите почту и пароль'; return; }
-  busyAuth = true; $('loginBtn').innerHTML = '<span class="spin"></span> Вхожу…';
+  if (!email || !pass) { $('authErr').textContent = 'Заполните поля входа'; return; }
+  busyAuth = true; $('loginBtn').innerHTML = '<span class="spin"></span> Вход…';
   try {
+    toggleFullscreen();
     await auth.signInWithEmailAndPassword(email, pass);
   } catch(e){ authError(e); }
   busyAuth = false; $('loginBtn').textContent = 'ВОЙТИ';
@@ -338,7 +346,7 @@ $('loginBtn').onclick = doLogin;
 <script>
 'use strict';
 /* ============================================================
-   АУДИО СИСТЕМА
+   ПРОЦЕДУРНЫЙ МОБИЛЬНЫЙ ЗВУКОВОЙ СИНТЕЗАТОР
    ============================================================ */
 const Audio8 = {
   ctx:null, master:null, musG:null, sfxG:null, noiseBuf:null,
@@ -350,7 +358,7 @@ const Audio8 = {
     if (!AC) return;
     this.ctx = new AC();
     this.master = this.ctx.createGain(); this.master.gain.value = 0.5; this.master.connect(this.ctx.destination);
-    this.musG = this.ctx.createGain(); this.musG.gain.value = 0.22; this.musG.connect(this.master);
+    this.musG = this.ctx.createGain(); this.musG.gain.value = 0.2; this.musG.connect(this.master);
     this.sfxG = this.ctx.createGain(); this.sfxG.gain.value = 0.45; this.sfxG.connect(this.master);
 
     const len = this.ctx.sampleRate * 0.5, buf = this.ctx.createBuffer(1, len, this.ctx.sampleRate), d = buf.getChannelData(0);
@@ -362,14 +370,14 @@ const Audio8 = {
     this.timer = setInterval(()=>this.schedule(), 40);
   },
   resume(){ if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume(); },
-  toggleMusic() { this.musicMuted = !this.musicMuted; if (this.musG) this.musG.gain.value = this.musicMuted ? 0 : 0.22; return this.musicMuted; },
+  toggleMusic() { this.musicMuted = !this.musicMuted; if (this.musG) this.musG.gain.value = this.musicMuted ? 0 : 0.2; return this.musicMuted; },
   toggleSfx() { this.sfxMuted = !this.sfxMuted; if (this.sfxG) this.sfxG.gain.value = this.sfxMuted ? 0 : 0.45; return this.sfxMuted; },
 
   tracks: [
-    { name:'🌲 Террария Дзен (День)', bpm:95, wave:'sine', vol:.2,
+    { name:'🌲 Мобильный Саундтрек (День)', bpm:90, wave:'sine', vol:.18,
       mel:[60,64,67,72,0,67,64,0, 62,65,69,74,0,69,65,0],
       bass:[36,0,43,0,38,0,45,0] },
-    { name:'🦇 Эхо Пещер (Ночь)', bpm:70, wave:'triangle', vol:.25,
+    { name:'🦇 Эхо Подземелий (Ночь)', bpm:72, wave:'triangle', vol:.22,
       mel:[57,60,64,67,72,67,64,60, 53,57,60,65,69,65,60,57],
       bass:[33,0,33,0,29,0,29,0] }
   ],
@@ -400,13 +408,13 @@ const Audio8 = {
       const m = tr.mel[s % tr.mel.length];
       if (m) this.note(m, t, stepDur*1.8, tr.wave, tr.vol);
       const b = tr.bass[s % tr.bass.length];
-      if (b) this.note(b, t, stepDur*1.5, 'triangle', .18);
+      if (b) this.note(b, t, stepDur*1.5, 'triangle', .15);
       this.step++;
       this.nextT += stepDur;
     }
   },
 
-  /* SFX */
+  /* Звуковые эффекты */
   blip(f0, f1, dur, wave, vol){
     if (!this.ready || this.sfxMuted) return;
     const t = this.ctx.currentTime;
@@ -423,12 +431,12 @@ const Audio8 = {
     g.gain.setValueAtTime(vol,t); g.gain.exponentialRampToValueAtTime(0.001, t+dur);
     s.connect(f); f.connect(g); g.connect(this.sfxG); s.start(t); s.stop(t+dur+0.02);
   },
-  jump(){ this.blip(200,450,.08,'sine',.2); },
-  land(){ this.noise(.05,.1,400); },
-  hit(){ this.blip(150,50,.12,'sawtooth',.22); },
-  coin(){ this.blip(800,1500,0.12,'sine',0.2); },
-  blockPlace(){ this.blip(220,110,0.1,'triangle',0.25); },
-  blockBreak(){ this.noise(0.1, 0.2, 500); }
+  jump(){ this.blip(220,500,.08,'sine',.2); },
+  land(){ this.noise(.05,.08,450); },
+  hit(){ this.blip(180,60,.12,'sawtooth',.22); },
+  coin(){ this.blip(900,1600,0.12,'sine',0.2); },
+  blockPlace(){ this.blip(250,120,0.08,'triangle',0.25); },
+  blockBreak(){ this.noise(0.08, 0.25, 400); }
 };
 ['pointerdown','keydown','touchstart'].forEach(ev =>
   window.addEventListener(ev, ()=>{ Audio8.init(); Audio8.resume(); }, { passive:true }));
@@ -437,26 +445,14 @@ const Audio8 = {
 <script>
 'use strict';
 /* ============================================================
-   ДИНАМИЧЕСКИЙ 2D МИР (ТЕРРАРИУМ)
+   ПРОЦЕДУРНЫЙ КАРКАС МИРА ТЕРРАРИИ
    ============================================================ */
-const TILE = 32;
 const WW = 1200; // Ширина мира в блоках
 const WH = 100;  // Высота мира в блоках
 const WORLD_PX_W = WW * TILE;
 const WORLD_PX_H = WH * TILE;
 
-/* Типы блоков */
-const B = {
-  AIR: 0,
-  GRASS: 1,
-  STONE: 2,
-  WOOD: 3,
-  LEAVES: 4,
-  PLANKS: 5,
-  BRICK: 6,
-  TORCH: 7,
-  LAVA: 8
-};
+const B = { AIR: 0, GRASS: 1, STONE: 2, WOOD: 3, LEAVES: 4, PLANKS: 5, BRICK: 6, TORCH: 7, LAVA: 8 };
 
 const BLOCK_DATA = {
   [B.AIR]: { solid: false, color: null },
@@ -466,38 +462,29 @@ const BLOCK_DATA = {
   [B.LEAVES]: { solid: false, color: '#31922a' },
   [B.PLANKS]: { solid: true, color: '#c9b8e8' },
   [B.BRICK]: { solid: true, color: '#ba3c3c' },
-  [B.TORCH]: { solid: false, color: '#ffd94f', light: 8 },
-  [B.LAVA]: { solid: false, color: '#ff4f1e', light: 6, hazard: true }
+  [B.TORCH]: { solid: false, color: '#ffd94f', light: 9 },
+  [B.LAVA]: { solid: false, color: '#ff4f1e', light: 7, hazard: true }
 };
 
-// Хранилище локальных изменений блоков (из Firebase)
 const worldMutations = new Map();
 
-// Генерация базового (девственного) ландшафта процедурно
+// Генерация ландшафта (Холмы, Деревья, Недра и Лава на дне)
 function getBaseTile(tx, ty) {
-  if (tx < 0 || tx >= WW || ty < 0 || ty >= WH) return B.STONE; // Границы мира
-  
-  if (ty >= WH - 4) return B.LAVA; // Лава на самом дне мира
+  if (tx < 0 || tx >= WW || ty < 0 || ty >= WH) return B.STONE;
+  if (ty >= WH - 4) return B.LAVA;
 
-  // Генерация поверхности (холмы)
   let surfaceY = Math.floor(40 + Math.sin(tx * 0.04) * 8 + Math.cos(tx * 0.12) * 3);
   
   if (ty < surfaceY) {
-    // Генерация случайных деревьев на траве
-    if (ty === surfaceY - 1 && (tx * 17) % 19 === 0) {
-      // Это ствол дерева
-      return B.WOOD;
-    }
+    if (ty === surfaceY - 1 && (tx * 17) % 19 === 0) return B.WOOD; // Стволы деревьев
+    if (ty >= surfaceY - 4 && ty < surfaceY - 1 && ((tx + 1) * 17) % 19 === 1) return B.LEAVES; // Листва
     return B.AIR;
   }
   
-  // Кроны деревьев
-  if (ty >= surfaceY - 4 && ty < surfaceY - 1 && ((tx + 1) * 17) % 19 === 1) return B.LEAVES;
-
   if (ty === surfaceY) return B.GRASS;
-  if (ty > surfaceY && ty < surfaceY + 12) return B.GRASS; // Земляной слой
+  if (ty > surfaceY && ty < surfaceY + 10) return B.GRASS;
   
-  return B.STONE; // Каменный слой
+  return B.STONE; // Недра
 }
 
 function tileAt(tx, ty) {
@@ -515,25 +502,24 @@ function isSolid(tx, ty) {
 <script>
 'use strict';
 /* ============================================================
-   ИГРОК: УПРАВЛЕНИЕ, СТРОИТЕЛЬСТВО, ВЫЖИВАНИЕ
+   ПЕРСОНАЖ: СТРОИТЕЛЬСТВО, КЛИКИ, ЗДОРОВЬЕ, МОНЕТЫ
    ============================================================ */
-const keys = { left:false, right:false, jump:false };
-let jumpBuf = false;
-
 const P = {
   x: 100 * TILE, y: 30 * TILE, w: 20, h: 28, vx: 0, vy: 0, dir: 1,
   ground: false, hp: 100, maxHp: 100, coins: 0,
   selectedBlock: B.GRASS,
-  activeSkin: 'default',
   deadT: 0
 };
+
+// Режим взаимодействия на мобильных: 'dig' (ломать) или 'build' (строить)
+let mobileInteractMode = 'dig'; 
 
 const cam = { x: 0, y: 0 };
 let screenShake = 0;
 const particles = [];
 
 function spawnP(x, y, vx, vy, life, color, size){
-  if (particles.length > 200) particles.shift();
+  if (particles.length > 150) particles.shift();
   particles.push({ x, y, vx, vy, life, maxLife: life, color, size });
 }
 
@@ -541,11 +527,10 @@ function damagePlayer(amount, reason) {
   if (P.deadT > 0) return;
   P.hp = Math.max(0, P.hp - amount);
   Audio8.hit();
-  screenShake = 10;
+  screenShake = 12;
   
-  // Кровяные брызги
-  for (let i = 0; i < 8; i++) {
-    spawnP(P.x + P.w/2, P.y + P.h/2, (Math.random()-0.5)*4, -Math.random()*3, 15, '#ff3b3b', 3);
+  for (let i = 0; i < 6; i++) {
+    spawnP(P.x + P.w/2, P.y + P.h/2, (Math.random()-0.5)*3, -Math.random()*2, 12, '#ff3b3b', 3.5);
   }
 
   if (P.hp <= 0) {
@@ -555,18 +540,15 @@ function damagePlayer(amount, reason) {
 
 function die(reason) {
   P.deadT = 80;
-  Audio8.hit();
-  toast(`💀 Ты погиб (${reason || 'неизвестная смерть'})! Возрождение...`, 3000);
+  toast(`💀 Ты погиб (${reason})! Возрождение...`, 2500);
   
-  // Разбрасываем накопленные монетки!
-  const lostCoins = Math.floor(P.coins * 0.3);
+  const lostCoins = Math.floor(P.coins * 0.25);
   P.coins -= lostCoins;
   $('coinsCount').textContent = P.coins;
 
-  // Возрождение на поверхности
   setTimeout(() => {
     P.x = 100 * TILE;
-    P.y = 10 * TILE;
+    P.y = 15 * TILE;
     P.vx = 0; P.vy = 0;
     P.hp = 100;
     P.deadT = 0;
@@ -587,16 +569,14 @@ function collideX(){
 }
 
 function collideY(){
-  const wasAir = !P.ground;
   P.ground = false;
   const tx0 = Math.floor((P.x + 2) / TILE), tx1 = Math.floor((P.x + P.w - 2) / TILE);
   if (P.vy > 0){
     const ty = Math.floor((P.y + P.h) / TILE);
     for (let tx = tx0; tx <= tx1; tx++) if (isSolid(tx, ty)){
       P.y = ty * TILE - P.h; 
-      // Проверка урона от падения
-      if (P.vy > 14) {
-        damagePlayer(Math.floor((P.vy - 14) * 8), 'разбился с высоты');
+      if (P.vy > 15) {
+        damagePlayer(Math.floor((P.vy - 15) * 7), 'разбился при падении');
       }
       P.vy = 0; P.ground = true; 
       break;
@@ -607,52 +587,56 @@ function collideY(){
   }
 }
 
-function handleBlockInteraction(mx, my, isRightClick) {
+// МОБИЛЬНОЕ ВЗАИМОДЕЙСТВИЕ (ТАПЫ ПО ЭКРАНУ)
+function handleMobileScreenTouch(touchX, touchY) {
   if (P.deadT > 0) return;
 
-  // Рассчитываем мировые координаты клика с учетом камеры и зума
-  const worldX = mx + cam.x;
-  const worldY = my + cam.y;
+  // Конвертация координат касания на Canvas с учетом камеры и масштаба
+  const rect = cv.getBoundingClientRect();
+  const scaleX = vw / rect.width;
+  const scaleY = vh / rect.height;
+  const worldX = (touchX - rect.left) * scaleX + cam.x;
+  const worldY = (touchY - rect.top) * scaleY + cam.y;
   
   const tx = Math.floor(worldX / TILE);
   const ty = Math.floor(worldY / TILE);
 
-  // Дистанция взаимодействия (макс. 6 блоков)
+  // Радиус действия тача (макс. 5 блоков от игрока)
   const px = Math.floor((P.x + P.w/2) / TILE);
   const py = Math.floor((P.y + P.h/2) / TILE);
   const dist = Math.hypot(tx - px, ty - py);
   
-  if (dist > 7) {
-    toast('🛑 Слишком далеко!', 1000);
+  if (dist > 5.8) {
+    toast('🛑 Слишком далеко для касания!', 800);
     return;
   }
 
   const key = `${tx}_${ty}`;
 
-  if (isRightClick) {
-    // СТАВИТЬ БЛОК
+  if (mobileInteractMode === 'build') {
+    // Режим "Строить"
     if (tileAt(tx, ty) === B.AIR) {
-      // Проверка, чтобы не застроить самого игрока
+      // Проверка на то, чтобы не застроить самого игрока
       const tRect = { x: tx*TILE, y: ty*TILE, w: TILE, h: TILE };
       if (P.x < tRect.x + tRect.w && P.x + P.w > tRect.x && P.y < tRect.y + tRect.h && P.y + P.h > tRect.y && BLOCK_DATA[P.selectedBlock].solid) {
-        return; // Нельзя застраивать себя твердым блоком
+        return; 
       }
       db.ref('world_changes/' + key).set(P.selectedBlock);
       Audio8.blockPlace();
     }
   } else {
-    // РАЗРУШАТЬ БЛОК
+    // Режим "Копать"
     const currentBlock = tileAt(tx, ty);
     if (currentBlock !== B.AIR) {
       db.ref('world_changes/' + key).set(B.AIR);
       Audio8.blockBreak();
       
-      // Выпадают случайные монетки при разрушении блоков (симуляция гринда)
-      if (currentBlock === B.STONE && Math.random() < 0.15) {
+      // Выпадают случайные монетки при добыче руды/камня
+      if (currentBlock === B.STONE && Math.random() < 0.14) {
         P.coins += 1;
         $('coinsCount').textContent = P.coins;
         Audio8.coin();
-        toast('🪙 Найдена монета!', 800);
+        toast('🪙 Найдена монета в камне!', 600);
         saveProgressExact();
       }
     }
@@ -670,14 +654,14 @@ function stepPlayer(){
   if (keys.left && !inputActive) { P.vx -= 0.55; P.dir = -1; }
   else if (keys.right && !inputActive) { P.vx += 0.55; P.dir = 1; }
   else { P.vx *= 0.72; if(Math.abs(P.vx) < 0.05) P.vx = 0; }
-  P.vx = clamp(P.vx, -5, 5);
+  P.vx = clamp(P.vx, -4.8, 4.8);
 
-  P.vy += 0.45; // Гравитация
-  if (P.vy > 18) P.vy = 18;
+  P.vy += 0.42; // Гравитация
+  if (P.vy > 16) P.vy = 16;
 
   if (jumpBuf && !inputActive) {
     if (P.ground) {
-      P.vy = -9.2;
+      P.vy = -8.8;
       P.ground = false;
       Audio8.jump();
     }
@@ -687,19 +671,19 @@ function stepPlayer(){
   P.x += P.vx; collideX();
   P.y += P.vy; collideY();
 
-  // Опасности: Огненная лава
+  // Нахождение в лаве убивает игрока
   const currentTileUnder = tileAt(Math.floor((P.x + P.w/2)/TILE), Math.floor((P.y + P.h - 2)/TILE));
   if (currentTileUnder === B.LAVA) {
-    damagePlayer(1.5, 'сгорел в лаве');
+    damagePlayer(1.6, 'сгорел в лаве');
   }
 
-  // Обновление HUD
+  // Обновление HUD значений
   $('hpFill').style.width = (P.hp / P.maxHp * 100) + '%';
   $('hpTxt').textContent = `${Math.ceil(P.hp)}/${P.maxHp}`;
   $('coordX').textContent = Math.floor(P.x / TILE);
   $('coordY').textContent = Math.floor(P.y / TILE);
 
-  // Камера плавно следует за персонажем
+  // Центрирование камеры
   const targetCamX = P.x + P.w/2 - vw * 0.5;
   const targetCamY = P.y + P.h/2 - vh * 0.5;
   cam.x = clamp(lerp(cam.x, targetCamX, 0.1), 0, WORLD_PX_W - vw);
@@ -724,7 +708,7 @@ function updParticles(){
 <script>
 'use strict';
 /* ============================================================
-   СЕТЬ: СИНХРОНИЗАЦИЯ ИГРОВОГО МИРА И ИГРОКОВ
+   СИНХРОНИЗАЦИЯ ЧЕРЕЗ REALTIME DATABASE
    ============================================================ */
 let MY_UID = null, MY_NAME = '', joined = false;
 const remotes = {};
@@ -733,7 +717,6 @@ let meRef = null;
 function joinNet(){
   meRef = db.ref('players/' + MY_UID);
   
-  // Синхронизация своего статуса на выход
   db.ref('.info/connected').on('value', s => {
     if (s.val() === true) {
       meRef.onDisconnect().remove();
@@ -741,36 +724,29 @@ function joinNet(){
     }
   });
 
-  // Отслеживание изменений других игроков
   db.ref('players').on('value', snap => {
     const now = Date.now(), seen = new Set();
     snap.forEach(ch => {
       const v = ch.val();
       if (!v || ch.key === MY_UID) return;
-      if (v.t && now - v.t > 15000) return; // Игрок оффлайн
+      if (v.t && now - v.t > 15000) return; 
       seen.add(ch.key);
       let r = remotes[ch.key];
       if (!r) r = remotes[ch.key] = { rx: v.x, ry: v.y, tx: v.x, ty: v.y };
-      r.n = v.n; r.tx = v.x; r.ty = v.y; r.d = v.d || 1; r.hp = v.hp || 100;
+      r.n = v.n; r.tx = v.x; r.ty = v.y; r.d = v.d || 1; r.hp = v.hp || 100; r.coins = v.coins || 0;
     });
     for (const k in remotes) if (!seen.has(k)) delete remotes[k];
     $('online').textContent = seen.size + 1;
     updateLeaderboard();
   });
 
-  // Отслеживание изменений БЛОКОВ в мире
-  db.ref('world_changes').on('child_added', snap => {
-    worldMutations.set(snap.key, snap.val());
-  });
-  db.ref('world_changes').on('child_changed', snap => {
-    worldMutations.set(snap.key, snap.val());
-  });
-  db.ref('world_changes').on('child_removed', snap => {
-    worldMutations.delete(snap.key);
-  });
+  // Синхронизация блоков мира в реальном времени
+  db.ref('world_changes').on('child_added', snap => { worldMutations.set(snap.key, snap.val()); });
+  db.ref('world_changes').on('child_changed', snap => { worldMutations.set(snap.key, snap.val()); });
+  db.ref('world_changes').on('child_removed', snap => { worldMutations.delete(snap.key); });
 
-  // Синхронизация чата
-  db.ref('chat').limitToLast(15).on('child_added', snap => {
+  // Живой чат
+  db.ref('chat').limitToLast(12).on('child_added', snap => {
     const data = snap.val();
     if (!data) return;
     const msgEl = document.createElement('div');
@@ -780,8 +756,7 @@ function joinNet(){
     box.scrollTop = box.scrollHeight;
   });
 
-  // Быстрый апдейт координат по сети
-  setInterval(sendMyState, 100);
+  setInterval(sendMyState, 120);
 }
 
 function sendMyState(){
@@ -820,23 +795,22 @@ function updateLeaderboard(){
   const list = [];
   list.push({ n: MY_NAME, coins: P.coins, hp: P.hp, me: true });
   for (const k in remotes) {
-    list.push({ n: remotes[k].n || 'Аноним', coins: remotes[k].coins || 0, hp: remotes[k].hp || 100 });
+    list.push({ n: remotes[k].n || 'Игрок', coins: remotes[k].coins || 0, hp: remotes[k].hp || 100 });
   }
   list.sort((a,b) => b.coins - a.coins);
 
   $('boardRows').innerHTML = list.map((r, i) =>
     `<div class="brow ${r.me ? 'me' : ''}">` +
     `<span class="nm"><i>${i+1}.</i>${esc(r.n)}</span>` +
-    `<span class="bl">🪙 ${r.coins} (❤️${Math.ceil(r.hp)})</span></div>`
+    `<span class="bl">🪙 ${r.coins}</span></div>`
   ).join('');
-  $('boardUpd').textContent = new Date().toLocaleTimeString('ru-RU');
 }
 
 function smoothRemotes(){
   for (const k in remotes){
     const r = remotes[k];
-    r.rx = lerp(r.rx, r.tx, 0.2);
-    r.ry = lerp(r.ry, r.ty, 0.2);
+    r.rx = lerp(r.rx, r.tx, 0.22);
+    r.ry = lerp(r.ry, r.ty, 0.22);
   }
 }
 
@@ -860,7 +834,7 @@ async function startGame(){
   $('loading').classList.add('hidden');
   $('hud').classList.add('on');
 
-  // Восстановление сохранений
+  // Чтение сохранений
   const local = localStorage.getItem('terra_exact_save_v1');
   if (local) {
     try {
@@ -878,7 +852,7 @@ async function startGame(){
   $('coinsCount').textContent = P.coins;
   joinNet();
   
-  toast(`🌲 Добро пожаловать, <b>${esc(MY_NAME)}</b>! Выживай и строй!`, 4000);
+  toast(`🌲 Привет, <b>${esc(MY_NAME)}</b>! Выживай, добывай блоки и строй прямо с телефона!`, 4000);
   Audio8.init();
   Audio8.playTrack(0);
 
@@ -889,91 +863,110 @@ async function startGame(){
 <script>
 'use strict';
 /* ============================================================
-   УПРАВЛЕНИЕ: КЛАВИАТУРА, МЫШЬ, МОБИЛЬНОЕ УПРАВЛЕНИЕ
+   МОБИЛЬНОЕ СЕНСОРНОЕ УПРАВЛЕНИЕ (TOUCH EVENTS)
    ============================================================ */
-window.addEventListener('keydown', e => {
-  if (e.target.tagName === 'INPUT') {
-    if (e.key === 'Enter') { sendChatMessage(); $('chatInput').blur(); }
-    return;
-  }
-  switch(e.code){
-    case 'ArrowLeft': case 'KeyA': keys.left = true; break;
-    case 'ArrowRight': case 'KeyD': keys.right = true; break;
-    case 'ArrowUp': case 'KeyW': case 'Space':
-      if (!keys.jump && !e.repeat) jumpBuf = true;
-      keys.jump = true; break;
-    case 'Digit1': selectSlot(0); break;
-    case 'Digit2': selectSlot(1); break;
-    case 'Digit3': selectSlot(2); break;
-    case 'Digit4': selectSlot(3); break;
-    case 'Digit5': selectSlot(4); break;
-    case 'Digit6': selectSlot(5); break;
-    case 'Enter': e.preventDefault(); $('chatInput').focus(); break;
-  }
-});
 
-window.addEventListener('keyup', e => {
-  if (e.target.tagName === 'INPUT') return;
-  switch(e.code){
-    case 'ArrowLeft': case 'KeyA': keys.left = false; break;
-    case 'ArrowRight': case 'KeyD': keys.right = false; break;
-    case 'ArrowUp': case 'KeyW': case 'Space': keys.jump = false; break;
-  }
-});
-
-function selectSlot(idx) {
-  const slots = document.querySelectorAll('#hotbar .slot');
-  slots.forEach(s => s.classList.remove('active'));
-  if(slots[idx]) {
-    slots[idx].classList.add('active');
-    P.selectedBlock = parseInt(slots[idx].dataset.type);
-  }
-}
-
-// Позиционирование слотов Hotbar при клике
-document.querySelectorAll('#hotbar .slot').forEach((s, idx) => {
-  s.onclick = () => selectSlot(idx);
-});
-
-// МОБИЛЬНЫЕ ТАЧИ
+// Обработка кликов по виртуальным кнопкам влево/вправо/прыжок
 function bindTouch(id, on, off){
   const el = $(id);
-  const start = e => { e.preventDefault(); el.classList.add('act'); on(); };
-  const end = e => { e.preventDefault(); el.classList.remove('act'); off(); };
+  const start = e => { 
+    e.preventDefault(); 
+    el.classList.add('act'); 
+    on(); 
+  };
+  const end = e => { 
+    e.preventDefault(); 
+    el.classList.remove('act'); 
+    off(); 
+  };
   el.addEventListener('touchstart', start, { passive:false });
   el.addEventListener('touchend', end, { passive:false });
-  el.addEventListener('mousedown', start); el.addEventListener('mouseup', end); el.addEventListener('mouseleave', end);
 }
+
 bindTouch('tLeft', () => keys.left = true, () => keys.left = false);
 bindTouch('tRight', () => keys.right = true, () => keys.right = false);
 bindTouch('tJump', () => { if (!keys.jump) jumpBuf = true; keys.jump = true; }, () => keys.jump = false);
+
+// ТАП ПО ЭКРАНУ (Для ломания/строительства блоков)
+cv.addEventListener('touchstart', e => {
+  // Игнорируем тачи, если они пришлись на кнопки интерфейса или виртуальный D-pad
+  const target = e.target;
+  if (target.tagName === 'BUTTON' || target.classList.contains('tbtn') || target.closest('#hotbar') || target.closest('#chat') || target.closest('#camControls') || target.closest('#tModeToggle')) {
+    return;
+  }
+  
+  e.preventDefault();
+  const touch = e.touches[0];
+  handleMobileScreenTouch(touch.clientX, touch.clientY);
+}, { passive: false });
+
+// Обработка переключения режимов мобильного взаимодействия
+const tModeToggle = $('tModeToggle');
+tModeToggle.addEventListener('touchstart', e => {
+  e.preventDefault();
+  if (mobileInteractMode === 'dig') {
+    mobileInteractMode = 'build';
+    tModeToggle.classList.add('build-active');
+    $('tModeIcon').textContent = '🧱';
+    $('tModeText').textContent = 'СТРОИТЬ';
+    toast('🧱 Режим: СТРОИТЕЛЬСТВО блоков', 1000);
+  } else {
+    mobileInteractMode = 'dig';
+    tModeToggle.classList.remove('build-active');
+    $('tModeIcon').textContent = '⛏️';
+    $('tModeText').textContent = 'КОПАТЬ';
+    toast('⛏️ Режим: РАЗРУШЕНИЕ блоков', 1000);
+  }
+  Audio8.blockPlace();
+});
+
+// Переключение слотов в Hotbar на касание
+document.querySelectorAll('#hotbar .slot').forEach((s, idx) => {
+  s.addEventListener('touchstart', e => {
+    e.preventDefault();
+    document.querySelectorAll('#hotbar .slot').forEach(slot => slot.classList.remove('active'));
+    s.classList.add('active');
+    P.selectedBlock = parseInt(s.dataset.type);
+    Audio8.blockPlace();
+  });
+});
 
 if ('ontouchstart' in window) document.body.classList.add('touch');
 function checkOrient(){ document.body.classList.toggle('portrait', innerHeight > innerWidth); }
 window.addEventListener('resize', checkOrient); checkOrient();
 
-// Системные бинды кнопок HUD
-$('muteBtn').onclick = () => {
-  const muted = Audio8.toggleSfx(); $('muteBtn').textContent = muted ? '🔇' : '🔊';
-};
-$('musMuteBtn').onclick = () => {
-  const muted = Audio8.toggleMusic(); $('musMuteBtn').textContent = muted ? '🔇' : '🎵';
-};
-$('musBtn').onclick = () => {
-  Audio8.playTrack((Audio8.trackIdx + 1) % Audio8.tracks.length);
-};
-$('chatToggleBtn').onclick = () => {
-  $('chat').classList.toggle('hidden');
-};
+// Настройки HUD кнопок сверху
+$('muteBtn').onclick = () => { const muted = Audio8.toggleSfx(); $('muteBtn').textContent = muted ? '🔇' : '🔊'; };
+$('musMuteBtn').onclick = () => { const muted = Audio8.toggleMusic(); $('musMuteBtn').textContent = muted ? '🔇' : '🎵'; };
+$('musBtn').onclick = () => { Audio8.playTrack((Audio8.trackIdx + 1) % Audio8.tracks.length); };
+$('chatToggleBtn').onclick = () => { $('chat').classList.toggle('hidden'); };
 </script>
 
 <script>
 'use strict';
 /* ============================================================
-   РЕНДЕР: CANVAS, ТЕКСТУРЫ И ОСВЕЩЕНИЕ TORCH (RTX)
+   РЕНДЕРЕР: РИСОВАНИЕ МИРА, ФАХЕЛОВ, RTX-ОСВЕЩЕНИЯ И СЕТКИ-ПРИЦЕЛА
    ============================================================ */
 const cv = $('game'), ctx = cv.getContext('2d');
-let vw = 0, vh = 0, dpr = 1, ZOOM = 1.35;
+let vw = 0, vh = 0, dpr = 1, ZOOM = 1.25;
+
+// Координаты под пальцем игрока для рисования прицела-сетки
+let activeTouchWorldX = -1;
+let activeTouchWorldY = -1;
+
+cv.addEventListener('touchmove', e => {
+  const touch = e.touches[0];
+  const rect = cv.getBoundingClientRect();
+  const scaleX = vw / rect.width;
+  const scaleY = vh / rect.height;
+  activeTouchWorldX = (touch.clientX - rect.left) * scaleX + cam.x;
+  activeTouchWorldY = (touch.clientY - rect.top) * scaleY + cam.y;
+}, { passive: true });
+
+cv.addEventListener('touchend', () => {
+  activeTouchWorldX = -1;
+  activeTouchWorldY = -1;
+});
 
 function resize(){
   dpr = Math.min(1.8, window.devicePixelRatio || 1);
@@ -983,35 +976,15 @@ function resize(){
 }
 window.addEventListener('resize', resize); resize();
 
-$('zoomOutBtn').onclick = () => { ZOOM = clamp(ZOOM - 0.15, 0.8, 2.0); resize(); };
-$('zoomInBtn').onclick = () => { ZOOM = clamp(ZOOM + 0.15, 0.8, 2.0); resize(); };
+$('zoomOutBtn').onclick = () => { ZOOM = clamp(ZOOM - 0.12, 0.75, 1.8); resize(); };
+$('zoomInBtn').onclick = () => { ZOOM = clamp(ZOOM + 0.12, 0.75, 1.8); resize(); };
 $('fullScrBtn').onclick = () => { toggleFullscreen(); };
 
-// Клик по миру (Разрушение и постройка блоков)
-cv.onmousedown = (e) => {
-  if (e.target.tagName === 'INPUT' || $('auth').offsetWidth > 0) return;
-  e.preventDefault();
-  
-  // Получаем абсолютные координаты клика относительно холста
-  const rect = cv.getBoundingClientRect();
-  const scaleX = vw / rect.width;
-  const scaleY = vh / rect.height;
-  const mx = (e.clientX - rect.left) * scaleX;
-  const my = (e.clientY - rect.top) * scaleY;
-
-  const isRightClick = e.button === 2;
-  handleBlockInteraction(mx, my, isRightClick);
-};
-
-// Отключаем стандартное контекстное меню при правом клике
-cv.oncontextmenu = (e) => e.preventDefault();
-
 function drawSky(){
-  // Красивый градиент неба (день/ночь)
   const skyG = ctx.createLinearGradient(0, 0, 0, vh);
-  skyG.addColorStop(0, '#101535');
-  skyG.addColorStop(0.6, '#1a224a');
-  skyG.addColorStop(1, '#2f3d68');
+  skyG.addColorStop(0, '#111638');
+  skyG.addColorStop(0.6, '#182046');
+  skyG.addColorStop(1, '#2c3960');
   ctx.fillStyle = skyG;
   ctx.fillRect(0, 0, vw, vh);
 }
@@ -1022,7 +995,7 @@ function drawWorldAndPlayers(){
   const ty0 = Math.max(0, Math.floor(cam.y / TILE) - 1);
   const ty1 = Math.min(WH - 1, Math.floor((cam.y + vh) / TILE) + 1);
 
-  // 1. Отрисовка блоков мира
+  // 1. Отрисовка блоков
   for (let ty = ty0; ty <= ty1; ty++) {
     for (let tx = tx0; tx <= tx1; tx++) {
       const v = tileAt(tx, ty);
@@ -1035,25 +1008,39 @@ function drawWorldAndPlayers(){
       ctx.fillStyle = data.color;
       ctx.fillRect(x, y, TILE, TILE);
 
-      // Рисуем рамку травки или тень
       if (v === B.GRASS) {
         ctx.fillStyle = data.top;
         ctx.fillRect(x, y, TILE, 4);
       } else if (v === B.TORCH) {
-        // Процедурное пламя факела
         ctx.fillStyle = '#ff8f1e';
         ctx.fillRect(x + 14, y + 10, 4, 10);
         ctx.fillStyle = '#ffdf4f';
         ctx.fillRect(x + 12, y + 6, 8, 8);
       } else if (v === B.LAVA) {
-        // Колебания лавы
         ctx.fillStyle = '#ffae2e';
         ctx.fillRect(x, y + 4 + Math.sin(performance.now()/200 + tx)*2, TILE, 4);
       }
     }
   }
 
-  // 2. Отрисовка частиц
+  // Рисование СЕТКИ-ПРИЦЕЛА под пальцем игрока (упрощает позиционирование блоков на мобилках)
+  if (activeTouchWorldX !== -1) {
+    const targetTX = Math.floor(activeTouchWorldX / TILE);
+    const targetTY = Math.floor(activeTouchWorldY / TILE);
+    
+    // Проверка расстояния
+    const px = Math.floor((P.x + P.w/2) / TILE);
+    const py = Math.floor((P.y + P.h/2) / TILE);
+    const dist = Math.hypot(targetTX - px, targetTY - py);
+
+    ctx.save();
+    ctx.strokeStyle = dist <= 5.8 ? 'rgba(125,255,125,0.8)' : 'rgba(255,125,125,0.8)';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(targetTX * TILE - cam.x, targetTY * TILE - cam.y, TILE, TILE);
+    ctx.restore();
+  }
+
+  // 2. Частицы
   for (const p of particles) {
     ctx.globalAlpha = p.life / p.maxLife;
     ctx.fillStyle = p.color;
@@ -1061,14 +1048,14 @@ function drawWorldAndPlayers(){
   }
   ctx.globalAlpha = 1;
 
-  // 3. Другие игроки (Мультиплеер)
+  // 3. Сетевые игроки
   for (const k in remotes) {
     const r = remotes[k];
     if (r.rx + TILE < cam.x || r.rx > cam.x + vw || r.ry + TILE < cam.y || r.ry > cam.y + vh) continue;
     drawChar(r.rx - cam.x, r.ry - cam.y, r.d, r.n, false, r.hp);
   }
 
-  // 4. Локальный игрок
+  // 4. Твой персонаж
   if (P.deadT <= 0) {
     drawChar(P.x - cam.x, P.y - cam.y, P.dir, MY_NAME, true, P.hp);
   }
@@ -1079,11 +1066,10 @@ function drawChar(x, y, dir, name, isMe, hp) {
   ctx.translate(x + P.w/2, y + P.h/2);
   ctx.scale(dir, 1);
 
-  // Скин
   ctx.fillStyle = isMe ? '#4f7cff' : '#39d98a';
   ctx.fillRect(-P.w/2, -P.h/2, P.w, P.h);
 
-  // Текстура глаз
+  // Глаза
   ctx.fillStyle = '#fff';
   ctx.fillRect(P.w/2 - 8, -P.h/2 + 5, 4, 4);
   ctx.fillStyle = '#000';
@@ -1091,7 +1077,6 @@ function drawChar(x, y, dir, name, isMe, hp) {
 
   ctx.restore();
 
-  // Ник и ХП бар над игроком
   if (name) {
     ctx.font = 'bold 11px Rubik';
     ctx.textAlign = 'center';
@@ -1100,7 +1085,6 @@ function drawChar(x, y, dir, name, isMe, hp) {
     ctx.fillText(name, x + P.w/2, y - 10);
     ctx.shadowBlur = 0;
 
-    // Маленький ХП бар
     if (hp < 100) {
       ctx.fillStyle = 'rgba(0,0,0,0.5)';
       ctx.fillRect(x - 2, y - 6, P.w + 4, 3);
@@ -1110,33 +1094,31 @@ function drawChar(x, y, dir, name, isMe, hp) {
   }
 }
 
-// Динамические факелы и Лавовое освещение (RTX Освещение на Canvas)
+// RTX Теневое динамическое освещение вокруг факелов и персонажа
 function drawLighting() {
   ctx.save();
   ctx.globalCompositeOperation = 'multiply';
 
-  // Создаем слой темноты
   const lightMap = ctx.createLinearGradient(0, 0, 0, vh);
-  lightMap.addColorStop(0, 'rgba(255,255,255,1.0)'); // Наверху светло
-  lightMap.addColorStop(0.4, 'rgba(20,25,35,0.72)');  // Под землей темнее
-  lightMap.addColorStop(1.0, 'rgba(10,12,20,0.95)');  // В самом низу глубокая пещера
+  lightMap.addColorStop(0, 'rgba(255,255,255,1.0)'); 
+  lightMap.addColorStop(0.38, 'rgba(18,22,32,0.7)'); 
+  lightMap.addColorStop(1.0, 'rgba(8,10,18,0.96)');  
   
   ctx.fillStyle = lightMap;
   ctx.fillRect(0, 0, vw, vh);
 
-  // Источники света убирают темноту через `screen` или `destination-out`
   ctx.globalCompositeOperation = 'screen';
 
-  // 1. Свет от игрока
+  // Свет игрока
   if (P.deadT <= 0) {
-    const pGlow = ctx.createRadialGradient(P.x+P.w/2 - cam.x, P.y+P.h/2 - cam.y, 10, P.x+P.w/2 - cam.x, P.y+P.h/2 - cam.y, 130);
-    pGlow.addColorStop(0, 'rgba(255,245,210,0.8)');
+    const pGlow = ctx.createRadialGradient(P.x+P.w/2 - cam.x, P.y+P.h/2 - cam.y, 10, P.x+P.w/2 - cam.x, P.y+P.h/2 - cam.y, 140);
+    pGlow.addColorStop(0, 'rgba(255,240,200,0.8)');
     pGlow.addColorStop(1, 'rgba(0,0,0,0)');
     ctx.fillStyle = pGlow;
-    ctx.beginPath(); ctx.arc(P.x+P.w/2 - cam.x, P.y+P.h/2 - cam.y, 130, 0, 7); ctx.fill();
+    ctx.beginPath(); ctx.arc(P.x+P.w/2 - cam.x, P.y+P.h/2 - cam.y, 140, 0, 7); ctx.fill();
   }
 
-  // 2. Свет от факелов и лавы в зоне видимости экрана
+  // Освещение от факелов/лавы
   const tx0 = Math.max(0, Math.floor(cam.x / TILE) - 1);
   const tx1 = Math.min(WW - 1, Math.floor((cam.x + vw) / TILE) + 1);
   const ty0 = Math.max(0, Math.floor(cam.y / TILE) - 1);
@@ -1151,12 +1133,12 @@ function drawLighting() {
         const y = ty * TILE + TILE/2 - cam.y;
         const rad = data.light * TILE;
         
-        const glow = ctx.createRadialGradient(x, y, 10, x, y, rad);
+        const glow = ctx.createRadialGradient(x, y, 8, x, y, rad);
         if (v === B.TORCH) {
-          glow.addColorStop(0, 'rgba(255,220,130,0.9)');
+          glow.addColorStop(0, 'rgba(255,210,110,0.9)');
           glow.addColorStop(1, 'rgba(0,0,0,0)');
         } else if (v === B.LAVA) {
-          glow.addColorStop(0, 'rgba(255,100,30,0.85)');
+          glow.addColorStop(0, 'rgba(255,90,20,0.85)');
           glow.addColorStop(1, 'rgba(0,0,0,0)');
         }
         
@@ -1169,7 +1151,7 @@ function drawLighting() {
   ctx.restore();
 }
 
-/* ---------- Главный цикл ---------- */
+/* ---------- Игровой Loop ---------- */
 let lastTs = 0, dtAcc = 0;
 
 function update(){
@@ -1194,7 +1176,6 @@ function loop(ts){
   drawLighting();
 }
 
-/* Навешиваем системные тосты */
 let toastT = null;
 function toast(msg, ms = 2200){
   const el = $('toast'); el.innerHTML = msg; el.classList.add('show');
