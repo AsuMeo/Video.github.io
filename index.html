@@ -2,474 +2,162 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>БЛОКРАН SURVIVAL: РЕАЛТАЙМ МУЛЬТИПЛЕЕР</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"&gt;
+<title>TERRARIA ONLINE — Мультиплеерное Выживание</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Rubik:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
-  * { 
-    margin: 0; 
-    padding: 0; 
-    box-sizing: border-box; 
-    -webkit-tap-highlight-color: transparent; 
-    user-select: none;
-    -webkit-user-select: none;
-  }
-  html, body { 
-    width: 100%; 
-    height: 100%; 
-    overflow: hidden; 
-    background: #06080f; 
-    font-family: 'Rubik', sans-serif;
-    position: fixed;
-  }
-  #game { 
-    position: absolute; 
-    inset: 0; 
-    width: 100%; 
-    height: 100%; 
-    display: block; 
-    image-rendering: pixelated; 
-  }
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body { width:100%; height:100%; overflow:hidden; background:#05070f; font-family:'Rubik',sans-serif; user-select:none; }
+  #game { position:fixed; inset:0; width:100%; height:100%; display:block; image-rendering:pixelated; }
 
   /* ---------- AUTH ---------- */
   #auth {
-    position: fixed; 
-    inset: 0; 
-    z-index: 50; 
-    display: flex; 
-    align-items: center; 
-    justify-content: center;
-    background: radial-gradient(1200px 700px at 50% -10%, #1a234a 0%, #070a1e 50%, #030408 100%);
-    transition: opacity .4s;
+    position:fixed; inset:0; z-index:50; display:flex; align-items:center; justify-content:center;
+    background:radial-gradient(1200px 700px at 50% -10%, #1b2b5e 0%, #0a1030 45%, #05070f 100%);
+    transition:opacity .5s;
   }
-  #auth.hidden { opacity: 0; pointer-events: none; }
+  #auth.hidden { opacity:0; pointer-events:none; }
   .auth-card {
-    width: min(440px, 94vw); 
-    padding: 26px; 
-    border-radius: 24px;
-    background: rgba(10, 15, 36, 0.88); 
-    backdrop-filter: blur(18px);
-    border: 1px solid rgba(100, 150, 255, 0.3);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.15);
-    text-align: center; 
-    color: #e2eaff;
+    width:min(420px, 92vw); padding:34px 30px 28px; border-radius:22px;
+    background:rgba(13,20,46,.72); backdrop-filter:blur(14px);
+    border:1px solid rgba(120,160,255,.22);
+    box-shadow:0 0 60px rgba(60,110,255,.18), inset 0 1px 0 rgba(255,255,255,.08);
+    text-align:center; color:#dfe8ff;
   }
-  .logo { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 10px; }
-  .logo h1 { 
-    font-family: 'Press Start 2P', monospace; 
-    font-size: 15px; 
-    letter-spacing: 0.5px;
-    background: linear-gradient(180deg, #9ae2ff, #3b82f6 60%, #a855f7); 
-    -webkit-background-clip: text; 
-    background-clip: text; 
-    color: transparent;
-    filter: drop-shadow(0 0 12px rgba(59, 130, 246, 0.5)); 
-  }
-  .tagline { font-size: 11px; color: #8fa5e2; margin-bottom: 18px; }
-  .field { margin-bottom: 12px; text-align: left; }
-  .field label { display: block; font-size: 9px; letter-spacing: 1.2px; text-transform: uppercase; color: #7f95d1; margin-bottom: 5px; }
+  .logo { display:flex; align-items:center; justify-content:center; gap:12px; margin-bottom:6px; }
+  .logo h1 { font-family:'Press Start 2P',monospace; font-size:18px; letter-spacing:2px;
+    background:linear-gradient(180deg,#8ecbff,#4f7cff 60%,#b96bff); -webkit-background-clip:text; background-clip:text; color:transparent;
+    filter:drop-shadow(0 0 12px rgba(90,140,255,.55)); }
+  .tagline { font-size:13px; color:#8fa3d9; margin-bottom:22px; }
+  .field { margin-bottom:12px; text-align:left; }
+  .field label { display:block; font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:#7f93c9; margin-bottom:5px; }
   .field input {
-    width: 100%; 
-    padding: 12px 14px; 
-    border-radius: 12px; 
-    border: 1px solid rgba(100, 150, 255, 0.25);
-    background: rgba(4, 7, 20, 0.85); 
-    color: #f0f5ff; 
-    font-size: 14px; 
-    font-family: 'Rubik'; 
-    outline: none; 
-    transition: border-color 0.2s, box-shadow 0.2s;
+    width:100%; padding:12px 14px; border-radius:12px; border:1px solid rgba(120,160,255,.25);
+    background:rgba(6,10,28,.75); color:#eaf1ff; font-size:15px; font-family:'Rubik'; outline:none; transition:.2s;
   }
-  .field input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25); }
+  .field input:focus { border-color:#5f8dff; box-shadow:0 0 0 3px rgba(95,141,255,.18); }
   .btn {
-    width: 100%; 
-    padding: 13px; 
-    border: none; 
-    border-radius: 12px; 
-    cursor: pointer; 
-    font-family: 'Rubik'; 
-    font-weight: 800;
-    font-size: 13px; 
-    color: #fff; 
-    transition: transform 0.1s, filter 0.2s; 
-    margin-top: 4px;
+    width:100%; padding:13px; border:none; border-radius:12px; cursor:pointer; font-family:'Rubik'; font-weight:800;
+    font-size:15px; letter-spacing:.5px; color:#fff; transition:.15s; margin-top:6px;
   }
-  .btn:active { transform: scale(.97); }
-  .btn-primary { background: linear-gradient(135deg, #2563eb, #7c3aed); box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); }
-  .btn-primary:hover { filter: brightness(1.1); }
-  .btn-ghost { background: transparent; border: 1px solid rgba(100, 150, 255, 0.35); color: #adc4ff; margin-top: 8px; }
-  .btn-ghost:hover { background: rgba(59, 130, 246, 0.1); }
-  #authErr { min-height: 14px; color: #f87171; font-size: 11px; margin-top: 8px; }
-  .hint { margin-top: 12px; font-size: 10px; color: #6d80b0; line-height: 1.5; }
-  .spin { display: inline-block; width: 12px; height: 12px; border: 2px solid #fff3; border-top-color: #fff; border-radius: 50%; animation: sp 1s linear infinite; vertical-align: -2px; }
-  @keyframes sp { to { transform: rotate(360deg); } }
+  .btn:active { transform:scale(.97); }
+  .btn-primary { background:linear-gradient(135deg,#3f7bff,#7b4dff); box-shadow:0 6px 22px rgba(80,110,255,.4); }
+  .btn-primary:hover { filter:brightness(1.12); }
+  .btn-ghost { background:transparent; border:1px solid rgba(120,160,255,.35); color:#a9bcff; margin-top:10px; }
+  .btn-ghost:hover { background:rgba(95,141,255,.1); }
+  #authErr { min-height:18px; color:#ff7d92; font-size:13px; margin-top:10px; }
+  .hint { margin-top:14px; font-size:12px; color:#6f83b8; line-height:1.5; }
+  .spin { display:inline-block; width:14px; height:14px; border:2px solid #fff3; border-top-color:#fff; border-radius:50%; animation:sp 1s linear infinite; vertical-align:-2px; }
+  @keyframes sp { to { transform:rotate(360deg); } }
 
   /* ---------- HUD ---------- */
-  #hud { position: absolute; inset: 0; z-index: 20; pointer-events: none; display: none; }
-  #hud.on { display: block; }
-  
+  #hud { position:fixed; inset:0; z-index:20; pointer-events:none; display:none; }
+  #hud.on { display:block; }
   #topbar {
-    position: absolute; 
-    top: 12px; 
-    left: 14px; 
-    display: flex; 
-    flex-direction: column; 
-    gap: 4px;
-    color: #f0f5ff; 
-    text-shadow: 0 2px 4px rgba(0,0,0,0.85);
+    position:absolute; top:10px; left:12px; display:flex; flex-direction:column; gap:6px;
+    color:#eaf1ff; text-shadow:0 2px 6px #000;
   }
-  #playerStats { display: flex; align-items: center; gap: 8px; }
-  #hpBarWrap { width: 130px; height: 13px; background: rgba(0,0,0,0.65); border: 1px solid rgba(255,255,255,0.15); border-radius: 4px; overflow: hidden; position: relative; }
-  #hpBarFill { height: 100%; width: 100%; background: linear-gradient(90deg, #dc2626, #f87171); transition: width 0.2s; }
-  #hpTxt { position: absolute; inset: 0; text-align: center; font-size: 8px; font-weight: 800; line-height: 11px; color: #fff; }
-  
-  #xpBarWrap { width: 130px; height: 5px; background: rgba(0,0,0,0.65); border: 1px solid rgba(255,255,255,0.08); border-radius: 3px; overflow: hidden; }
-  #xpBarFill { height: 100%; width: 0%; background: #10b981; transition: width 0.3s; }
-  #levelBadge { background: #f59e0b; color: #000; font-weight: 800; font-size: 9px; padding: 2px 5px; border-radius: 4px; text-shadow: none; }
-
-  #stats { font-size: 11px; color: #cbd5e1; display: flex; gap: 10px; margin-top: 2px; }
-  #stats b { color: #fff; }
+  #hpBar { display:flex; align-items:center; gap:8px; font-weight:800; font-size:14px; color:#ff5c7a; }
+  #hpWrap { width:140px; height:12px; border-radius:6px; background:rgba(8,12,30,.7); border:1px solid rgba(255,100,100,.3); overflow:hidden; }
+  #hpFill { height:100%; width:100%; background:linear-gradient(90deg,#ff4f67,#ff8597); box-shadow:0 0 10px rgba(255,100,100,.5); transition:width .2s; }
+  #stats { font-size:13px; color:#c9d7ff; display:flex; gap:14px; }
+  #stats b { color:#fff; }
 
   /* Hotbar UI */
-  #hotbarWrap {
-    position: absolute; 
-    bottom: 14px; 
-    left: 50%; 
-    transform: translateX(-50%);
-    display: flex; 
-    gap: 5px; 
-    background: rgba(6, 10, 24, 0.9); 
-    border: 2px solid rgba(100, 140, 255, 0.3);
-    padding: 5px; 
-    border-radius: 14px; 
-    pointer-events: auto; 
-    z-index: 30;
+  #hotbar {
+    position:absolute; bottom:14px; left:50%; transform:translateX(-50%);
+    display:flex; gap:6px; pointer-events:auto; background:rgba(10,16,40,0.85);
+    padding:6px; border-radius:14px; border:2px solid rgba(130,165,255,.35); z-index:30;
   }
-  .hot-slot {
-    width: 44px; 
-    height: 44px; 
-    background: rgba(15, 23, 42, 0.85); 
-    border: 2px solid #475569;
-    border-radius: 10px; 
-    display: flex; 
-    flex-direction: column; 
-    align-items: center; 
-    justify-content: center;
-    position: relative; 
-    cursor: pointer; 
-    transition: transform 0.1s, border-color 0.15s;
+  .slot {
+    width:48px; height:48px; border-radius:8px; border:2px solid rgba(255,255,255,0.15);
+    background:rgba(255,255,255,0.05); display:flex; align-items:center; justify-content:center;
+    cursor:pointer; color:#fff; font-size:10px; font-weight:bold; position:relative; transition:0.15s;
   }
-  .hot-slot.active { border-color: #f59e0b; background: rgba(245, 158, 11, 0.15); transform: scale(1.06); }
-  .hot-slot .icon-mock { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
-  .hot-slot .count { position: absolute; bottom: 1px; right: 3px; font-size: 9px; font-weight: 800; color: #fff; text-shadow: 1px 1px 2px #000; }
-  .hot-slot .key-num { position: absolute; top: 1px; left: 2px; font-size: 8px; color: #94a3b8; }
+  .slot.active { border-color:#ffd94f; background:rgba(255,217,79,0.18); transform:scale(1.08); }
+  .slot .icon { width:22px; height:22px; border-radius:3px; }
+  .slot .num { position:absolute; top:2px; left:4px; font-size:9px; color:#8fa3d9; }
 
-  /* Mobile HUD Interaction Mode Buttons */
-  #mobileInteractionMode {
-    position: absolute; 
-    bottom: 68px; 
-    left: 50%; 
-    transform: translateX(-50%);
-    display: flex; 
-    gap: 8px; 
-    pointer-events: auto; 
-    z-index: 30;
-  }
-  .mode-btn {
-    padding: 8px 14px; 
-    border-radius: 12px; 
-    border: 1.5px solid rgba(100, 150, 255, 0.35);
-    background: rgba(8, 12, 30, 0.85); 
-    color: #fff; 
-    font-size: 10px; 
-    font-weight: 800;
-    display: flex; 
-    align-items: center; 
-    gap: 6px; 
-    cursor: pointer;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-    transition: transform 0.1s, background-color 0.2s;
-  }
-  .mode-btn.active {
-    background: #f59e0b; 
-    border-color: #fff; 
-    color: #000;
-  }
-  .mode-btn:active { transform: scale(0.95); }
-
-  /* Level 10 Active Spell Button */
-  #activeSkillBtn {
-    position: absolute; 
-    bottom: 14px; 
-    right: 130px; 
-    width: 48px; 
-    height: 48px; 
-    border-radius: 50%;
-    background: radial-gradient(#c084fc, #7c3aed); 
-    border: 2px solid #fff; 
-    color: #fff;
-    font-size: 18px; 
-    display: none; 
-    align-items: center; 
-    justify-content: center; 
-    cursor: pointer;
-    box-shadow: 0 0 14px rgba(124, 58, 237, 0.75); 
-    pointer-events: auto; 
-    transition: transform 0.1s;
-    z-index: 35;
-  }
-  #activeSkillBtn:active { transform: scale(0.9); }
-
-  /* Camera & Function Buttons Top */
+  /* Cam & Audio Controls */
   #camControls {
-    position: absolute; 
-    top: 12px; 
-    left: 50%; 
-    transform: translateX(-50%);
-    display: flex; 
-    gap: 5px; 
-    pointer-events: auto; 
-    z-index: 30;
+    position:absolute; top:10px; left:50%; transform:translateX(-50%);
+    display:flex; gap:6px; pointer-events:auto; z-index:30;
   }
   .hud-btn {
-    width: 34px; 
-    height: 34px; 
-    border-radius: 9px; 
-    border: 1px solid rgba(100, 150, 255, 0.25);
-    background: rgba(8, 12, 30, 0.8); 
-    color: #fff; 
-    font-size: 12px; 
-    font-weight: 800; 
-    cursor: pointer;
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    backdrop-filter: blur(8px);
-    transition: transform 0.1s, background-color 0.2s;
+    width:42px; height:42px; border-radius:12px; border:1px solid rgba(130,165,255,.35);
+    background:rgba(10,16,40,.82); color:#fff; font-size:15px; font-weight:800; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; backdrop-filter:blur(6px);
+    transition:transform 0.1s, background-color 0.15s; user-select:none; touch-action:manipulation;
   }
-  .hud-btn:active { transform: scale(0.92); }
-  #craftToggleBtn { background: linear-gradient(135deg, #059669, #047857); border-color: #34d399; }
+  .hud-btn:active { transform:scale(0.92); background-color:rgba(95,141,255,.45); }
 
   /* Leaderboard */
   #board {
-    position: absolute; 
-    top: 12px; 
-    right: 14px; 
-    min-width: 160px; 
-    max-width: 200px;
-    background: rgba(6, 10, 24, 0.75); 
-    backdrop-filter: blur(6px);
-    border: 1px solid rgba(100, 150, 255, 0.15); 
-    border-radius: 14px; 
-    padding: 8px 10px; 
-    color: #e2eaff;
+    position:absolute; top:10px; right:12px; min-width:190px; max-width:240px;
+    background:rgba(8,12,30,.5); backdrop-filter:blur(6px);
+    border:1px solid rgba(130,165,255,.22); border-radius:14px; padding:10px 12px; color:#dfe8ff;
   }
-  #board h3 { font-size: 8px; letter-spacing: 0.5px; text-transform: uppercase; color: #94a3b8; margin-bottom: 5px; }
-  .brow { display: flex; justify-content: space-between; gap: 6px; font-size: 11px; padding: 2px 0; }
-  .brow.me { background: rgba(59, 130, 246, 0.15); border-radius: 4px; padding-left: 4px; padding-right: 4px; }
-  .brow .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100px; }
-  .brow .bl { font-weight: 800; color: #10b981; }
+  #board h3 { font-size:11px; letter-spacing:2px; text-transform:uppercase; color:#8fa3d9; margin-bottom:7px; display:flex; justify-content:space-between; }
+  #board h3 span { color:#5f7ac9; font-size:10px; }
+  .brow { display:flex; justify-content:space-between; gap:10px; font-size:13px; padding:3px 2px; border-radius:6px; }
+  .brow.me { background:rgba(95,141,255,.18); }
+  .brow .nm { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:130px; }
+  .brow .bl { font-weight:800; color:#ffd94f; font-variant-numeric:tabular-nums; }
+  .brow i { font-style:normal; color:#7f93c9; margin-right:6px; font-size:11px; }
 
   #toast {
-    position: absolute; 
-    top: 15%; 
-    left: 50%; 
-    transform: translateX(-50%); 
-    padding: 10px 18px; 
-    border-radius: 12px;
-    background: rgba(8, 12, 30, 0.9); 
-    border: 1px solid rgba(100, 150, 255, 0.3); 
-    color: #fff; 
-    font-weight: 600; 
-    font-size: 12px;
-    opacity: 0; 
-    transition: opacity .3s; 
-    text-align: center; 
-    max-width: 80vw; 
-    pointer-events: none;
-    z-index: 45;
+    position:absolute; top:18%; left:50%; transform:translateX(-50%); padding:12px 24px; border-radius:14px;
+    background:rgba(10,16,40,.85); border:1px solid rgba(130,165,255,.35); color:#fff; font-weight:600; font-size:15px;
+    opacity:0; transition:opacity .3s; text-align:center; max-width:80vw; pointer-events:none; text-shadow:0 1px 3px #000;
   }
-  #toast.show { opacity: 1; }
+  #toast.show { opacity:1; }
+
   #trackName {
-    position: absolute; 
-    top: 145px; 
-    right: 14px; 
-    font-size: 8px; 
-    font-weight: bold;
-    color: #ffe98a; 
-    background: rgba(6, 10, 24, 0.6); 
-    padding: 3px 7px; 
-    border-radius: 6px;
-    pointer-events: none;
+    position:absolute; top:135px; right:12px; font-size:10px; font-weight:bold;
+    color:#ffe98a; background:rgba(10,16,40,0.65); padding:4px 10px; border-radius:8px;
+    border:1px solid rgba(130,165,255,0.25); pointer-events:none; text-shadow:0 1px 3px #000;
   }
 
-  /* Chat window */
-  #chat {
-    position: absolute; 
-    bottom: 14px; 
-    left: 14px; 
-    width: 240px; 
-    height: 120px;
-    background: rgba(6, 10, 24, 0.55); 
-    border: 1px solid rgba(100, 150, 255, 0.15);
-    border-radius: 14px; 
-    backdrop-filter: blur(8px); 
-    display: flex; 
-    flex-direction: column;
-    pointer-events: auto; 
-    z-index: 25; 
-    transition: opacity 0.3s;
-  }
-  #chat.hidden { opacity: 0; pointer-events: none; }
-  #chatMsgs { flex: 1; overflow-y: auto; padding: 6px; font-size: 9px; display: flex; flex-direction: column; gap: 3px; }
-  #chatInput {
-    background: rgba(4, 7, 20, 0.85); 
-    border: none; 
-    border-top: 1px solid rgba(100, 150, 255, 0.15);
-    padding: 6px 10px; 
-    color: #fff; 
-    font-size: 11px; 
-    border-radius: 0 0 14px 14px; 
-    outline: none;
-  }
-
-  /* Craft Panel */
-  #craftPanel {
-    position: absolute; 
-    top: 55px; 
-    left: 14px; 
-    width: 230px; 
-    max-height: calc(100vh - 210px);
-    background: rgba(8, 12, 30, 0.95); 
-    border: 2px solid rgba(16, 185, 129, 0.4);
-    border-radius: 16px; 
-    backdrop-filter: blur(10px); 
-    display: none; 
-    flex-direction: column;
-    pointer-events: auto; 
-    z-index: 28; 
-    box-shadow: 0 8px 30px rgba(0,0,0,0.6); 
-    overflow: hidden;
-  }
-  #craftPanel.open { display: flex; }
-  .craft-header { background: rgba(16, 185, 129, 0.12); padding: 8px 12px; font-size: 8px; font-family: 'Press Start 2P'; color: #34d399; }
-  .recipe-list { overflow-y: auto; padding: 6px; display: flex; flex-direction: column; gap: 4px; }
-  .recipe-item {
-    background: rgba(255,255,255,0.02); 
-    border: 1px solid rgba(255,255,255,0.05); 
-    border-radius: 8px;
-    padding: 6px; 
-    display: flex; 
-    justify-content: space-between; 
-    align-items: center;
-  }
-  .recipe-info { display: flex; align-items: center; gap: 6px; }
-  .recipe-icon { font-size: 15px; }
-  .recipe-name { font-size: 11px; font-weight: 800; color: #fff; }
-  .recipe-cost { font-size: 9px; color: #94a3b8; }
-  .recipe-btn {
-    padding: 4px 8px; 
-    border-radius: 5px; 
-    font-size: 9px; 
-    font-weight: 800; 
-    cursor: pointer;
-    background: #10b981; 
-    border: none; 
-    color: #fff;
-  }
-  .recipe-btn:disabled { background: #334155; color: #64748b; cursor: default; }
-
-  /* BOOK / GUIDE OVERLAY */
-  #bookOverlay {
-    position: fixed; 
-    inset: 0; 
-    z-index: 100; 
-    display: none; 
-    align-items: center; 
-    justify-content: center;
-    background: rgba(3, 5, 15, 0.85); 
-    backdrop-filter: blur(8px);
-  }
-  #bookOverlay.open { display: flex; }
-  .book-container {
-    width: min(660px, 96vw); 
-    height: min(400px, 80vh);
-    background: #3e2723; 
-    border: 4px solid #2d1a12; 
-    border-radius: 16px;
-    display: flex; 
-    flex-direction: column; 
-    overflow: hidden;
-  }
-  .book-header {
-    background: #2d1a12; 
-    padding: 8px 12px; 
-    display: flex; 
-    justify-content: space-between; 
-    align-items: center; 
-    color: #ffe98a;
-    font-family: 'Press Start 2P', monospace; 
-    font-size: 8px;
-  }
-  .book-body { flex: 1; display: flex; background: #f4eccf; color: #3e2723; padding: 12px; gap: 12px; overflow: hidden; }
-  .book-page { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
-  .book-page.divider { border-right: 2px dashed rgba(62, 39, 35, 0.2); padding-right: 8px; }
-  .book-page h3 { font-size: 13px; font-weight: 800; border-bottom: 2px solid #3e2723; padding-bottom: 2px; margin-bottom: 8px; color: #5d4037; }
-  .book-page p { font-size: 11px; line-height: 1.4; margin-bottom: 8px; }
-  
-  .skin-card {
-    background: rgba(62, 39, 35, 0.05); 
-    border: 1px solid #5d4037; 
-    border-radius: 8px;
-    padding: 6px; 
-    display: flex; 
-    align-items: center; 
-    justify-content: space-between; 
-    margin-bottom: 6px;
-  }
-  .skin-card.equipped { background: rgba(46, 125, 50, 0.12); border-color: #2e7d32; }
-  .skin-info { display: flex; align-items: center; gap: 6px; }
-  .skin-preview-box { width: 18px; height: 18px; border-radius: 3px; border: 1.5px solid #3e2723; }
-  .skin-name { font-size: 10px; font-weight: 800; }
-  .skin-btn { padding: 3px 6px; border-radius: 4px; font-weight: 800; font-size: 9px; cursor: pointer; border: none; }
-  .skin-btn.buy { background: #e65100; color: #fff; }
-  .skin-btn.equip { background: #3e2723; color: #f4eccf; }
-  .skin-btn.active { background: #2e7d32; color: #fff; }
-
-  .book-footer { background: #2d1a12; padding: 6px 12px; display: flex; justify-content: space-between; }
-  .book-close-btn { background: #c62828; color: #fff; border: none; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 10px; }
-  .book-nav-btn { background: #5d4037; color: #ffe98a; border: none; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 10px; }
-
-  /* Mobile Touch Controls */
-  #touch { position: absolute; inset: 0; display: none; }
-  body.touch #touch { display: block; }
+  /* Touch controls */
+  #touch { position:absolute; inset:0; display:none; }
+  body.touch #touch { display:block; }
   .tbtn {
-    position: absolute; 
-    bottom: 12px; 
-    width: 58px; 
-    height: 58px; 
-    border-radius: 14px; 
-    pointer-events: auto;
-    background: rgba(15, 23, 42, 0.55); 
-    border: 1.5px solid rgba(140,175,255,0.3); 
-    color: #fff; 
-    font-size: 20px;
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    backdrop-filter: blur(4px);
+    position:absolute; bottom:18px; width:74px; height:74px; border-radius:20px; pointer-events:auto;
+    background:rgba(20,30,70,.4); border:2px solid rgba(140,175,255,.35); color:#fff; font-size:30px;
+    display:flex; align-items:center; justify-content:center; backdrop-filter:blur(4px); user-select:none; touch-action:none;
   }
-  .tbtn.act { background: rgba(59, 130, 246, 0.5); border-color: #fff; }
-  #tLeft { left: 14px; } 
-  #tRight { left: 80px; }
-  #tJump { right: 14px; width: 68px; height: 68px; border-radius: 50%; font-size: 24px; background: rgba(16, 185, 129, 0.35); border-color: rgba(52, 211, 153, 0.45); }
-  
-  #vignette { position: fixed; inset: 0; z-index: 10; pointer-events: none; background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,10,0.55) 100%); }
-  #loading { position: fixed; inset: 0; z-index: 80; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 10px; background: #05070a; color: #8fa3d9; font-size: 12px; }
+  .tbtn.act { background:rgba(95,141,255,.45); }
+  #tLeft { left:16px; } #tRight { left:106px; }
+  #tJump { right:16px; width:90px; height:90px; border-radius:50%; font-size:36px; background:rgba(60,180,120,.3); border-color:rgba(120,255,170,.4); }
+
+  /* Внутриигровой чат */
+  #chat {
+    position:absolute; bottom:110px; left:16px; width:280px; height:150px;
+    background:rgba(10,16,40,.55); border:1px solid rgba(130,165,255,.22);
+    border-radius:14px; backdrop-filter:blur(6px); display:flex; flex-direction:column;
+    pointer-events:auto; z-index:25; transition: opacity 0.3s, transform 0.3s;
+  }
+  #chat.hidden { opacity:0; pointer-events:none; transform:translateY(15px); }
+  #chatMsgs { flex:1; overflow-y:auto; padding:8px; font-size:12px; display:flex; flex-direction:column; gap:4px; text-shadow:0 1px 2px #000; }
+  #chatInput {
+    background:rgba(6,10,28,.8); border:none; border-top:1px solid rgba(130,165,255,.2);
+    padding:8px 10px; color:#fff; font-size:13px; border-radius:0 0 14px 14px; outline:none;
+  }
+
+  #rotate {
+    position:fixed; inset:0; z-index:90; display:none; align-items:center; justify-content:center; flex-direction:column; gap:16px;
+    background:rgba(4,6,16,.94); color:#dfe8ff; text-align:center; padding:20px;
+  }
+  body.touch.portrait #rotate { display:flex; }
+  #rotate .ph { font-size:60px; animation:rot 1.6s ease-in-out infinite; }
+  @keyframes rot { 0%,20%{transform:rotate(0)} 60%,100%{transform:rotate(90deg)} }
+  #rotate p { font-size:16px; max-width:300px; line-height:1.5; }
+  #vignette { position:fixed; inset:0; z-index:10; pointer-events:none;
+    background:radial-gradient(ellipse at center, transparent 55%, rgba(0,0,10,.5) 100%); }
+  #loading { position:fixed; inset:0; z-index:80; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:14px;
+    background:#05070f; color:#8fa3d9; font-size:14px; letter-spacing:1px; transition:opacity .4s; }
+  #loading.hidden { opacity:0; pointer-events:none; }
 </style>
 </head>
 <body>
@@ -478,60 +166,45 @@
 
 <div id="hud">
   <div id="topbar">
-    <div id="playerStats">
-      <span id="levelBadge">LVL 1</span>
-      <div style="display: flex; flex-direction: column;">
-        <div id="hpBarWrap">
-          <div id="hpBarFill"></div>
-          <div id="hpTxt">100 / 100 HP</div>
-        </div>
-        <div id="xpBarWrap">
-          <div id="xpBarFill"></div>
-        </div>
-      </div>
+    <div id="hpBar">
+      <span>❤️ HP</span>
+      <div id="hpWrap"><div id="hpFill"></div></div>
+      <span id="hpTxt">100/100</span>
     </div>
     <div id="stats">
-      <span>🪙 <b id="coinsCount">0</b></span>
-      <span style="color: #ffe98a;">🍁 <b id="seasonLabel">ЛЕТО</b></span>
-      <span>👥 <b id="online">1</b></span>
+      <span>🪙 Монеты: <b id="coinsCount">0</b></span>
+      <span>👥 Онлайн: <b id="online">1</b></span>
+      <span>📍 X: <b id="coordX">0</b> Y: <b id="coordY">0</b></span>
     </div>
   </div>
 
   <div id="camControls">
-    <button class="hud-btn" id="zoomOutBtn" title="Отдалить">🔍−</button>
-    <button class="hud-btn" id="zoomInBtn" title="Приблизить">🔍+</button>
+    <button class="hud-btn" id="zoomOutBtn" title="Отдалить камеру">🔍−</button>
+    <button class="hud-btn" id="zoomInBtn" title="Приблизить камеру">🔍+</button>
     <button class="hud-btn" id="fullScrBtn" title="Полный экран">📺</button>
-    <button class="hud-btn" id="craftToggleBtn" title="Крафт">🛠️</button>
-    <button class="hud-btn" id="guideBookBtn" title="Гардероб">📖</button>
-    <button class="hud-btn" id="musBtn" title="Музыка">📻</button>
+    <button class="hud-btn" id="musBtn" title="Сменить трек">📻</button>
+    <button class="hud-btn" id="musMuteBtn" title="Музыка">🎵</button>
     <button class="hud-btn" id="muteBtn" title="Звуки">🔊</button>
-    <button class="hud-btn" id="chatToggleBtn" title="Чат">💬</button>
+    <button class="hud-btn" id="chatToggleBtn" title="Скрыть/Показать чат">💬</button>
   </div>
 
-  <!-- Mobile Interaction mode -->
-  <div id="mobileInteractionMode">
-    <button class="mode-btn active" id="modeMineBtn">⛏️ ДОБЫЧА / ТЕЛЕПОРТ</button>
-    <button class="mode-btn" id="modeBuildBtn">🧱 СТРОЙКА</button>
+  <!-- Панель Выбора Блоков (HOTBAR) -->
+  <div id="hotbar">
+    <div class="slot active" data-type="1"><div class="num">1</div><div class="icon" style="background:#55c34d;"></div></div>
+    <div class="slot" data-type="2"><div class="num">2</div><div class="icon" style="background:#7fa8c9;"></div></div>
+    <div class="slot" data-type="3"><div class="num">3</div><div class="icon" style="background:#8a5a33;"></div></div>
+    <div class="slot" data-type="5"><div class="num">4</div><div class="icon" style="background:#c9b8e8;"></div></div>
+    <div class="slot" data-type="6"><div class="num">5</div><div class="icon" style="background:#ba3c3c;"></div></div>
+    <div class="slot" data-type="7"><div class="num">6</div><div class="icon" style="background:#ffd94f;box-shadow:0 0 8px #ffd94f;"></div></div>
   </div>
-
-  <div id="craftPanel">
-    <div class="craft-header">🛠️ КРАФТ ВЕРСТАК</div>
-    <div class="recipe-list" id="recipeListContainer"></div>
-  </div>
-
-  <!-- Inventory Hotbar -->
-  <div id="hotbarWrap"></div>
-
-  <!-- Super Spell Level 10 Button -->
-  <button id="activeSkillBtn" title="Огненный Взрыв!">🔥</button>
 
   <div id="chat">
     <div id="chatMsgs"></div>
-    <input id="chatInput" maxlength="64" placeholder="Чат..." autocomplete="off">
+    <input id="chatInput" maxlength="64" placeholder="Нажмите Enter для чата..." autocomplete="off">
   </div>
 
   <div id="board">
-    <h3>🏆 Игроки мира</h3>
+    <h3>🏆 Игроки в мире <span id="boardUpd"></span></h3>
     <div id="boardRows"></div>
   </div>
   <div id="toast"></div>
@@ -544,74 +217,51 @@
   </div>
 </div>
 
-<!-- GUIDE BOOK & SKINS SHOP MODAL -->
-<div id="bookOverlay">
-  <div class="book-container">
-    <div class="book-header">
-      <span>📖 РУКОВОДСТВО И ГАРДЕРОБ</span>
-      <span id="bookProgress">LVL 1</span>
-    </div>
-    <div class="book-body">
-      <div class="book-page divider" id="bookLeftPage"></div>
-      <div class="book-page" id="bookRightPage">
-        <h3>👗 ГАРДЕРОБ СКИНОВ</h3>
-        <p style="font-size: 10px; margin-bottom: 8px;">Добывайте монеты из жил золота и монстров, разблокируйте уникальный внешний вид!</p>
-        <div id="skinsShopContainer"></div>
-      </div>
-    </div>
-    <div class="book-footer">
-      <button class="book-nav-btn" id="bookPrevBtn">◀ Назад</button>
-      <button class="book-close-btn" id="bookCloseBtn">Закрыть</button>
-      <button class="book-nav-btn" id="bookNextBtn">Вперед ▶</button>
-    </div>
-  </div>
-</div>
-
 <div id="auth">
   <div class="auth-card">
     <div class="logo">
-      <svg width="32" height="32" viewBox="0 0 48 48">
+      <svg width="42" height="42" viewBox="0 0 48 48">
         <defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0" stop-color="#6ee7ff"/><stop offset=".55" stop-color="#4f7cff"/><stop offset="1" stop-color="#b96bff"/>
         </linearGradient></defs>
         <rect x="4" y="26" width="18" height="18" rx="3" fill="url(#lg)"/>
-        <rect x="26" y="26" width="18" height="18" rx="3" fill="#10b981"/>
-        <rect x="15" y="4" width="18" height="18" rx="3" fill="#fbbf24"/>
+        <rect x="26" y="26" width="18" height="18" rx="3" fill="#39d98a"/>
+        <rect x="15" y="4" width="18" height="18" rx="3" fill="#ffd94f"/>
       </svg>
-      <h1>БЛОКРАН SURVIVAL</h1>
+      <h1>TERRARIA ONLINE</h1>
     </div>
-    <div class="tagline">Песочница с телепортацией, падением сакуры и совместным выживанием! 🌲</div>
-    <div class="field">
-      <label>Никнейм</label>
-      <input id="nick" maxlength="14" placeholder="Имя игрока" autocomplete="off">
+    <div class="tagline">Выживай, копай и строй с другими игроками в реальном времени! 😄</div>
+    <div class="field" id="nickField">
+      <label>Ник (видят все)</label>
+      <input id="nick" maxlength="14" placeholder="Например: Стив" autocomplete="off">
     </div>
     <div class="field">
-      <label>Электронная почта</label>
+      <label>Почта</label>
       <input id="email" type="email" placeholder="you@example.com" autocomplete="email">
     </div>
     <div class="field">
       <label>Пароль</label>
       <input id="pass" type="password" placeholder="Минимум 6 символов" autocomplete="current-password">
     </div>
-    <button class="btn btn-primary" id="loginBtn">ВОЙТИ В ИГРУ</button>
+    <button class="btn btn-primary" id="loginBtn">ВОЙТИ</button>
     <button class="btn btn-ghost" id="regBtn">СОЗДАТЬ АККАУНТ</button>
     <div id="authErr"></div>
-    <div class="hint">📺 Нажмите кнопку 📺 в игре для полноэкранного режима на Android!<br>
-    ⚡ В режиме «Добыча» нажмите на пустое место (воздух) для активации ТЕЛЕПОРТАЦИИ!</div>
+    <div class="hint">🏃 A/D — бег · ПРОБЕЛ — прыжок<br>
+    ⛏️ ЛКМ — ломать блок · ПКМ — ставить блок (в радиусе видимости)<br>
+    Цифры 1–6 — переключение блоков на панели горячих клавиш.</div>
   </div>
 </div>
 
-<div id="loading">
-  <div class="spin" style="width: 24px; height: 24px; border-width: 3px"></div>
-  <div id="loadTxt">ПОДКЛЮЧЕНИЕ К ОБЩЕМУ REALTIME МИРУ БЛОКОВ…</div>
-</div>
+<div id="rotate"><div class="ph">📱</div><p>Поверни телефон горизонтально!</p></div>
+<div id="loading"><div class="spin" style="width:26px;height:26px;border-width:3px"></div><div id="loadTxt">ПОДКЛЮЧЕНИЕ К СЕРВЕРУ МИРА…</div></div>
 
+<!-- FIREBASE COMPAT LIBS -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script>
 'use strict';
-// ПОЛНОСТЬЮ РАБОЧИЙ FIREBASE CONFIG С КЛЮЧОМ REALTIME DATABASE
+
 const firebaseConfig = {
   apiKey: "AIzaSyBm0mIvHVznIeF2PoFk6dtdaiT5r877wyA",
   authDomain: "meow-874ce.firebaseapp.com",
@@ -628,46 +278,31 @@ const db = firebase.database();
 const $ = id => document.getElementById(id);
 const clamp = (v,a,b) => v<a?a:(v>b?b:v);
 const lerp = (a,b,t) => a+(b-a)*t;
-function mulberry32(seed){ return function(){ seed|=0; seed=seed+0x6D2B79F5|0; let t=Math.imul(seed^seed>>>15,1|seed); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
 const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
-function hexToRGBA(hex, alpha) {
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
-  return `rgba(${r},${g},${b},${alpha})`;
-}
-
+/* Fullscreen API */
 function toggleFullscreen() {
   const doc = window.document;
   const docEl = doc.documentElement;
-  const req = docEl.requestFullscreen || docEl.webkitRequestFullscreen || docEl.mozRequestFullScreen || docEl.msRequestFullscreen;
-  const exit = doc.exitFullscreen || doc.webkitExitFullscreen || doc.mozCancelFullScreen || doc.msExitFullscreen;
-
-  if(!doc.fullscreenElement && !doc.webkitFullscreenElement && !doc.mozFullScreenElement && !doc.msFullscreenElement) {
-    if (req) {
-      req.call(docEl).then(() => {
-        if (screen.orientation && screen.orientation.lock) {
-          screen.orientation.lock('landscape').catch(() => {});
-        }
-      }).catch(() => {});
-    }
+  const req = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
+  const cancel = doc.exitFullscreen || doc.mozCancelFullScreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
+  if(!doc.fullscreenElement && !doc.mozFullScreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement) {
+    req.call(docEl).catch(() => {});
   } else {
-    if (exit) exit.call(doc);
+    cancel.call(doc);
   }
 }
 
+/* AUTHENTICATION */
 const AUTH_ERR = {
-  'auth/invalid-email':'Неверная почта',
+  'auth/invalid-email':'Некорректная почта',
   'auth/user-not-found':'Пользователь не найден',
   'auth/wrong-password':'Неверный пароль',
-  'auth/invalid-credential':'Неверный логин или пароль',
-  'auth/email-already-in-use':'Почта уже зарегистрирована',
-  'auth/weak-password':'Пароль слишком слабый (мин. 6 символов)',
-  'auth/too-many-requests':'Слишком много попыток.',
-  'auth/network-request-failed':'Нет соединения с сетью'
+  'auth/invalid-credential':'Неверные данные входа',
+  'auth/email-already-in-use':'Почта уже используется',
+  'auth/weak-password':'Пароль слишком слабый (мин. 6 символов)'
 };
-function authError(e){ $('authErr').textContent = AUTH_ERR[e.code] || ('Ошибка: ' + (e.code||e.message)); }
+function authError(e){ $('authErr').textContent = AUTH_ERR[e.code] || e.message; }
 function validNick(n){ return /^[A-Za-zА-Яа-яЁё0-9_\-]{2,14}$/.test(n); }
 let busyAuth = false;
 
@@ -675,11 +310,10 @@ async function doRegister(){
   if (busyAuth) return;
   const nick = $('nick').value.trim(), email = $('email').value.trim(), pass = $('pass').value;
   $('authErr').textContent = '';
-  if (!validNick(nick)) { $('authErr').textContent = 'Ник: 2–14 символов (буквы, цифры, _ и -)'; return; }
-  if (!email || !pass) { $('authErr').textContent = 'Заполните все поля'; return; }
-  busyAuth = true; $('regBtn').innerHTML = '<span class="spin"></span> СОЗДАЮ…';
+  if (!validNick(nick)) { $('authErr').textContent = 'Ник: 2–14 символов'; return; }
+  if (!email || !pass) { $('authErr').textContent = 'Заполни все поля'; return; }
+  busyAuth = true; $('regBtn').innerHTML = '<span class="spin"></span> Создаю…';
   try {
-    toggleFullscreen();
     const cr = await auth.createUserWithEmailAndPassword(email, pass);
     await db.ref('users/' + cr.user.uid).set({ name: nick, created: firebase.database.ServerValue.TIMESTAMP });
     MY_NAME = nick;
@@ -691,142 +325,94 @@ async function doLogin(){
   const email = $('email').value.trim(), pass = $('pass').value;
   $('authErr').textContent = '';
   if (!email || !pass) { $('authErr').textContent = 'Введите почту и пароль'; return; }
-  busyAuth = true; $('loginBtn').innerHTML = '<span class="spin"></span> ВХОЖУ…';
+  busyAuth = true; $('loginBtn').innerHTML = '<span class="spin"></span> Вхожу…';
   try {
-    toggleFullscreen();
     await auth.signInWithEmailAndPassword(email, pass);
   } catch(e){ authError(e); }
-  busyAuth = false; $('loginBtn').textContent = 'ВОЙТИ В ИГРУ';
+  busyAuth = false; $('loginBtn').textContent = 'ВОЙТИ';
 }
 $('regBtn').onclick = doRegister;
 $('loginBtn').onclick = doLogin;
-$('pass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
 </script>
 
 <script>
 'use strict';
 /* ============================================================
-   АУДИО: Процедурный синтезатор в стиле Майнкрафт/Террария
+   АУДИО СИСТЕМА
    ============================================================ */
 const Audio8 = {
-  ctx:null, master:null, musG:null, sfxG:null, noiseBuf:null, rainG:null, rainSrc:null,
+  ctx:null, master:null, musG:null, sfxG:null, noiseBuf:null,
   trackIdx:-1, step:0, nextT:0, timer:null, musicMuted:false, sfxMuted:false, ready:false,
-  manualRadio:false,
-
+  
   init(){
     if (this.ready) return;
     const AC = window.AudioContext || window.webkitAudioContext;
     if (!AC) return;
     this.ctx = new AC();
-    this.master = this.ctx.createGain(); this.master.gain.value = 0.55; this.master.connect(this.ctx.destination);
-    
-    this.musG = this.ctx.createGain(); this.musG.gain.value = this.musicMuted ? 0 : 0.25; this.musG.connect(this.master);
-    this.sfxG = this.ctx.createGain(); this.sfxG.gain.value = this.sfxMuted ? 0 : 0.45; this.sfxG.connect(this.master);
-    this.rainG = this.ctx.createGain(); this.rainG.gain.value = 0.0; this.rainG.connect(this.master);
+    this.master = this.ctx.createGain(); this.master.gain.value = 0.5; this.master.connect(this.ctx.destination);
+    this.musG = this.ctx.createGain(); this.musG.gain.value = 0.22; this.musG.connect(this.master);
+    this.sfxG = this.ctx.createGain(); this.sfxG.gain.value = 0.45; this.sfxG.connect(this.master);
 
     const len = this.ctx.sampleRate * 0.5, buf = this.ctx.createBuffer(1, len, this.ctx.sampleRate), d = buf.getChannelData(0);
     for (let i=0;i<len;i++) d[i] = Math.random()*2-1;
     this.noiseBuf = buf;
-
-    const rainBufLen = this.ctx.sampleRate * 2;
-    const rainBuf = this.ctx.createBuffer(1, rainBufLen, this.ctx.sampleRate);
-    const rd = rainBuf.getChannelData(0);
-    for(let i=0; i<rainBufLen; i++) rd[i] = Math.random() * 2 - 1;
-
-    this.rainSrc = this.ctx.createBufferSource();
-    this.rainSrc.buffer = rainBuf;
-    this.rainSrc.loop = true;
-    const rainFilter = this.ctx.createBiquadFilter();
-    rainFilter.type = 'lowpass';
-    rainFilter.frequency.value = 650;
-    this.rainSrc.connect(rainFilter);
-    rainFilter.connect(this.rainG);
-    this.rainSrc.start(0);
 
     this.ready = true;
     this.nextT = this.ctx.currentTime + 0.1;
     this.timer = setInterval(()=>this.schedule(), 40);
   },
   resume(){ if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume(); },
-  toggleMusic() {
-    this.musicMuted = !this.musicMuted;
-    if (this.musG) this.musG.gain.value = this.musicMuted ? 0 : 0.25;
-    return this.musicMuted;
-  },
-  toggleSfx() {
-    this.sfxMuted = !this.sfxMuted;
-    if (this.sfxG) this.sfxG.gain.value = this.sfxMuted ? 0 : 0.45;
-    if (this.rainG) this.rainG.gain.value = this.sfxMuted ? 0 : (weather.rainIntensity * 0.18);
-    return this.sfxMuted;
-  },
-  updateRainSound(intensity) {
-    if (!this.ready || this.sfxMuted) return;
-    if (this.rainG) this.rainG.gain.setTargetAtTime(intensity * 0.18, this.ctx.currentTime, 0.4);
-  },
+  toggleMusic() { this.musicMuted = !this.musicMuted; if (this.musG) this.musG.gain.value = this.musicMuted ? 0 : 0.22; return this.musicMuted; },
+  toggleSfx() { this.sfxMuted = !this.sfxMuted; if (this.sfxG) this.sfxG.gain.value = this.sfxMuted ? 0 : 0.45; return this.sfxMuted; },
+
   tracks: [
-    { name:'🌲 Зелёная Обитель', bpm:72, wave:'sine', vol:.35,
-      mel:[60,64,67,71,67,64,60,0, 62,65,69,72,69,65,62,0, 60,64,67,71,72,71,67,0, 59,62,65,67,65,62,59,0],
-      bass:[36,0,40,0,43,0,36,0, 38,0,41,0,45,0,38,0] },
-    { name:'💎 Мистические Копи', bpm:60, wave:'sine', vol:.4,
-      mel:[67,74,79,0,74,67,0,0, 66,73,78,0,73,66,0,0, 64,71,76,0,71,64,0,0, 62,69,74,0,69,62,0,0],
-      bass:[31,0,31,0,30,0,30,0, 28,0,28,0,26,0,26,0] },
-    { name:'🔥 Опасная Ночь', bpm:115, wave:'sawtooth', vol:.07,
-      mel:[60,60,63,60,65,60,67,0, 60,60,63,60,67,65,63,0, 58,58,61,58,63,58,65,0, 58,58,61,58,65,63,61,0],
-      bass:[36,36,36,36,36,36,36,36, 34,34,34,34,34,34,34,34] }
+    { name:'🌲 Террария Дзен (День)', bpm:95, wave:'sine', vol:.2,
+      mel:[60,64,67,72,0,67,64,0, 62,65,69,74,0,69,65,0],
+      bass:[36,0,43,0,38,0,45,0] },
+    { name:'🦇 Эхо Пещер (Ночь)', bpm:70, wave:'triangle', vol:.25,
+      mel:[57,60,64,67,72,67,64,60, 53,57,60,65,69,65,60,57],
+      bass:[33,0,33,0,29,0,29,0] }
   ],
   playTrack(i){
     if (i === this.trackIdx) return;
     this.trackIdx = i; this.step = 0;
-    if (this.ctx) this.nextT = this.ctx.currentTime + 0.1;
-    const curName = this.tracks[i] ? this.tracks[i].name : 'Звуки Ветров';
-    $('trackName').textContent = '📻 ' + curName;
-  },
-  nextTrack(){
-    this.manualRadio = true;
-    let next = (this.trackIdx + 1) % this.tracks.length;
-    this.playTrack(next);
-    toast('📻 Воспроизведение: ' + this.tracks[next].name, 1500);
+    if (this.ctx) this.nextT = this.ctx.currentTime + 0.05;
+    const el = $('trackName'); if (el) el.textContent = this.tracks[i] ? '📻 ' + this.tracks[i].name : '';
   },
   f(m){ return m === 0 ? 0 : 440*Math.pow(2,(m-69)/12); },
-  note(midi, t, dur, wave, vol, dest){
+  note(midi, t, dur, wave, vol){
     if (midi === 0 || vol <= 0) return;
     const o = this.ctx.createOscillator(), g = this.ctx.createGain();
     o.type = wave; o.frequency.value = this.f(midi);
     g.gain.setValueAtTime(0, t);
-    g.gain.linearRampToValueAtTime(vol, t+0.012);
-    g.gain.setValueAtTime(vol, t+dur*0.6);
+    g.gain.linearRampToValueAtTime(vol, t+0.008);
     g.gain.exponentialRampToValueAtTime(0.001, t+dur);
-    o.connect(g); g.connect(dest||this.musG);
-    o.start(t); o.stop(t+dur+0.05);
-  },
-  kick(t){
-    const o = this.ctx.createOscillator(), g = this.ctx.createGain();
-    o.type='sine'; o.frequency.setValueAtTime(120,t); o.frequency.exponentialRampToValueAtTime(35,t+0.16);
-    g.gain.setValueAtTime(.35,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.16);
-    o.connect(g); g.connect(this.musG); o.start(t); o.stop(t+0.18);
+    o.connect(g); g.connect(this.musG);
+    o.start(t); o.stop(t+dur+0.03);
   },
   schedule(){
-    if (!this.ready || this.musicMuted) return;
+    if (!this.ready || this.musicMuted || this.trackIdx === -1) return;
     const tr = this.tracks[this.trackIdx];
     if (!tr) return;
     const stepDur = 60 / tr.bpm / 2;
-    while (this.nextT < this.ctx.currentTime + 0.15){
+    while (this.nextT < this.ctx.currentTime + 0.16){
       const s = this.step, t = this.nextT;
       const m = tr.mel[s % tr.mel.length];
-      if (m) this.note(m, t, stepDur*1.7, tr.wave, tr.vol);
+      if (m) this.note(m, t, stepDur*1.8, tr.wave, tr.vol);
       const b = tr.bass[s % tr.bass.length];
-      if (b) this.note(b, t, stepDur*1.4, 'triangle', .16);
-      if (tr.bpm > 100 && s % 4 === 0) this.kick(t);
+      if (b) this.note(b, t, stepDur*1.5, 'triangle', .18);
       this.step++;
       this.nextT += stepDur;
     }
   },
+
+  /* SFX */
   blip(f0, f1, dur, wave, vol){
     if (!this.ready || this.sfxMuted) return;
     const t = this.ctx.currentTime;
     const o = this.ctx.createOscillator(), g = this.ctx.createGain();
     o.type = wave; o.frequency.setValueAtTime(f0,t); o.frequency.exponentialRampToValueAtTime(Math.max(f1,1), t+dur);
-    g.gain.setValueAtTime(vol,t); g.gain.exponentialRampToValueAtTime(0.001,t+dur);
+    g.gain.setValueAtTime(vol,t); g.gain.exponentialRampToValueAtTime(0.001, t+dur);
     o.connect(g); g.connect(this.sfxG); o.start(t); o.stop(t+dur+0.02);
   },
   noise(dur, vol, freq){
@@ -834,21 +420,15 @@ const Audio8 = {
     const t = this.ctx.currentTime;
     const s = this.ctx.createBufferSource(), g = this.ctx.createGain(), f = this.ctx.createBiquadFilter();
     s.buffer=this.noiseBuf; f.type='lowpass'; f.frequency.value=freq||1000;
-    g.gain.setValueAtTime(vol,t); g.gain.exponentialRampToValueAtTime(0.001,t+dur);
+    g.gain.setValueAtTime(vol,t); g.gain.exponentialRampToValueAtTime(0.001, t+dur);
     s.connect(f); f.connect(g); g.connect(this.sfxG); s.start(t); s.stop(t+dur+0.02);
   },
-  jump(){ this.blip(240,500,.08,'sine',.14); },
-  land(){ this.noise(.05,.08,400); },
-  hit(){ this.blip(170,40,.12,'triangle',.22); this.noise(.1,.12,850); },
-  breakBlock(){ this.noise(.12, .2, 380); },
-  placeBlock(){ this.blip(160,110,.05,'triangle',.14); },
-  lvlUp(){
-    [380, 480, 580, 780].forEach((f, i) => {
-      setTimeout(() => this.blip(f, f + 120, 0.16, 'square', 0.18), i * 90);
-    });
-  },
-  coin(){ this.blip(900,1600,0.12,'sine',0.15); },
-  skill(){ this.blip(130, 850, 0.4, 'sawtooth', 0.22); this.noise(0.45, 0.28, 1400); }
+  jump(){ this.blip(200,450,.08,'sine',.2); },
+  land(){ this.noise(.05,.1,400); },
+  hit(){ this.blip(150,50,.12,'sawtooth',.22); },
+  coin(){ this.blip(800,1500,0.12,'sine',0.2); },
+  blockPlace(){ this.blip(220,110,0.1,'triangle',0.25); },
+  blockBreak(){ this.noise(0.1, 0.2, 500); }
 };
 ['pointerdown','keydown','touchstart'].forEach(ev =>
   window.addEventListener(ev, ()=>{ Audio8.init(); Audio8.resume(); }, { passive:true }));
@@ -857,582 +437,286 @@ const Audio8 = {
 <script>
 'use strict';
 /* ============================================================
-   МИР СУРВАЙВАЛА: Бесшовный бесконечный мир Террарии
+   ДИНАМИЧЕСКИЙ 2D МИР (ТЕРРАРИУМ)
    ============================================================ */
-const TILE = 32, WW = 400, WH = 100, WORLD_PX = WW * TILE;
-const world = new Uint16Array(WW * WH);
-const backWorld = new Uint16Array(WW * WH);
+const TILE = 32;
+const WW = 1200; // Ширина мира в блоках
+const WH = 100;  // Высота мира в блоках
+const WORLD_PX_W = WW * TILE;
+const WORLD_PX_H = WH * TILE;
 
+/* Типы блоков */
 const B = {
-  AIR: 0, GRASS: 1, DIRT: 2, STONE: 3, COAL: 4, IRON: 5, GOLD: 6, DIAMOND: 7,
-  WOOD: 8, LEAVES: 9, STONE_BRICK: 10, WOOD_PLANK: 11, TORCH: 12, LAVA: 13,
-  WATER: 14, SAND: 15, GRASS_TALL: 16, SAKURA_LEAVES: 17
+  AIR: 0,
+  GRASS: 1,
+  STONE: 2,
+  WOOD: 3,
+  LEAVES: 4,
+  PLANKS: 5,
+  BRICK: 6,
+  TORCH: 7,
+  LAVA: 8
 };
 
-const TILES_INFO = {
-  [B.AIR]: { solid: false, mineTime: 0, color: 'transparent' },
-  [B.GRASS]: { solid: true, mineTime: 250, color: '#10b981', bg: '#2b1e15' },
-  [B.DIRT]: { solid: true, mineTime: 200, color: '#78350f' },
-  [B.STONE]: { solid: true, mineTime: 550, color: '#4b5563' },
-  [B.COAL]: { solid: true, mineTime: 600, color: '#111827' },
-  [B.IRON]: { solid: true, mineTime: 750, color: '#d97706' },
-  [B.GOLD]: { solid: true, mineTime: 1100, color: '#eab308' },
-  [B.DIAMOND]: { solid: true, mineTime: 1600, color: '#06b6d4' },
-  [B.WOOD]: { solid: false, mineTime: 350, color: '#451a03' },
-  [B.LEAVES]: { solid: false, mineTime: 90, color: '#047857' },
-  [B.STONE_BRICK]: { solid: true, mineTime: 650, color: '#374151' },
-  [B.WOOD_PLANK]: { solid: true, mineTime: 250, color: '#b45309' },
-  [B.TORCH]: { solid: false, mineTime: 15, color: '#f59e0b', light: [255,150,40, 1.0] },
-  [B.LAVA]: { solid: false, mineTime: 9999, color: '#ef4444', hazard: true, light: [255,40,0, 0.9] },
-  [B.WATER]: { solid: false, mineTime: 9999, color: '#2563eb' },
-  [B.SAND]: { solid: true, mineTime: 180, color: '#fef08a' },
-  [B.GRASS_TALL]: { solid: false, mineTime: 10, color: '#10b981' },
-  [B.SAKURA_LEAVES]: { solid: false, mineTime: 90, color: '#f472b6' }
+const BLOCK_DATA = {
+  [B.AIR]: { solid: false, color: null },
+  [B.GRASS]: { solid: true, color: '#55c34d', top: '#7de06f' },
+  [B.STONE]: { solid: true, color: '#7fa8c9' },
+  [B.WOOD]: { solid: true, color: '#8a5a33' },
+  [B.LEAVES]: { solid: false, color: '#31922a' },
+  [B.PLANKS]: { solid: true, color: '#c9b8e8' },
+  [B.BRICK]: { solid: true, color: '#ba3c3c' },
+  [B.TORCH]: { solid: false, color: '#ffd94f', light: 8 },
+  [B.LAVA]: { solid: false, color: '#ff4f1e', light: 6, hazard: true }
 };
 
-function blockAt(tx, ty) {
-  if (tx < 0 || tx >= WW || ty < 0 || ty >= WH) return B.STONE;
-  return world[ty * WW + tx];
+// Хранилище локальных изменений блоков (из Firebase)
+const worldMutations = new Map();
+
+// Генерация базового (девственного) ландшафта процедурно
+function getBaseTile(tx, ty) {
+  if (tx < 0 || tx >= WW || ty < 0 || ty >= WH) return B.STONE; // Границы мира
+  
+  if (ty >= WH - 4) return B.LAVA; // Лава на самом дне мира
+
+  // Генерация поверхности (холмы)
+  let surfaceY = Math.floor(40 + Math.sin(tx * 0.04) * 8 + Math.cos(tx * 0.12) * 3);
+  
+  if (ty < surfaceY) {
+    // Генерация случайных деревьев на траве
+    if (ty === surfaceY - 1 && (tx * 17) % 19 === 0) {
+      // Это ствол дерева
+      return B.WOOD;
+    }
+    return B.AIR;
+  }
+  
+  // Кроны деревьев
+  if (ty >= surfaceY - 4 && ty < surfaceY - 1 && ((tx + 1) * 17) % 19 === 1) return B.LEAVES;
+
+  if (ty === surfaceY) return B.GRASS;
+  if (ty > surfaceY && ty < surfaceY + 12) return B.GRASS; // Земляной слой
+  
+  return B.STONE; // Каменный слой
 }
-function setBlock(tx, ty, blockId) {
-  if (tx >= 0 && tx < WW && ty >= 0 && ty < WH) {
-    world[ty * WW + tx] = blockId;
-  }
-}
-function solidAt(tx, ty) {
-  const b = blockAt(tx, ty);
-  return TILES_INFO[b] ? TILES_INFO[b].solid : false;
+
+function tileAt(tx, ty) {
+  const key = `${tx}_${ty}`;
+  if (worldMutations.has(key)) return worldMutations.get(key);
+  return getBaseTile(tx, ty);
 }
 
-// Хранилище сгенерированных деревьев для падающих листьев сакуры
-const spawnedTrees = [];
-
-// ГЕНЕРАЦИЯ ЕДИНОГО МИРА НА ОСНОВЕ СИДА ИЗ FIREBASE REALTIME DB
-function generateSharedWorld(sharedSeed) {
-  const R = mulberry32(sharedSeed);
-  const noise = (x) => Math.sin(x * 0.055) * 6 + Math.cos(x * 0.11) * 2;
-
-  const skyLimit = 35;
-  for (let x = 0; x < WW; x++) {
-    const h = Math.round(skyLimit + noise(x));
-    for (let y = 0; y < WH; y++) {
-      const idx = y * WW + x;
-      if (y < h) {
-        world[idx] = B.AIR;
-      } else if (y === h) {
-        world[idx] = B.GRASS;
-      } else if (y < h + 10) {
-        world[idx] = B.DIRT;
-      } else {
-        world[idx] = B.STONE;
-      }
-      if (y >= h) {
-        backWorld[idx] = (y < h + 10) ? B.DIRT : B.STONE;
-      } else {
-        backWorld[idx] = B.AIR;
-      }
-    }
-  }
-
-  // Генерация пещерных пустот
-  const caveCount = 38;
-  for (let i = 0; i < caveCount; i++) {
-    let cx = R() * WW | 0;
-    let cy = R() * (WH - skyLimit - 15) + skyLimit + 12 | 0;
-    let len = 40 + R() * 70 | 0;
-    for (let s = 0; s < len; s++) {
-      cx += Math.round((R() - 0.5) * 3);
-      cy += Math.round((R() - 0.5) * 2);
-      cx = clamp(cx, 2, WW - 3);
-      cy = clamp(cy, skyLimit + 3, WH - 6);
-      for (let dx = -2; dx <= 2; dx++) {
-        for (let dy = -2; dy <= 2; dy++) {
-          if (dx*dx + dy*dy <= 5) setBlock(cx + dx, cy + dy, B.AIR);
-        }
-      }
-    }
-  }
-
-  // Спавн рудных жил
-  function seedVein(blockId, depthMin, depthMax, spawnChance, rSize) {
-    for (let x = 3; x < WW - 3; x += 6) {
-      if (R() < spawnChance) {
-        const y = Math.round(depthMin + R() * (depthMax - depthMin));
-        for (let dx = -rSize; dx <= rSize; dx++) {
-          for (let dy = -rSize; dy <= rSize; dy++) {
-            if (R() < 0.75 && blockAt(x + dx, y + dy) === B.STONE) {
-              setBlock(x + dx, y + dy, blockId);
-            }
-          }
-        }
-      }
-    }
-  }
-  seedVein(B.COAL, skyLimit + 10, WH - 10, 0.65, 2);
-  seedVein(B.IRON, skyLimit + 15, WH - 15, 0.45, 1);
-  seedVein(B.GOLD, skyLimit + 30, WH - 10, 0.3, 1);
-  seedVein(B.DIAMOND, WH - 25, WH - 4, 0.16, 1);
-
-  // Озера кипящей лавы снизу
-  for (let x = 0; x < WW; x++) {
-    for (let y = WH - 9; y < WH; y++) {
-      if (blockAt(x, y) === B.AIR || (R() < 0.4 && y > WH - 7)) {
-        setBlock(x, y, B.LAVA);
-      }
-    }
-  }
-
-  // Спавн обычных и сакуровых деревьев
-  spawnedTrees.length = 0;
-  for (let x = 5; x < WW - 5; x += 10 + Math.round(R() * 8)) {
-    let surfaceY = -1;
-    for (let y = 0; y < WH; y++) {
-      if (blockAt(x, y) === B.GRASS) { surfaceY = y; break; }
-    }
-    if (surfaceY !== -1) {
-      const isSakura = R() < 0.35;
-      const treeHeight = 5 + Math.round(R() * 3);
-      
-      // Ствол
-      for (let ty = 1; ty <= treeHeight; ty++) {
-        setBlock(x, surfaceY - ty, B.WOOD);
-      }
-      
-      // Листва
-      const leafBlock = isSakura ? B.SAKURA_LEAVES : B.LEAVES;
-      const ly = surfaceY - treeHeight;
-      for (let ldx = -2; ldx <= 2; ldx++) {
-        for (let ldy = -2; ldy <= 2; ldy++) {
-          if (Math.abs(ldx) + Math.abs(ldy) <= 3) {
-            setBlock(x + ldx, ly + ldy, leafBlock);
-          }
-        }
-      }
-
-      spawnedTrees.push({ x: x, y: ly, isSakura: isSakura });
-    }
-  }
-
-  // Дикая растительность
-  for (let x = 0; x < WW; x++) {
-    for (let y = 0; y < WH - 1; y++) {
-      if (blockAt(x, y) === B.GRASS && blockAt(x, y - 1) === B.AIR) {
-        if (R() < 0.35) setBlock(x, y - 1, B.GRASS_TALL);
-      }
-    }
-  }
+function isSolid(tx, ty) {
+  const t = tileAt(tx, ty);
+  return BLOCK_DATA[t] ? BLOCK_DATA[t].solid : false;
 }
 </script>
 
 <script>
 'use strict';
 /* ============================================================
-   ПЕРСОНАЖ: Инвентарь, Уровни, XP, Способности
+   ИГРОК: УПРАВЛЕНИЕ, СТРОИТЕЛЬСТВО, ВЫЖИВАНИЕ
    ============================================================ */
-const P = {
-  x: WW * TILE / 2, y: 15 * TILE, w: 22, h: 26, vx: 0, vy: 0, dir: 1,
-  ground: false, hp: 100, maxHp: 100, xp: 0, level: 1, maxXp: 100,
-  coins: 0, activeSkin: 'default', deadT: 0, runT: 0, squash: 0,
-  activeHotbarSlot: 0,
-  inventory: [
-    { type: 'pickaxe_wood', count: 1 },
-    { type: 'sword_wood', count: 1 },
-    { type: B.TORCH, count: 10 },
-    { type: B.DIRT, count: 32 },
-    { type: B.STONE_BRICK, count: 15 },
-    { type: null, count: 0 },
-    { type: null, count: 0 },
-    { type: null, count: 0 },
-    { type: null, count: 0 }
-  ]
-};
+const keys = { left:false, right:false, jump:false };
+let jumpBuf = false;
 
-const SKINS = [
-  { id: 'default', name: 'Житель', color: '#5cb8ff', price: 0, desc: 'Пиксельный исследователь кубического мира.' },
-  { id: 'woodcutter', name: 'Дровосек', color: '#f97316', price: 15, desc: 'Обладает оранжевым прочным костюмом.' },
-  { id: 'miner', name: 'Шахтер', color: '#6b7280', price: 30, desc: 'Всегда носит тяжелую экипировку.' },
-  { id: 'golden', name: 'Лорд Лидер', color: '#fbbf24', price: 65, desc: 'Особая золотая корона на голове!' },
-  { id: 'void', name: 'Слуга Пустоты', color: '#c084fc', price: 120, desc: 'Фиолетовая неоновая дымка.' }
-];
-let ownedSkins = ['default'];
+const P = {
+  x: 100 * TILE, y: 30 * TILE, w: 20, h: 28, vx: 0, vy: 0, dir: 1,
+  ground: false, hp: 100, maxHp: 100, coins: 0,
+  selectedBlock: B.GRASS,
+  activeSkin: 'default',
+  deadT: 0
+};
 
 const cam = { x: 0, y: 0 };
-const keys = { left: false, right: false, jump: false };
-const particles = [];
-const damageTexts = [];
 let screenShake = 0;
+const particles = [];
 
-// Телепортационный объект анимации
-let teleportAnim = null;
-
-function spawnP(x, y, vx, vy, life, color, size, grav){
-  if (particles.length > 250) particles.shift();
-  particles.push({ x, y, vx, vy, life, maxLife: life, color, size, grav: grav ?? 0.22 });
-}
-function textPop(x, y, text, color) {
-  damageTexts.push({ x, y, text, color, life: 35 });
+function spawnP(x, y, vx, vy, life, color, size){
+  if (particles.length > 200) particles.shift();
+  particles.push({ x, y, vx, vy, life, maxLife: life, color, size });
 }
 
-function gainXP(amt) {
-  P.xp += amt;
-  textPop(P.x + P.w/2, P.y - 8, `+${amt} XP`, '#22c55e');
-  if (P.xp >= P.maxXp) {
-    P.xp -= P.maxXp;
-    P.level++;
-    P.maxXp = P.level * 90 + 40;
-    P.maxHp = 100 + (P.level - 1) * 8;
-    P.hp = P.maxHp;
-    Audio8.lvlUp();
-    textPop(P.x + P.w/2, P.y - 28, `LEVEL UP! (${P.level})`, '#fbbf24');
-    for (let i = 0; i < 20; i++) {
-      spawnP(P.x + P.w/2, P.y + P.h/2, (Math.random()-0.5)*5, (Math.random()-0.5)*5 - 2, 35, '#eab308', 3, 0.1);
-    }
-    checkSkillsUnlock();
-    saveProgressExact();
-  }
-}
-
-function checkSkillsUnlock() {
-  if (P.level >= 10) {
-    $('activeSkillBtn').style.display = 'flex';
-  } else {
-    $('activeSkillBtn').style.display = 'none';
-  }
-}
-
-function addToInventory(type, amt = 1) {
-  if (typeof type === 'number') {
-    for (const slot of P.inventory) {
-      if (slot.type === type && slot.count < 99) {
-        slot.count += amt;
-        renderHotbar();
-        return true;
-      }
-    }
-  }
-  for (const slot of P.inventory) {
-    if (slot.type === null) {
-      slot.type = type;
-      slot.count = amt;
-      renderHotbar();
-      return true;
-    }
-  }
-  toast('🎒 Инвентарь переполнен!', 1200);
-  return false;
-}
-
-function getActiveTool() {
-  const slot = P.inventory[P.activeHotbarSlot];
-  return (slot && slot.type) ? slot.type : null;
-}
-</script>
-
-<script>
-'use strict';
-/* ============================================================
-   ВРАГИ (MOBS) И НАНОСИМЫЙ УРОН
-   ============================================================ */
-const enemies = [];
-
-function spawnEnemy(type, x, y) {
-  enemies.push({
-    id: Math.random(),
-    type, x, y,
-    w: type === 'slime' ? 22 : 18,
-    h: type === 'slime' ? 16 : 26,
-    vx: 0, vy: 0,
-    hp: type === 'zombie' ? 70 : (type === 'eye' ? 35 : 25),
-    maxHp: type === 'zombie' ? 70 : (type === 'eye' ? 35 : 25),
-    dir: 1,
-    color: type === 'slime' ? '#10b981' : (type === 'zombie' ? '#047857' : '#ef4444'),
-    lastHit: 0, jumpCooldown: 0
-  });
-}
-
-function updateMobs() {
-  for (let i = enemies.length - 1; i >= 0; i--) {
-    const e = enemies[i];
-    if (e.type !== 'eye') e.vy += 0.4;
-
-    const dist = Math.hypot((P.x - e.x), (P.y - e.y));
-    if (dist < 260) {
-      e.dir = Math.sign(P.x - e.x) || 1;
-      if (e.type === 'eye') {
-        e.vx = e.dir * 1.4;
-        e.vy = Math.sign(P.y - e.y) * 1.1;
-      } else {
-        e.vx = e.dir * 1.1;
-        const txFront = Math.floor((e.x + e.dir * 14) / TILE);
-        const tyFeet = Math.floor((e.y + e.h - 4) / TILE);
-        if (solidAt(txFront, tyFeet) && e.jumpCooldown <= 0) {
-          e.vy = -7.0;
-          e.jumpCooldown = 45;
-        }
-      }
-    } else {
-      if (Math.random() < 0.01) e.dir = -e.dir;
-      e.vx = e.dir * 0.5;
-    }
-
-    if (e.jumpCooldown > 0) e.jumpCooldown--;
-
-    e.x += e.vx;
-    const txL = Math.floor(e.x / TILE), txR = Math.floor((e.x + e.w) / TILE);
-    const tyT = Math.floor(e.y / TILE), tyB = Math.floor((e.y + e.h) / TILE);
-    
-    if (solidAt(txL, tyT) || solidAt(txL, tyB)) { e.x = (txL + 1) * TILE; e.dir = -e.dir; }
-    if (solidAt(txR, tyT) || solidAt(txR, tyB)) { e.x = txR * TILE - e.w; e.dir = -e.dir; }
-
-    e.y += e.vy;
-    const nTxL = Math.floor(e.x / TILE), nTxR = Math.floor((e.x + e.w) / TILE);
-    const nTyTop = Math.floor(e.y / TILE), nTyBot = Math.floor((e.y + e.h) / TILE);
-
-    if (solidAt(nTxL, nTyBot) || solidAt(nTxR, nTyBot)) { e.y = nTyBot * TILE - e.h; e.vy = 0; }
-    if (solidAt(nTxL, nTyTop) || solidAt(nTxR, nTyTop)) { e.y = (nTyTop + 1) * TILE; e.vy = 0.5; }
-
-    if (e.x + e.w > P.x && e.x < P.x + P.w && e.y + e.h > P.y && e.y < P.y + P.h) {
-      if (P.deadT <= 0) playerDamage(12);
-    }
-
-    if (e.hp <= 0) {
-      for (let p = 0; p < 12; p++) {
-        spawnP(e.x + e.w/2, e.y + e.h/2, (Math.random()-0.5)*4, -Math.random()*3, 20, e.color, 2.5, 0.2);
-      }
-      gainXP(25);
-      P.coins += 2 + Math.floor(Math.random() * 3);
-      $('coinsCount').textContent = P.coins;
-      Audio8.coin();
-      enemies.splice(i, 1);
-    }
-  }
-
-  // Спавн мобов
-  if (weather.timeOfDay > 0.4 && weather.timeOfDay < 0.8 && enemies.length < 6 && Math.random() < 0.012) {
-    const rx = P.x + (Math.random() - 0.5) * 450;
-    const ry = P.y - 120;
-    if (rx > 0 && rx < WORLD_PX) {
-      spawnEnemy(Math.random() < 0.55 ? 'zombie' : 'eye', rx, ry);
-    }
-  } else if (enemies.length < 3 && Math.random() < 0.006) {
-    const rx = P.x + (Math.random() - 0.5) * 350;
-    const ry = P.y - 80;
-    spawnEnemy('slime', rx, ry);
-  }
-}
-
-function playerDamage(amt) {
-  P.hp = Math.max(0, P.hp - amt);
-  screenShake = 8;
+function damagePlayer(amount, reason) {
+  if (P.deadT > 0) return;
+  P.hp = Math.max(0, P.hp - amount);
   Audio8.hit();
-  textPop(P.x + P.w/2, P.y, `-${amt} HP`, '#ef4444');
-  if (P.hp <= 0) die();
-}
-
-function die() {
-  P.hp = P.maxHp;
-  P.x = WW * TILE / 2;
-  P.y = 15 * TILE;
-  P.vx = 0; P.vy = 0;
-  P.deadT = 35;
-  toast('💀 Возрождение на начальной точке спавна!', 2200);
-  saveProgressExact();
-}
-</script>
-
-<script>
-'use strict';
-/* ============================================================
-   КРАФТ, СЕЗОНЫ И ПОГОДНАЯ СИСТЕМА
-   ============================================================ */
-const CRAFT_RECIPES = [
-  { id: 'torch', name: 'Факел', icon: '🕯️', cost: '1 Уголь + 1 Дерево', req: { [B.COAL]: 1, [B.WOOD]: 1 }, result: B.TORCH, amt: 4 },
-  { id: 'wood_plank', name: 'Деревянная Доска', icon: '🪵', cost: '1 Дерево', req: { [B.WOOD]: 1 }, result: B.WOOD_PLANK, amt: 4 },
-  { id: 'stone_brick', name: 'Каменный Кирпич', icon: '🧱', cost: '2 Камня', req: { [B.STONE]: 2 }, result: B.STONE_BRICK, amt: 1 },
-  { id: 'sword_iron', name: 'Железный Меч', icon: '⚔️', cost: '5 Железа + 2 Дерева', req: { [B.IRON]: 5, [B.WOOD]: 2 }, result: 'sword_iron', amt: 1 },
-  { id: 'pickaxe_iron', name: 'Железная Кирка', icon: '⛏️', cost: '6 Железа + 3 Дерева', req: { [B.IRON]: 6, [B.WOOD]: 3 }, result: 'pickaxe_iron', amt: 1 },
-  { id: 'heal_potion', name: 'Лечебное Зелье', icon: '🧪', cost: '8 Травы + 2 Золота', req: { [B.GRASS_TALL]: 8, [B.GOLD]: 2 }, result: 'heal_potion', amt: 1 }
-];
-
-function renderCraftingPanel() {
-  const container = $('recipeListContainer');
-  container.innerHTML = CRAFT_RECIPES.map(rec => {
-    let hasIngredients = true;
-    for (const key in rec.req) {
-      const need = rec.req[key];
-      let have = 0;
-      for (const slot of P.inventory) {
-        if (slot.type === parseInt(key)) have += slot.count;
-      }
-      if (have < need) hasIngredients = false;
-    }
-
-    return `
-      <div class="recipe-item">
-        <div class="recipe-info">
-          <span class="recipe-icon">${rec.icon}</span>
-          <div>
-            <div class="recipe-name">${rec.name}</div>
-            <div class="recipe-cost">${rec.cost}</div>
-          </div>
-        </div>
-        <button class="recipe-btn" ${hasIngredients ? '' : 'disabled'} onclick="craftItem('${rec.id}')">Создать</button>
-      </div>
-    `;
-  }).join('');
-}
-
-window.craftItem = function(recipeId) {
-  const rec = CRAFT_RECIPES.find(r => r.id === recipeId);
-  if (!rec) return;
-
-  for (const key in rec.req) {
-    let need = rec.req[key];
-    for (const slot of P.inventory) {
-      if (slot.type === parseInt(key)) {
-        const take = Math.min(slot.count, need);
-        slot.count -= take;
-        need -= take;
-        if (slot.count <= 0) { slot.type = null; slot.count = 0; }
-        if (need <= 0) break;
-      }
-    }
+  screenShake = 10;
+  
+  // Кровяные брызги
+  for (let i = 0; i < 8; i++) {
+    spawnP(P.x + P.w/2, P.y + P.h/2, (Math.random()-0.5)*4, -Math.random()*3, 15, '#ff3b3b', 3);
   }
 
-  addToInventory(rec.result, rec.amt);
-  Audio8.lvlUp();
-  toast(`🛠️ Изготовлено: ${rec.name}!`, 1200);
-  renderCraftingPanel();
-  saveProgressExact();
-};
-
-const SEASONS = ['ЛЕТО', 'ОСЕНЬ', 'ЗИМА', 'ВЕСНА'];
-let weather = {
-  rainIntensity: 0.0,
-  isRaining: false,
-  timeOfDay: 0.2, 
-  season: 'ЛЕТО',
-  lastSeasonSwitch: 0
-};
-
-function updateDynamicWeatherAndSeasons(now) {
-  weather.timeOfDay = (Date.now() % 300000) / 300000; // 5 минут цикл суток
-
-  const weatherCycle = Date.now() % 90000;
-  weather.isRaining = weatherCycle < 25000; 
-
-  if (weather.isRaining) {
-    weather.rainIntensity = lerp(weather.rainIntensity, 1.0, 0.005);
-  } else {
-    weather.rainIntensity = lerp(weather.rainIntensity, 0.0, 0.005);
-  }
-  Audio8.updateRainSound(weather.rainIntensity);
-
-  if (now - weather.lastSeasonSwitch > 75000) {
-    weather.lastSeasonSwitch = now;
-    const curIdx = SEASONS.indexOf(weather.season);
-    weather.season = SEASONS[(curIdx + 1) % SEASONS.length];
-    $('seasonLabel').textContent = weather.season;
-    toast(`🍁 Смена времени года: ${weather.season}!`, 2000);
+  if (P.hp <= 0) {
+    die(reason);
   }
 }
-</script>
 
-<script>
-'use strict';
-/* ============================================================
-   ДВИЖЕНИЕ И ФИЗИКА СЕТКИ БЛОКОВ
-   ============================================================ */
-function stepPlayer() {
-  P.vy += 0.45; // Гравитация
+function die(reason) {
+  P.deadT = 80;
+  Audio8.hit();
+  toast(`💀 Ты погиб (${reason || 'неизвестная смерть'})! Возрождение...`, 3000);
+  
+  // Разбрасываем накопленные монетки!
+  const lostCoins = Math.floor(P.coins * 0.3);
+  P.coins -= lostCoins;
+  $('coinsCount').textContent = P.coins;
 
-  if (keys.left) { P.vx -= 0.55; P.dir = -1; }
-  else if (keys.right) { P.vx += 0.55; P.dir = 1; }
-  else {
-    P.vx *= P.ground ? 0.72 : 0.94;
-    if (Math.abs(P.vx) < 0.05) P.vx = 0;
+  // Возрождение на поверхности
+  setTimeout(() => {
+    P.x = 100 * TILE;
+    P.y = 10 * TILE;
+    P.vx = 0; P.vy = 0;
+    P.hp = 100;
+    P.deadT = 0;
+    saveProgressExact();
+  }, 1500);
+}
+
+function collideX(){
+  const ty0 = Math.floor(P.y / TILE), ty1 = Math.floor((P.y + P.h - 1) / TILE);
+  if (P.vx > 0){
+    const tx = Math.floor((P.x + P.w) / TILE);
+    for (let ty = ty0; ty <= ty1; ty++) if (isSolid(tx, ty)){ P.x = tx * TILE - P.w - 0.01; P.vx = 0; break; }
+  } else if (P.vx < 0){
+    const tx = Math.floor(P.x / TILE);
+    for (let ty = ty0; ty <= ty1; ty++) if (isSolid(tx, ty)){ P.x = (tx + 1) * TILE + 0.01; P.vx = 0; break; }
   }
+  P.x = clamp(P.x, 0, WORLD_PX_W - P.w);
+}
 
-  const maxSpeed = 4.2 + (P.level * 0.08);
-  P.vx = clamp(P.vx, -maxSpeed, maxSpeed);
-
-  // Ось X коллизия
-  P.x += P.vx;
-  const tx0_x = Math.floor(P.x / TILE);
-  const tx1_x = Math.floor((P.x + P.w) / TILE);
-  const ty0_x = Math.floor(P.y / TILE);
-  const ty1_x = Math.floor((P.y + P.h) / TILE);
-
-  if (P.vx > 0) {
-    for (let y = ty0_x; y <= ty1_x; y++) {
-      if (solidAt(tx1_x, y)) {
-        P.x = tx1_x * TILE - P.w - 0.01;
-        P.vx = 0;
-        break;
-      }
-    }
-  } else if (P.vx < 0) {
-    for (let y = ty0_x; y <= ty1_x; y++) {
-      if (solidAt(tx0_x, y)) {
-        P.x = (tx0_x + 1) * TILE + 0.01;
-        P.vx = 0;
-        break;
-      }
-    }
-  }
-
-  // Ось Y коллизия
-  P.y += P.vy;
+function collideY(){
+  const wasAir = !P.ground;
   P.ground = false;
-  const tx0_y = Math.floor(P.x / TILE);
-  const tx1_y = Math.floor((P.x + P.w) / TILE);
-  const ty0_y = Math.floor(P.y / TILE);
-  const ty1_y = Math.floor((P.y + P.h) / TILE);
-
-  if (P.vy > 0) {
-    for (let x = tx0_y; x <= tx1_y; x++) {
-      if (solidAt(x, ty1_y)) {
-        P.y = ty1_y * TILE - P.h;
-        P.vy = 0;
-        P.ground = true;
-        break;
+  const tx0 = Math.floor((P.x + 2) / TILE), tx1 = Math.floor((P.x + P.w - 2) / TILE);
+  if (P.vy > 0){
+    const ty = Math.floor((P.y + P.h) / TILE);
+    for (let tx = tx0; tx <= tx1; tx++) if (isSolid(tx, ty)){
+      P.y = ty * TILE - P.h; 
+      // Проверка урона от падения
+      if (P.vy > 14) {
+        damagePlayer(Math.floor((P.vy - 14) * 8), 'разбился с высоты');
       }
+      P.vy = 0; P.ground = true; 
+      break;
     }
-  } else if (P.vy < 0) {
-    for (let x = tx0_y; x <= tx1_y; x++) {
-      if (solidAt(x, ty0_y)) {
-        P.y = (ty0_y + 1) * TILE + 0.01;
-        P.vy = 0;
-        break;
+  } else if (P.vy < 0){
+    const ty = Math.floor(P.y / TILE);
+    for (let tx = tx0; tx <= tx1; tx++) if (isSolid(tx, ty)){ P.y = (ty + 1) * TILE + 0.01; P.vy = 0; break; }
+  }
+}
+
+function handleBlockInteraction(mx, my, isRightClick) {
+  if (P.deadT > 0) return;
+
+  // Рассчитываем мировые координаты клика с учетом камеры и зума
+  const worldX = mx + cam.x;
+  const worldY = my + cam.y;
+  
+  const tx = Math.floor(worldX / TILE);
+  const ty = Math.floor(worldY / TILE);
+
+  // Дистанция взаимодействия (макс. 6 блоков)
+  const px = Math.floor((P.x + P.w/2) / TILE);
+  const py = Math.floor((P.y + P.h/2) / TILE);
+  const dist = Math.hypot(tx - px, ty - py);
+  
+  if (dist > 7) {
+    toast('🛑 Слишком далеко!', 1000);
+    return;
+  }
+
+  const key = `${tx}_${ty}`;
+
+  if (isRightClick) {
+    // СТАВИТЬ БЛОК
+    if (tileAt(tx, ty) === B.AIR) {
+      // Проверка, чтобы не застроить самого игрока
+      const tRect = { x: tx*TILE, y: ty*TILE, w: TILE, h: TILE };
+      if (P.x < tRect.x + tRect.w && P.x + P.w > tRect.x && P.y < tRect.y + tRect.h && P.y + P.h > tRect.y && BLOCK_DATA[P.selectedBlock].solid) {
+        return; // Нельзя застраивать себя твердым блоком
+      }
+      db.ref('world_changes/' + key).set(P.selectedBlock);
+      Audio8.blockPlace();
+    }
+  } else {
+    // РАЗРУШАТЬ БЛОК
+    const currentBlock = tileAt(tx, ty);
+    if (currentBlock !== B.AIR) {
+      db.ref('world_changes/' + key).set(B.AIR);
+      Audio8.blockBreak();
+      
+      // Выпадают случайные монетки при разрушении блоков (симуляция гринда)
+      if (currentBlock === B.STONE && Math.random() < 0.15) {
+        P.coins += 1;
+        $('coinsCount').textContent = P.coins;
+        Audio8.coin();
+        toast('🪙 Найдена монета!', 800);
+        saveProgressExact();
       }
     }
   }
+}
 
-  if (P.vy > 11) P.vy = 11;
-
-  if (keys.jump && P.ground) {
-    P.vy = -10.0;
-    P.ground = false;
-    Audio8.jump();
+function stepPlayer(){
+  if (P.deadT > 0) {
+    P.deadT--;
+    return;
   }
 
-  const ctx = Math.floor((P.x + P.w/2)/TILE);
-  const cty = Math.floor((P.y + P.h/2)/TILE);
-  if (blockAt(ctx, cty) === B.LAVA) playerDamage(3);
+  const inputActive = (document.activeElement === $('chatInput'));
 
-  P.runT += Math.abs(P.vx);
+  if (keys.left && !inputActive) { P.vx -= 0.55; P.dir = -1; }
+  else if (keys.right && !inputActive) { P.vx += 0.55; P.dir = 1; }
+  else { P.vx *= 0.72; if(Math.abs(P.vx) < 0.05) P.vx = 0; }
+  P.vx = clamp(P.vx, -5, 5);
 
-  // Камера слежения
-  cam.x = lerp(cam.x, P.x - vw / 2 + P.w / 2, 0.12);
-  cam.y = lerp(cam.y, P.y - vh / 2 + P.h / 2, 0.08);
+  P.vy += 0.45; // Гравитация
+  if (P.vy > 18) P.vy = 18;
 
-  cam.x = clamp(cam.x, 0, WORLD_PX - vw);
-  cam.y = clamp(cam.y, 0, WH * TILE - vh);
+  if (jumpBuf && !inputActive) {
+    if (P.ground) {
+      P.vy = -9.2;
+      P.ground = false;
+      Audio8.jump();
+    }
+    jumpBuf = false;
+  }
+
+  P.x += P.vx; collideX();
+  P.y += P.vy; collideY();
+
+  // Опасности: Огненная лава
+  const currentTileUnder = tileAt(Math.floor((P.x + P.w/2)/TILE), Math.floor((P.y + P.h - 2)/TILE));
+  if (currentTileUnder === B.LAVA) {
+    damagePlayer(1.5, 'сгорел в лаве');
+  }
+
+  // Обновление HUD
+  $('hpFill').style.width = (P.hp / P.maxHp * 100) + '%';
+  $('hpTxt').textContent = `${Math.ceil(P.hp)}/${P.maxHp}`;
+  $('coordX').textContent = Math.floor(P.x / TILE);
+  $('coordY').textContent = Math.floor(P.y / TILE);
+
+  // Камера плавно следует за персонажем
+  const targetCamX = P.x + P.w/2 - vw * 0.5;
+  const targetCamY = P.y + P.h/2 - vh * 0.5;
+  cam.x = clamp(lerp(cam.x, targetCamX, 0.1), 0, WORLD_PX_W - vw);
+  cam.y = clamp(lerp(cam.y, targetCamY, 0.1), 0, WORLD_PX_H - vh);
 
   if (screenShake > 0) {
     cam.x += (Math.random() - 0.5) * screenShake;
     cam.y += (Math.random() - 0.5) * screenShake;
-    screenShake *= 0.88;
+    screenShake *= 0.9;
+  }
+}
+
+function updParticles(){
+  for (let i = particles.length - 1; i >= 0; i--){
+    const p = particles[i];
+    p.x += p.vx; p.y += p.vy; p.life--;
+    if (p.life <= 0) particles.splice(i, 1);
   }
 }
 </script>
@@ -1440,63 +724,74 @@ function stepPlayer() {
 <script>
 'use strict';
 /* ============================================================
-   СЕТЬ: Синхронизация блоков (Realtime World) и Игроков
+   СЕТЬ: СИНХРОНИЗАЦИЯ ИГРОВОГО МИРА И ИГРОКОВ
    ============================================================ */
 let MY_UID = null, MY_NAME = '', joined = false;
 const remotes = {};
-let meRef = null, lastSend = 0;
+let meRef = null;
 
 function joinNet(){
   meRef = db.ref('players/' + MY_UID);
-  db.ref('.info/connected').on('value', s => {
-    if (s.val() === true){ meRef.onDisconnect().remove(); sendNow(); }
-  });
   
+  // Синхронизация своего статуса на выход
+  db.ref('.info/connected').on('value', s => {
+    if (s.val() === true) {
+      meRef.onDisconnect().remove();
+      sendMyState();
+    }
+  });
+
+  // Отслеживание изменений других игроков
   db.ref('players').on('value', snap => {
     const now = Date.now(), seen = new Set();
     snap.forEach(ch => {
       const v = ch.val();
       if (!v || ch.key === MY_UID) return;
-      if (v.t && now - v.t > 15000) return;
+      if (v.t && now - v.t > 15000) return; // Игрок оффлайн
       seen.add(ch.key);
       let r = remotes[ch.key];
       if (!r) r = remotes[ch.key] = { rx: v.x, ry: v.y, tx: v.x, ty: v.y };
-      r.n = v.n; r.tx = v.x; r.ty = v.y; r.d = v.d || 1;
-      r.skin = v.skin || 'default'; r.lvl = v.lvl || 1;
+      r.n = v.n; r.tx = v.x; r.ty = v.y; r.d = v.d || 1; r.hp = v.hp || 100;
     });
     for (const k in remotes) if (!seen.has(k)) delete remotes[k];
     $('online').textContent = seen.size + 1;
+    updateLeaderboard();
   });
 
-  // РЕАЛТАЙМ СИНХРОНИЗАЦИЯ БЛОКОВ МЕЖДУ ИГРОКАМИ
-  db.ref('world_tiles').on('child_added', syncTileFromNet);
-  db.ref('world_tiles').on('child_changed', syncTileFromNet);
-  db.ref('world_tiles').on('child_removed', snap => {
-    const [tx, ty] = snap.key.split('_').map(Number);
-    setBlock(tx, ty, B.AIR);
+  // Отслеживание изменений БЛОКОВ в мире
+  db.ref('world_changes').on('child_added', snap => {
+    worldMutations.set(snap.key, snap.val());
+  });
+  db.ref('world_changes').on('child_changed', snap => {
+    worldMutations.set(snap.key, snap.val());
+  });
+  db.ref('world_changes').on('child_removed', snap => {
+    worldMutations.delete(snap.key);
   });
 
-  // ЧАТ СЕТИ
+  // Синхронизация чата
   db.ref('chat').limitToLast(15).on('child_added', snap => {
     const data = snap.val();
     if (!data) return;
     const msgEl = document.createElement('div');
-    const color = getSkinColor(data.skin || 'default');
-    msgEl.innerHTML = `<span style="color:${color};font-weight:800;">${esc(data.name)}:</span> <span style="color:#fff;">${esc(data.text)}</span>`;
+    msgEl.innerHTML = `<span style="color:#ffe98a;font-weight:800;">${esc(data.name)}:</span> <span style="color:#fff;">${esc(data.text)}</span>`;
     const box = $('chatMsgs');
     box.appendChild(msgEl);
     box.scrollTop = box.scrollHeight;
   });
 
-  setInterval(() => { if (Date.now() - lastSend > 100) sendNow(); }, 100);
+  // Быстрый апдейт координат по сети
+  setInterval(sendMyState, 100);
 }
 
-function syncTileFromNet(snap) {
-  const [tx, ty] = snap.key.split('_').map(Number);
-  const blockId = snap.val();
-  if (tx >= 0 && tx < WW && ty >= 0 && ty < WH) {
-    setBlock(tx, ty, blockId);
-  }
+function sendMyState(){
+  if (!meRef) return;
+  meRef.update({
+    n: MY_NAME,
+    x: Math.round(P.x), y: Math.round(P.y), d: P.dir, hp: Math.round(P.hp),
+    coins: P.coins,
+    t: firebase.database.ServerValue.TIMESTAMP
+  });
 }
 
 function sendChatMessage() {
@@ -1505,50 +800,43 @@ function sendChatMessage() {
   if (txt.length === 0) return;
   db.ref('chat').push({
     name: MY_NAME,
-    skin: P.activeSkin,
     text: txt,
     t: firebase.database.ServerValue.TIMESTAMP
   });
   input.value = '';
 }
 
-function sendNow(){
-  if (!meRef) return;
-  meRef.update({
-    n: MY_NAME, skin: P.activeSkin,
-    x: Math.round(P.x), y: Math.round(P.y), d: P.dir,
-    lvl: P.level,
-    t: firebase.database.ServerValue.TIMESTAMP
-  });
-}
-
 function saveProgressExact() {
   if (!joined || !MY_UID) return;
-  const saveState = {
-    hp: P.hp,
-    level: P.level,
-    xp: P.xp,
-    coins: P.coins,
-    activeSkin: P.activeSkin,
-    ownedSkins: ownedSkins,
-    inventory: P.inventory,
-    x: Math.round(P.x),
-    y: Math.round(P.y)
+  const state = {
+    x: Math.round(P.x), y: Math.round(P.y),
+    hp: P.hp, coins: P.coins, t: Date.now()
   };
-  localStorage.setItem('blockran_survival_save_v2', JSON.stringify(saveState));
-  db.ref('saves/' + MY_UID).set(saveState).catch(() => {});
+  localStorage.setItem('terra_exact_save_v1', JSON.stringify(state));
+  db.ref('saves/' + MY_UID).set(state);
 }
 
-function getSkinColor(skinId) {
-  const sk = SKINS.find(s => s.id === skinId);
-  return sk ? sk.color : '#5cb8ff';
+function updateLeaderboard(){
+  const list = [];
+  list.push({ n: MY_NAME, coins: P.coins, hp: P.hp, me: true });
+  for (const k in remotes) {
+    list.push({ n: remotes[k].n || 'Аноним', coins: remotes[k].coins || 0, hp: remotes[k].hp || 100 });
+  }
+  list.sort((a,b) => b.coins - a.coins);
+
+  $('boardRows').innerHTML = list.map((r, i) =>
+    `<div class="brow ${r.me ? 'me' : ''}">` +
+    `<span class="nm"><i>${i+1}.</i>${esc(r.n)}</span>` +
+    `<span class="bl">🪙 ${r.coins} (❤️${Math.ceil(r.hp)})</span></div>`
+  ).join('');
+  $('boardUpd').textContent = new Date().toLocaleTimeString('ru-RU');
 }
 
 function smoothRemotes(){
   for (const k in remotes){
     const r = remotes[k];
-    if (Math.abs(r.tx - r.rx) > 200 || Math.abs(r.ty - r.ry) > 200){ r.rx = r.tx; r.ry = r.ty; }
-    else { r.rx = lerp(r.rx, r.tx, 0.25); r.ry = lerp(r.ry, r.ty, 0.25); }
+    r.rx = lerp(r.rx, r.tx, 0.2);
+    r.ry = lerp(r.ry, r.ty, 0.2);
   }
 }
 
@@ -1556,963 +844,362 @@ auth.onAuthStateChanged(async user => {
   if (user && !joined){
     joined = true;
     MY_UID = user.uid;
-    db.ref('users/' + user.uid + '/name').once('value').then(s => {
-       MY_NAME = s.val() || user.email.split('@')[0].slice(0, 14);
-       loadWorldAndStart();
-    }).catch(() => {
-       MY_NAME = user.email.split('@')[0].slice(0, 14);
-       loadWorldAndStart();
-    });
+    try {
+      const s = await db.ref('users/' + user.uid + '/name').once('value');
+      MY_NAME = s.val() || user.email.split('@')[0].slice(0, 14);
+    } catch(e){ MY_NAME = user.email.split('@')[0].slice(0, 14); }
+    startGame();
   } else if (!user){
     $('loading').classList.add('hidden');
     $('auth').classList.remove('hidden');
   }
 });
+
+async function startGame(){
+  $('auth').classList.add('hidden');
+  $('loading').classList.add('hidden');
+  $('hud').classList.add('on');
+
+  // Восстановление сохранений
+  const local = localStorage.getItem('terra_exact_save_v1');
+  if (local) {
+    try {
+      const d = JSON.parse(local);
+      P.x = d.x; P.y = d.y; P.hp = d.hp || 100; P.coins = d.coins || 0;
+    } catch(e){}
+  } else {
+    const snap = await db.ref('saves/' + MY_UID).once('value');
+    const d = snap.val();
+    if (d) {
+      P.x = d.x; P.y = d.y; P.hp = d.hp || 100; P.coins = d.coins || 0;
+    }
+  }
+
+  $('coinsCount').textContent = P.coins;
+  joinNet();
+  
+  toast(`🌲 Добро пожаловать, <b>${esc(MY_NAME)}</b>! Выживай и строй!`, 4000);
+  Audio8.init();
+  Audio8.playTrack(0);
+
+  requestAnimationFrame(loop);
+}
 </script>
 
 <script>
 'use strict';
 /* ============================================================
-   ИНТЕРФЕЙС И РЕЖИМЫ ТАПА ДЛЯ АНДРОИД
+   УПРАВЛЕНИЕ: КЛАВИАТУРА, МЫШЬ, МОБИЛЬНОЕ УПРАВЛЕНИЕ
    ============================================================ */
-let activeInteractionMode = 'mine'; // 'mine' или 'build'
-
-$('modeMineBtn').onclick = () => {
-  activeInteractionMode = 'mine';
-  $('modeMineBtn').classList.add('active');
-  $('modeBuildBtn').classList.remove('active');
-};
-$('modeBuildBtn').onclick = () => {
-  activeInteractionMode = 'build';
-  $('modeBuildBtn').classList.add('active');
-  $('modeMineBtn').classList.remove('active');
-};
-
-function renderHotbar() {
-  const wrap = $('hotbarWrap');
-  wrap.innerHTML = P.inventory.map((slot, idx) => {
-    const active = idx === P.activeHotbarSlot ? 'active' : '';
-    let inner = '';
-    if (slot.type !== null) {
-      if (typeof slot.type === 'string') {
-        const icons = {
-          'pickaxe_wood': '⛏️', 'sword_wood': '⚔️',
-          'pickaxe_iron': '🔩⛏️', 'sword_iron': '🔩⚔️',
-          'heal_potion': '🧪'
-        };
-        inner = `<span class="icon-mock">${icons[slot.type] || '🛠️'}</span>`;
-      } else {
-        const emoji = {
-          [B.GRASS]: '🌱', [B.DIRT]: '🟫', [B.STONE]: '🪨', [B.COAL]: '🌑',
-          [B.IRON]: '🧲', [B.GOLD]: '🟡', [B.DIAMOND]: '💎', [B.WOOD]: '🪵',
-          [B.LEAVES]: '🍃', [B.STONE_BRICK]: '🧱', [B.WOOD_PLANK]: '🪵',
-          [B.TORCH]: '🕯️', [B.SAND]: '🟡', [B.GRASS_TALL]: '🌿', [B.SAKURA_LEAVES]: '🌸'
-        };
-        inner = `<span class="icon-mock">${emoji[slot.type] || '📦'}</span>`;
-      }
-    }
-    const count = slot.count > 1 ? `<span class="count">${slot.count}</span>` : '';
-    return `
-      <div class="hot-slot ${active}" onclick="selectHotbarSlot(${idx})">
-        <span class="key-num">${idx + 1}</span>
-        ${inner}
-        ${count}
-      </div>
-    `;
-  }).join('');
-}
-
-window.selectHotbarSlot = function(idx) {
-  P.activeHotbarSlot = idx;
-  renderHotbar();
-};
-
-function renderBoard() {
-  const rows = [];
-  rows.push({ n: MY_NAME, lvl: P.level, me: true });
-  for (const k in remotes) {
-    rows.push({ n: remotes[k].n, lvl: remotes[k].lvl || 1, me: false });
-  }
-  rows.sort((a,b) => b.lvl - a.lvl);
-  $('boardRows').innerHTML = rows.map((r, i) => `
-    <div class="brow ${r.me ? 'me' : ''}">
-      <span class="nm"><i>${i+1}.</i>${esc(r.n)}</span>
-      <span class="bl">LVL ${r.lvl}</span>
-    </div>
-  `).join('');
-}
-
-let toastT = null;
-function toast(msg, ms = 2200){
-  const el = $('toast'); el.innerHTML = msg; el.classList.add('show');
-  clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('show'), ms);
-}
-
-$('zoomOutBtn').onclick = () => { ZOOM = clamp(ZOOM - 0.15, 0.8, 2.2); resize(); };
-$('zoomInBtn').onclick = () => { ZOOM = clamp(ZOOM + 0.15, 0.8, 2.2); resize(); };
-$('fullScrBtn').onclick = () => { toggleFullscreen(); };
-$('craftToggleBtn').onclick = () => {
-  const p = $('craftPanel');
-  p.classList.toggle('open');
-  if (p.classList.contains('open')) renderCraftingPanel();
-};
-$('muteBtn').onclick = () => {
-  const m = Audio8.toggleSfx();
-  $('muteBtn').textContent = m ? '🔇' : '🔊';
-};
-$('musBtn').onclick = () => { Audio8.init(); Audio8.nextTrack(); };
-$('chatToggleBtn').onclick = () => { $('chat').classList.toggle('hidden'); };
-
-/* ============================================================
-   ОБРАБОТКА ТАПОВ И ТЕЛЕПОРТАЦИИ
-   ============================================================ */
-const interactionInput = { x: 0, y: 0, isDown: false, targetBlock: { tx: 0, ty: 0 }, mineProgress: 0 };
-
-function getCanvasInputCoords(e) {
-  const rect = cv.getBoundingClientRect();
-  let clientX = e.clientX, clientY = e.clientY;
-  
-  if (e.touches && e.touches.length > 0) {
-    clientX = e.touches[0].clientX;
-    clientY = e.touches[0].clientY;
-  }
-  
-  const canvasX = (clientX - rect.left) * (cv.width / rect.width);
-  const canvasY = (clientY - rect.top) * (cv.height / rect.height);
-  const gameX = (canvasX / (dpr * ZOOM)) + cam.x;
-  const gameY = (canvasY / (dpr * ZOOM)) + cam.y;
-  return { x: gameX, y: gameY };
-}
-
-function handleInputStart(e) {
-  if (e.target.tagName === 'BUTTON' || e.target.closest('#hud')) return;
-  const coords = getCanvasInputCoords(e);
-  const tx = Math.floor(coords.x / TILE);
-  const ty = Math.floor(coords.y / TILE);
-
-  const activeTool = getActiveTool();
-  if (activeTool === 'heal_potion') {
-    P.hp = Math.min(P.maxHp, P.hp + 50);
-    Audio8.lvlUp();
-    textPop(P.x + P.w/2, P.y, `+50 HP`, '#4ade80');
-    P.inventory[P.activeHotbarSlot].count--;
-    if (P.inventory[P.activeHotbarSlot].count <= 0) P.inventory[P.activeHotbarSlot].type = null;
-    renderHotbar();
+window.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT') {
+    if (e.key === 'Enter') { sendChatMessage(); $('chatInput').blur(); }
     return;
   }
-
-  // Проверка удара по мобам
-  let hitMob = false;
-  for (const mob of enemies) {
-    if (coords.x > mob.x && coords.x < mob.x + mob.w && coords.y > mob.y && coords.y < mob.y + mob.h) {
-      const isSword = typeof activeTool === 'string' && activeTool.includes('sword');
-      const dmg = isSword ? (activeTool.includes('iron') ? 35 : 20) : 6;
-      mob.hp -= dmg;
-      mob.vx = P.dir * 3.8;
-      mob.vy = -3;
-      Audio8.hit();
-      textPop(mob.x + mob.w/2, mob.y, `-${dmg} HP`, '#f87171');
-      hitMob = true;
-      break;
-    }
+  switch(e.code){
+    case 'ArrowLeft': case 'KeyA': keys.left = true; break;
+    case 'ArrowRight': case 'KeyD': keys.right = true; break;
+    case 'ArrowUp': case 'KeyW': case 'Space':
+      if (!keys.jump && !e.repeat) jumpBuf = true;
+      keys.jump = true; break;
+    case 'Digit1': selectSlot(0); break;
+    case 'Digit2': selectSlot(1); break;
+    case 'Digit3': selectSlot(2); break;
+    case 'Digit4': selectSlot(3); break;
+    case 'Digit5': selectSlot(4); break;
+    case 'Digit6': selectSlot(5); break;
+    case 'Enter': e.preventDefault(); $('chatInput').focus(); break;
   }
+});
 
-  if (!hitMob) {
-    const block = blockAt(tx, ty);
+window.addEventListener('keyup', e => {
+  if (e.target.tagName === 'INPUT') return;
+  switch(e.code){
+    case 'ArrowLeft': case 'KeyA': keys.left = false; break;
+    case 'ArrowRight': case 'KeyD': keys.right = false; break;
+    case 'ArrowUp': case 'KeyW': case 'Space': keys.jump = false; break;
+  }
+});
 
-    if (activeInteractionMode === 'mine') {
-      if (block === B.AIR) {
-        // ТЕЛЕПОРТ
-        if (!teleportAnim) {
-          const targetX = tx * TILE + TILE / 2 - P.w / 2;
-          const targetY = ty * TILE + TILE / 2 - P.h / 2;
-
-          if (!solidAt(tx, ty)) {
-            teleportAnim = {
-              sx: P.x, sy: P.y,
-              tx: targetX, ty: targetY,
-              px: P.x, py: P.y,
-              progress: 0,
-              duration: 20
-            };
-            Audio8.jump();
-            for (let i = 0; i < 15; i++) {
-              spawnP(P.x + P.w/2, P.y + P.h/2, (Math.random()-0.5)*6, (Math.random()-0.5)*6, 20, '#60a5fa', 3, 0);
-            }
-          }
-        }
-      } else {
-        const dist = Math.hypot((P.x + P.w/2) - (tx * TILE + 16), (P.y + P.h/2) - (ty * TILE + 16));
-        if (dist <= 180) {
-          interactionInput.targetBlock = { tx, ty };
-          interactionInput.isDown = true;
-        }
-      }
-    } else {
-      // СТРОЙКА
-      const dist = Math.hypot((P.x + P.w/2) - (tx * TILE + 16), (P.y + P.h/2) - (ty * TILE + 16));
-      if (dist <= 180 && (block === B.AIR || block === B.GRASS_TALL)) {
-        const slot = P.inventory[P.activeHotbarSlot];
-        if (slot && typeof slot.type === 'number') {
-          setBlock(tx, ty, slot.type);
-          db.ref(`world_tiles/${tx}_${ty}`).set(slot.type);
-          Audio8.placeBlock();
-
-          slot.count--;
-          if (slot.count <= 0) { slot.type = null; slot.count = 0; }
-          renderHotbar();
-          saveProgressExact();
-        }
-      }
-    }
+function selectSlot(idx) {
+  const slots = document.querySelectorAll('#hotbar .slot');
+  slots.forEach(s => s.classList.remove('active'));
+  if(slots[idx]) {
+    slots[idx].classList.add('active');
+    P.selectedBlock = parseInt(slots[idx].dataset.type);
   }
 }
 
-function handleInputMove(e) {
-  const coords = getCanvasInputCoords(e);
-  interactionInput.x = coords.x;
-  interactionInput.y = coords.y;
+// Позиционирование слотов Hotbar при клике
+document.querySelectorAll('#hotbar .slot').forEach((s, idx) => {
+  s.onclick = () => selectSlot(idx);
+});
+
+// МОБИЛЬНЫЕ ТАЧИ
+function bindTouch(id, on, off){
+  const el = $(id);
+  const start = e => { e.preventDefault(); el.classList.add('act'); on(); };
+  const end = e => { e.preventDefault(); el.classList.remove('act'); off(); };
+  el.addEventListener('touchstart', start, { passive:false });
+  el.addEventListener('touchend', end, { passive:false });
+  el.addEventListener('mousedown', start); el.addEventListener('mouseup', end); el.addEventListener('mouseleave', end);
 }
+bindTouch('tLeft', () => keys.left = true, () => keys.left = false);
+bindTouch('tRight', () => keys.right = true, () => keys.right = false);
+bindTouch('tJump', () => { if (!keys.jump) jumpBuf = true; keys.jump = true; }, () => keys.jump = false);
 
-function handleInputEnd() {
-  interactionInput.isDown = false;
-  interactionInput.mineProgress = 0;
-}
+if ('ontouchstart' in window) document.body.classList.add('touch');
+function checkOrient(){ document.body.classList.toggle('portrait', innerHeight > innerWidth); }
+window.addEventListener('resize', checkOrient); checkOrient();
 
-cv.addEventListener('mousedown', handleInputStart);
-cv.addEventListener('mousemove', handleInputMove);
-window.addEventListener('mouseup', handleInputEnd);
-
-cv.addEventListener('touchstart', handleInputStart, { passive: true });
-cv.addEventListener('touchmove', handleInputMove, { passive: true });
-window.addEventListener('touchend', handleInputEnd, { passive: true });
-
-function updateMining() {
-  if (interactionInput.isDown) {
-    const { tx, ty } = interactionInput.targetBlock;
-    const b = blockAt(tx, ty);
-    if (b !== B.AIR) {
-      const info = TILES_INFO[b];
-      const activeTool = getActiveTool();
-      
-      let mult = 1.0;
-      if (typeof activeTool === 'string' && activeTool.includes('pickaxe')) {
-        mult = activeTool.includes('iron') ? 4.2 : 2.2;
-      }
-
-      interactionInput.mineProgress += 16.66 * mult;
-      
-      if (Math.random() < 0.35) {
-        spawnP(tx * TILE + 16, ty * TILE + 16, (Math.random()-0.5)*3, -Math.random()*2, 10, info.color, 2.5, 0.15);
-      }
-
-      if (interactionInput.mineProgress >= info.mineTime) {
-        setBlock(tx, ty, B.AIR);
-        db.ref(`world_tiles/${tx}_${ty}`).set(B.AIR);
-        Audio8.breakBlock();
-
-        const xpMap = { [B.STONE]: 2, [B.COAL]: 4, [B.IRON]: 6, [B.GOLD]: 12, [B.DIAMOND]: 30 };
-        gainXP(xpMap[b] || 1);
-        addToInventory(b, 1);
-
-        interactionInput.isDown = false;
-        interactionInput.mineProgress = 0;
-        saveProgressExact();
-      }
-    }
-  }
-}
-
-$('activeSkillBtn').onclick = () => {
-  if (P.level < 10) return;
-  Audio8.skill();
-  toast('🔥 ВЗРЫВ МЕТЕОРИТА ПРЕИСПОДНЕЙ!', 2000);
-  
-  const pTx = Math.floor((P.x + P.w/2)/TILE);
-  const pTy = Math.floor((P.y + P.h/2)/TILE);
-  
-  for (let dx = -3; dx <= 3; dx++) {
-    for (let dy = -3; dy <= 3; dy++) {
-      if (dx*dx + dy*dy <= 9) {
-        const b = blockAt(pTx + dx, pTy + dy);
-        if (b !== B.AIR && b !== B.LAVA) {
-          setBlock(pTx + dx, pTy + dy, B.AIR);
-          db.ref(`world_tiles/${pTx + dx}_${pTy + dy}`).set(B.AIR);
-          if (Math.random() < 0.45) addToInventory(b, 1);
-        }
-      }
-    }
-  }
-  for (const mob of enemies) {
-    if (Math.hypot(mob.x - P.x, mob.y - P.y) < 140) {
-      mob.hp -= 70;
-      textPop(mob.x + mob.w/2, mob.y, `-70 FIRE`, '#f59e0b');
-    }
-  }
-  saveProgressExact();
+// Системные бинды кнопок HUD
+$('muteBtn').onclick = () => {
+  const muted = Audio8.toggleSfx(); $('muteBtn').textContent = muted ? '🔇' : '🔊';
+};
+$('musMuteBtn').onclick = () => {
+  const muted = Audio8.toggleMusic(); $('musMuteBtn').textContent = muted ? '🔇' : '🎵';
+};
+$('musBtn').onclick = () => {
+  Audio8.playTrack((Audio8.trackIdx + 1) % Audio8.tracks.length);
+};
+$('chatToggleBtn').onclick = () => {
+  $('chat').classList.toggle('hidden');
 };
 </script>
 
 <script>
 'use strict';
 /* ============================================================
-   РУКОВОДСТВО И СМЕНА СТРАНИЦ КНИГИ
-   ============================================================ */
-let currentGuidePage = 0;
-const GUIDE_PAGES = [
-  {
-    title: '🌿 Общий мир',
-    content: `Добро пожаловать в единый мир БЛОКРАН SURVIVAL!<br><br>
-    Мы убрали локальную генерацию — теперь вы с друзьями играете в абсолютно одном пространстве.<br>
-    • Сид мира синхронизирован с базой данных.<br>
-    • Все ломания и постройки сохраняются мгновенно на сервере.<br>
-    • В режиме <b>«Добыча»</b> кликайте на пустое место, чтобы быстро <b>ТЕЛЕПОРТИРОВАТЬСЯ</b>!`
-  },
-  {
-    title: '🌸 Сакура и Живая Природа',
-    content: `Мир наполнен красивой живой атмосферой:<br><br>
-    • По поверхности раскинулись деревья цветущей розовой Сакуры.<br>
-    • С ветвей плавно опадают прекрасные розовые лепестки.<br>
-    • На заднем плане простираются живописные цепи гор, а в небе пролетают облака.`
-  },
-  {
-    title: '⚔️ Монстры и Опасности',
-    content: `Опасайтесь заходить глубоко в шахты без факелов и выходить на поверхность ночью!<br><br>
-    • Ночью пробуждаются Зомби и Демонические Летающие Глаза.<br>
-    • Наносите им удары Мечом или другими инструментами.<br>
-    • Убивайте монстров, повышайте уровень и монеты для покупки скинов!`
-  }
-];
-
-function updateGuideBookContent() {
-  const page = GUIDE_PAGES[currentGuidePage];
-  $('bookLeftPage').innerHTML = `
-    <h3>${page.title}</h3>
-    <p>${page.content}</p>
-  `;
-  $('bookPrevBtn').disabled = currentGuidePage === 0;
-  $('bookNextBtn').disabled = currentGuidePage === GUIDE_PAGES.length - 1;
-}
-
-function renderSkinsShop() {
-  const container = $('skinsShopContainer');
-  container.innerHTML = SKINS.map(s => {
-    const isOwned = ownedSkins.includes(s.id);
-    const isEquipped = P.activeSkin === s.id;
-    let btnHtml = '';
-    if (isEquipped) {
-      btnHtml = `<button class="skin-btn active">Надето</button>`;
-    } else if (isOwned) {
-      btnHtml = `<button class="skin-btn equip" onclick="equipSkin('${s.id}')">Выбрать</button>`;
-    } else {
-      btnHtml = `<button class="skin-btn buy" onclick="buySkin('${s.id}', ${s.price})">Купить</button>`;
-    }
-
-    return `
-      <div class="skin-card ${isEquipped ? 'equipped' : ''}">
-        <div class="skin-info">
-          <div class="skin-preview-box" style="background:${s.color};"></div>
-          <div>
-            <div class="skin-name">${esc(s.name)}</div>
-            <div style="font-size:9px; color:#5d4037;">${esc(s.desc)}</div>
-          </div>
-        </div>
-        <div>
-          ${!isOwned ? `<div class="skin-price">🪙 ${s.price}</div>` : ''}
-          ${btnHtml}
-        </div>
-      </div>
-    `;
-  }).join('');
-}
-
-window.buySkin = function(skinId, price) {
-  if (P.coins >= price) {
-    P.coins -= price;
-    ownedSkins.push(skinId);
-    P.activeSkin = skinId;
-    $('coinsCount').textContent = P.coins;
-    toast('👗 Новый скин успешно куплен!', 1800);
-    Audio8.lvlUp();
-    renderSkinsShop();
-    saveProgressExact();
-  } else {
-    toast('🪙 Недостаточно монет!', 1500);
-  }
-};
-
-window.equipSkin = function(skinId) {
-  if (ownedSkins.includes(skinId)) {
-    P.activeSkin = skinId;
-    toast('👗 Образ персонажа изменен!', 1500);
-    Audio8.coin();
-    renderSkinsShop();
-    saveProgressExact();
-  }
-};
-
-$('guideBookBtn').onclick = () => {
-  $('bookOverlay').classList.add('open');
-  updateGuideBookContent();
-  renderSkinsShop();
-};
-$('bookCloseBtn').onclick = () => { $('bookOverlay').classList.remove('open'); };
-$('bookPrevBtn').onclick = () => { if (currentGuidePage > 0) { currentGuidePage--; updateGuideBookContent(); } };
-$('bookNextBtn').onclick = () => { if (currentGuidePage < GUIDE_PAGES.length - 1) { currentGuidePage++; updateGuideBookContent(); } };
-</script>
-
-<script>
-'use strict';
-/* ============================================================
-   РЕНДЕРИНГ: Динамический цвет неба, туман, шейк камеры
+   РЕНДЕР: CANVAS, ТЕКСТУРЫ И ОСВЕЩЕНИЕ TORCH (RTX)
    ============================================================ */
 const cv = $('game'), ctx = cv.getContext('2d');
-const lcv = document.createElement('canvas'), lctx = lcv.getContext('2d');
-const LIGHT_SCALE = 4;
-
 let vw = 0, vh = 0, dpr = 1, ZOOM = 1.35;
 
 function resize(){
   dpr = Math.min(1.8, window.devicePixelRatio || 1);
   vw = Math.ceil(innerWidth / ZOOM); vh = Math.ceil(innerHeight / ZOOM);
   cv.width = innerWidth * dpr; cv.height = innerHeight * dpr;
-  lcv.width = Math.ceil(innerWidth * dpr / LIGHT_SCALE);
-  lcv.height = Math.ceil(innerHeight * dpr / LIGHT_SCALE);
   ctx.setTransform(dpr * ZOOM, 0, 0, dpr * ZOOM, 0, 0);
-  lctx.setTransform((dpr * ZOOM) / LIGHT_SCALE, 0, 0, (dpr * ZOOM) / LIGHT_SCALE, 0, 0);
 }
 window.addEventListener('resize', resize); resize();
 
-function drawSkyBackground() {
-  const tod = weather.timeOfDay;
-  let skyColor1, skyColor2;
+$('zoomOutBtn').onclick = () => { ZOOM = clamp(ZOOM - 0.15, 0.8, 2.0); resize(); };
+$('zoomInBtn').onclick = () => { ZOOM = clamp(ZOOM + 0.15, 0.8, 2.0); resize(); };
+$('fullScrBtn').onclick = () => { toggleFullscreen(); };
 
-  if (tod < 0.25 || tod > 0.75) {
-    skyColor1 = '#7dd3fc'; skyColor2 = '#e0f2fe'; // День
-  } else if (tod >= 0.25 && tod < 0.35) {
-    const t = (tod - 0.25) / 0.1;
-    skyColor1 = mixCol('#7dd3fc', '#f97316', t); // Закат
-    skyColor2 = mixCol('#e0f2fe', '#fef08a', t);
-  } else if (tod >= 0.35 && tod < 0.65) {
-    skyColor1 = '#090d16'; skyColor2 = '#05050a'; // Ночь
-  } else {
-    const t = (tod - 0.65) / 0.1;
-    skyColor1 = mixCol('#090d16', '#a78bfa', t); // Рассвет
-    skyColor2 = mixCol('#05050a', '#fed7aa', t);
-  }
-
-  const grad = ctx.createLinearGradient(0, 0, 0, vh);
-  grad.addColorStop(0, skyColor1);
-  grad.addColorStop(1, skyColor2);
-  ctx.fillStyle = grad;
-  ctx.fillRect(0, 0, vw, vh);
-
-  if (tod > 0.35 && tod < 0.65) {
-    ctx.fillStyle = '#fff';
-    const seedR = mulberry32(101);
-    for (let i = 0; i < 40; i++) {
-      const sx = (seedR() * 2000 - cam.x * 0.1) % vw;
-      const sy = seedR() * vh * 0.75;
-      ctx.fillRect(sx, sy, 1.5, 1.5);
-    }
-  }
-}
-
-// Параллакс цепи гор (Мягкие тени)
-function drawParallaxMountains() {
-  const isNightTime = weather.timeOfDay > 0.35 && weather.timeOfDay < 0.65;
-  const col1 = isNightTime ? 'rgba(15, 23, 42, 0.4)' : 'rgba(100, 116, 139, 0.25)';
-  const col2 = isNightTime ? 'rgba(7, 10, 18, 0.55)' : 'rgba(71, 85, 105, 0.4)';
-
-  const drawLayer = (offsetFactor, color, heightOffset) => {
-    ctx.fillStyle = color;
-    ctx.beginPath();
-    ctx.moveTo(0, vh);
-    const startX = Math.floor(cam.x * offsetFactor);
-    for (let x = 0; x <= vw; x += 30) {
-      const worldX = startX + x;
-      const y = vh - heightOffset - Math.sin(worldX * 0.0035) * 45 - Math.cos(worldX * 0.001) * 20;
-      ctx.lineTo(x, y);
-    }
-    ctx.lineTo(vw, vh);
-    ctx.closePath();
-    ctx.fill();
-  };
-
-  drawLayer(0.1, col1, 120);
-  drawLayer(0.25, col2, 60);
-}
-
-// Процедурные пушистые облака
-function drawProceduralClouds() {
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.18)';
-  const count = 5;
-  for (let i = 0; i < count; i++) {
-    const cx = (i * 350 + performance.now() * 0.03 - cam.x * 0.15) % (vw + 160) - 80;
-    const cy = 40 + Math.sin(performance.now() * 0.001 + i) * 15;
-    ctx.beginPath();
-    ctx.arc(cx, cy, 18, 0, 7);
-    ctx.arc(cx + 20, cy - 8, 24, 0, 7);
-    ctx.arc(cx + 42, cy, 18, 0, 7);
-    ctx.closePath();
-    ctx.fill();
-  }
-}
-
-function mixCol(c1, c2, t) {
-  const hex = c => parseInt(c.slice(1), 16);
-  const r1 = hex(c1) >> 16, g1 = (hex(c1) >> 8) & 0xff, b1 = hex(c1) & 0xff;
-  const r2 = hex(c2) >> 16, g2 = (hex(c2) >> 8) & 0xff, b2 = hex(c2) & 0xff;
-  const r = Math.round(lerp(r1, r2, t));
-  const g = Math.round(lerp(g1, g2, t));
-  const b = Math.round(lerp(b1, b2, t));
-  return `rgb(${r},${g},${b})`;
-}
-
-function drawBlocks() {
-  const tx0 = Math.max(0, Math.floor(cam.x / TILE));
-  const tx1 = Math.min(WW - 1, Math.ceil((cam.x + vw) / TILE));
-  const ty0 = Math.max(0, Math.floor(cam.y / TILE));
-  const ty1 = Math.min(WH - 1, Math.ceil((cam.y + vh) / TILE));
-
-  for (let ty = ty0; ty <= ty1; ty++) {
-    for (let tx = tx0; tx <= tx1; tx++) {
-      const b = blockAt(tx, ty);
-      const bx = tx * TILE - cam.x;
-      const by = ty * TILE - cam.y;
-
-      const bgB = backWorld[ty * WW + tx];
-      if (b === B.AIR && bgB !== B.AIR) {
-        ctx.fillStyle = bgB === B.DIRT ? '#451a03' : '#334155';
-        ctx.fillRect(bx, by, TILE, TILE);
-      }
-
-      if (b === B.AIR) continue;
-      
-      const info = TILES_INFO[b];
-      ctx.fillStyle = info.color;
-      
-      if (b === B.TORCH) {
-        ctx.fillStyle = '#78350f';
-        ctx.fillRect(bx + 14, by + 10, 4, 22);
-        ctx.fillStyle = '#f97316';
-        ctx.beginPath();
-        ctx.arc(bx + 16, by + 8 + Math.sin(performance.now()/80)*2, 5, 0, 7);
-        ctx.fill();
-      } else if (b === B.GRASS_TALL) {
-        ctx.fillStyle = '#10b981';
-        ctx.fillRect(bx + 6, by + 14, 4, 18);
-        ctx.fillRect(bx + 16, by + 8, 3, 24);
-      } else {
-        ctx.fillRect(bx, by, TILE, TILE);
-        if (b === B.GRASS) {
-          ctx.fillStyle = '#10b981';
-          ctx.fillRect(bx, by, TILE, 5);
-        } else if (b === B.STONE) {
-          ctx.fillStyle = '#374151';
-          ctx.fillRect(bx, by, TILE, 3);
-        }
-      }
-    }
-  }
-
-  // Обводка блока под пальцем/мышкой
-  const mouseTx = Math.floor(interactionInput.x / TILE);
-  const mouseTy = Math.floor(interactionInput.y / TILE);
-  const dist = Math.hypot((P.x + P.w/2) - (mouseTx * TILE + 16), (P.y + P.h/2) - (mouseTy * TILE + 16));
+// Клик по миру (Разрушение и постройка блоков)
+cv.onmousedown = (e) => {
+  if (e.target.tagName === 'INPUT' || $('auth').offsetWidth > 0) return;
+  e.preventDefault();
   
-  if (dist <= 180 && mouseTx >= 0 && mouseTx < WW && mouseTy >= 0 && mouseTy < WH) {
-    ctx.strokeStyle = 'rgba(255,255,255,0.4)';
-    ctx.lineWidth = 1.5;
-    ctx.strokeRect(mouseTx * TILE - cam.x, mouseTy * TILE - cam.y, TILE, TILE);
-    
-    if (interactionInput.isDown && blockAt(mouseTx, mouseTy) !== B.AIR) {
-      ctx.fillStyle = 'rgba(255,0,0,0.3)';
-      const h = TILE * (interactionInput.mineProgress / TILES_INFO[blockAt(mouseTx, mouseTy)].mineTime);
-      ctx.fillRect(mouseTx * TILE - cam.x, mouseTy * TILE - cam.y + TILE - h, TILE, h);
-    }
-  }
+  // Получаем абсолютные координаты клика относительно холста
+  const rect = cv.getBoundingClientRect();
+  const scaleX = vw / rect.width;
+  const scaleY = vh / rect.height;
+  const mx = (e.clientX - rect.left) * scaleX;
+  const my = (e.clientY - rect.top) * scaleY;
+
+  const isRightClick = e.button === 2;
+  handleBlockInteraction(mx, my, isRightClick);
+};
+
+// Отключаем стандартное контекстное меню при правом клике
+cv.oncontextmenu = (e) => e.preventDefault();
+
+function drawSky(){
+  // Красивый градиент неба (день/ночь)
+  const skyG = ctx.createLinearGradient(0, 0, 0, vh);
+  skyG.addColorStop(0, '#101535');
+  skyG.addColorStop(0.6, '#1a224a');
+  skyG.addColorStop(1, '#2f3d68');
+  ctx.fillStyle = skyG;
+  ctx.fillRect(0, 0, vw, vh);
 }
 
-function drawPlayer(x, y, dir, name, skinId, isMe) {
-  ctx.save();
-  ctx.translate(x + 11, y + 26);
-  const skinColor = getSkinColor(skinId);
+function drawWorldAndPlayers(){
+  const tx0 = Math.max(0, Math.floor(cam.x / TILE) - 1);
+  const tx1 = Math.min(WW - 1, Math.floor((cam.x + vw) / TILE) + 1);
+  const ty0 = Math.max(0, Math.floor(cam.y / TILE) - 1);
+  const ty1 = Math.min(WH - 1, Math.floor((cam.y + vh) / TILE) + 1);
 
-  ctx.save();
-  const aura = ctx.createRadialGradient(0, -13, 2, 0, -13, 40);
-  aura.addColorStop(0, hexToRGBA(skinColor, 0.35));
-  aura.addColorStop(1, 'rgba(0,0,0,0)');
-  ctx.fillStyle = aura;
-  ctx.beginPath(); ctx.arc(0, -13, 40, 0, 7); ctx.fill();
-  ctx.restore();
-
-  const run = isMe && Math.abs(P.vx) > 0.5 ? Math.sin(performance.now() * 0.015) * 4 : 0;
-  ctx.fillStyle = 'rgba(0,0,0,0.4)';
-  ctx.fillRect(-8 + run, -4, 5, 4);
-  ctx.fillRect(3 - run, -4, 5, 4);
-
-  ctx.fillStyle = skinColor;
-  ctx.fillRect(-11, -24, 22, 20);
-
-  const eyeOffset = dir * 2.5;
-  ctx.fillStyle = '#fff';
-  ctx.fillRect(-5 + eyeOffset, -18, 3.5, 3.5);
-  ctx.fillRect(2 + eyeOffset, -18, 3.5, 3.5);
-  ctx.fillStyle = '#0f172a';
-  ctx.fillRect(-4 + eyeOffset + dir, -17, 2, 2);
-  ctx.fillRect(3 + eyeOffset + dir, -17, 2, 2);
-
-  ctx.font = '700 10px Rubik'; ctx.textAlign = 'center';
-  ctx.fillStyle = isMe ? '#fbbf24' : '#ffffff';
-  ctx.fillText(name, 0, -30);
-
-  ctx.restore();
-}
-
-function drawLighting() {
-  const tod = weather.timeOfDay;
-  let ambientDark = 0.0;
-  if (tod > 0.35 && tod < 0.65) {
-    ambientDark = 0.84; // Ночь
-  } else if (tod >= 0.25 && tod <= 0.35) {
-    ambientDark = lerp(0.0, 0.84, (tod - 0.25)/0.1);
-  } else if (tod >= 0.65 && tod <= 0.75) {
-    ambientDark = lerp(0.84, 0.0, (tod - 0.65)/0.1);
-  }
-
-  lctx.clearRect(0, 0, vw, vh);
-  lctx.globalCompositeOperation = 'source-over';
-  lctx.fillStyle = `rgba(5, 7, 16, ${ambientDark})`;
-  lctx.fillRect(0, 0, vw, vh);
-
-  const tx0 = Math.max(0, Math.floor(cam.x / TILE));
-  const tx1 = Math.min(WW - 1, Math.ceil((cam.x + vw) / TILE));
-  const ty0 = Math.max(0, Math.floor(cam.y / TILE));
-  const ty1 = Math.min(WH - 1, Math.ceil((cam.y + vh) / TILE));
-
+  // 1. Отрисовка блоков мира
   for (let ty = ty0; ty <= ty1; ty++) {
     for (let tx = tx0; tx <= tx1; tx++) {
-      if (ty > 48) {
-        const depthFactor = clamp((ty - 48)/12, 0.0, 0.95);
-        lctx.fillStyle = `rgba(5, 7, 16, ${depthFactor})`;
-        lctx.fillRect((tx * TILE - cam.x)/LIGHT_SCALE, (ty * TILE - cam.y)/LIGHT_SCALE, TILE/LIGHT_SCALE, TILE/LIGHT_SCALE);
+      const v = tileAt(tx, ty);
+      if (v === B.AIR) continue;
+      
+      const x = tx * TILE - cam.x;
+      const y = ty * TILE - cam.y;
+      const data = BLOCK_DATA[v];
+
+      ctx.fillStyle = data.color;
+      ctx.fillRect(x, y, TILE, TILE);
+
+      // Рисуем рамку травки или тень
+      if (v === B.GRASS) {
+        ctx.fillStyle = data.top;
+        ctx.fillRect(x, y, TILE, 4);
+      } else if (v === B.TORCH) {
+        // Процедурное пламя факела
+        ctx.fillStyle = '#ff8f1e';
+        ctx.fillRect(x + 14, y + 10, 4, 10);
+        ctx.fillStyle = '#ffdf4f';
+        ctx.fillRect(x + 12, y + 6, 8, 8);
+      } else if (v === B.LAVA) {
+        // Колебания лавы
+        ctx.fillStyle = '#ffae2e';
+        ctx.fillRect(x, y + 4 + Math.sin(performance.now()/200 + tx)*2, TILE, 4);
       }
     }
   }
 
-  lctx.globalCompositeOperation = 'destination-out';
-
-  const drawLightHole = (x, y, r, alpha) => {
-    const lx = x / LIGHT_SCALE, ly = y / LIGHT_SCALE, lr = r / LIGHT_SCALE;
-    const g = lctx.createRadialGradient(lx, ly, lr * 0.15, lx, ly, lr);
-    g.addColorStop(0, `rgba(0,0,0,${alpha})`);
-    g.addColorStop(1, 'rgba(0,0,0,0)');
-    lctx.fillStyle = g;
-    lctx.beginPath(); lctx.arc(lx, ly, lr, 0, 7); lctx.fill();
-  };
-
-  drawLightHole(P.x + P.w/2 - cam.x, P.y + P.h/2 - cam.y, 140, 1.0);
-  for (const k in remotes) {
-    drawLightHole(remotes[k].rx + 11 - cam.x, remotes[k].ry + 13 - cam.y, 100, 0.8);
-  }
-
-  for (let ty = ty0; ty <= ty1; ty++) {
-    for (let tx = tx0; tx <= tx1; tx++) {
-      const b = blockAt(tx, ty);
-      if (b === B.TORCH) {
-        drawLightHole(tx * TILE + 16 - cam.x, ty * TILE + 16 - cam.y, 150, 1.0);
-      } else if (b === B.LAVA) {
-        drawLightHole(tx * TILE + 16 - cam.x, ty * TILE + 16 - cam.y, 110, 0.9);
-      }
-    }
-  }
-
-  ctx.save();
-  ctx.globalCompositeOperation = 'multiply';
-  ctx.drawImage(lcv, 0, 0, vw, vh);
-  ctx.restore();
-}
-
-function drawParticles() {
+  // 2. Отрисовка частиц
   for (const p of particles) {
     ctx.globalAlpha = p.life / p.maxLife;
     ctx.fillStyle = p.color;
-    ctx.fillRect(p.x - cam.x - p.size/2, p.y - cam.y - p.size/2, p.size, p.size);
+    ctx.fillRect(p.x - cam.x, p.y - cam.y, p.size, p.size);
   }
-  ctx.globalAlpha = 1.0;
+  ctx.globalAlpha = 1;
+
+  // 3. Другие игроки (Мультиплеер)
+  for (const k in remotes) {
+    const r = remotes[k];
+    if (r.rx + TILE < cam.x || r.rx > cam.x + vw || r.ry + TILE < cam.y || r.ry > cam.y + vh) continue;
+    drawChar(r.rx - cam.x, r.ry - cam.y, r.d, r.n, false, r.hp);
+  }
+
+  // 4. Локальный игрок
+  if (P.deadT <= 0) {
+    drawChar(P.x - cam.x, P.y - cam.y, P.dir, MY_NAME, true, P.hp);
+  }
 }
 
-function drawDamageTexts() {
+function drawChar(x, y, dir, name, isMe, hp) {
   ctx.save();
-  ctx.font = '800 10px Rubik';
-  ctx.textAlign = 'center';
-  for (let i = damageTexts.length - 1; i >= 0; i--) {
-    const t = damageTexts[i];
-    ctx.fillStyle = t.color;
-    ctx.fillText(t.text, t.x - cam.x, t.y - cam.y);
-    t.y -= 0.55;
-    t.life--;
-    if (t.life <= 0) damageTexts.splice(i, 1);
+  ctx.translate(x + P.w/2, y + P.h/2);
+  ctx.scale(dir, 1);
+
+  // Скин
+  ctx.fillStyle = isMe ? '#4f7cff' : '#39d98a';
+  ctx.fillRect(-P.w/2, -P.h/2, P.w, P.h);
+
+  // Текстура глаз
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(P.w/2 - 8, -P.h/2 + 5, 4, 4);
+  ctx.fillStyle = '#000';
+  ctx.fillRect(P.w/2 - 6, -P.h/2 + 5, 2, 2);
+
+  ctx.restore();
+
+  // Ник и ХП бар над игроком
+  if (name) {
+    ctx.font = 'bold 11px Rubik';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#fff';
+    ctx.shadowColor = '#000'; ctx.shadowBlur = 4;
+    ctx.fillText(name, x + P.w/2, y - 10);
+    ctx.shadowBlur = 0;
+
+    // Маленький ХП бар
+    if (hp < 100) {
+      ctx.fillStyle = 'rgba(0,0,0,0.5)';
+      ctx.fillRect(x - 2, y - 6, P.w + 4, 3);
+      ctx.fillStyle = '#ff5c7a';
+      ctx.fillRect(x - 2, y - 6, (P.w + 4) * (hp/100), 3);
+    }
   }
+}
+
+// Динамические факелы и Лавовое освещение (RTX Освещение на Canvas)
+function drawLighting() {
+  ctx.save();
+  ctx.globalCompositeOperation = 'multiply';
+
+  // Создаем слой темноты
+  const lightMap = ctx.createLinearGradient(0, 0, 0, vh);
+  lightMap.addColorStop(0, 'rgba(255,255,255,1.0)'); // Наверху светло
+  lightMap.addColorStop(0.4, 'rgba(20,25,35,0.72)');  // Под землей темнее
+  lightMap.addColorStop(1.0, 'rgba(10,12,20,0.95)');  // В самом низу глубокая пещера
+  
+  ctx.fillStyle = lightMap;
+  ctx.fillRect(0, 0, vw, vh);
+
+  // Источники света убирают темноту через `screen` или `destination-out`
+  ctx.globalCompositeOperation = 'screen';
+
+  // 1. Свет от игрока
+  if (P.deadT <= 0) {
+    const pGlow = ctx.createRadialGradient(P.x+P.w/2 - cam.x, P.y+P.h/2 - cam.y, 10, P.x+P.w/2 - cam.x, P.y+P.h/2 - cam.y, 130);
+    pGlow.addColorStop(0, 'rgba(255,245,210,0.8)');
+    pGlow.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = pGlow;
+    ctx.beginPath(); ctx.arc(P.x+P.w/2 - cam.x, P.y+P.h/2 - cam.y, 130, 0, 7); ctx.fill();
+  }
+
+  // 2. Свет от факелов и лавы в зоне видимости экрана
+  const tx0 = Math.max(0, Math.floor(cam.x / TILE) - 1);
+  const tx1 = Math.min(WW - 1, Math.floor((cam.x + vw) / TILE) + 1);
+  const ty0 = Math.max(0, Math.floor(cam.y / TILE) - 1);
+  const ty1 = Math.min(WH - 1, Math.floor((cam.y + vh) / TILE) + 1);
+
+  for (let ty = ty0; ty <= ty1; ty++) {
+    for (let tx = tx0; tx <= tx1; tx++) {
+      const v = tileAt(tx, ty);
+      const data = BLOCK_DATA[v];
+      if (data && data.light) {
+        const x = tx * TILE + TILE/2 - cam.x;
+        const y = ty * TILE + TILE/2 - cam.y;
+        const rad = data.light * TILE;
+        
+        const glow = ctx.createRadialGradient(x, y, 10, x, y, rad);
+        if (v === B.TORCH) {
+          glow.addColorStop(0, 'rgba(255,220,130,0.9)');
+          glow.addColorStop(1, 'rgba(0,0,0,0)');
+        } else if (v === B.LAVA) {
+          glow.addColorStop(0, 'rgba(255,100,30,0.85)');
+          glow.addColorStop(1, 'rgba(0,0,0,0)');
+        }
+        
+        ctx.fillStyle = glow;
+        ctx.beginPath(); ctx.arc(x, y, rad, 0, 7); ctx.fill();
+      }
+    }
+  }
+
   ctx.restore();
 }
 
-function drawAmbientWeather() {
-  if (weather.rainIntensity > 0.02) {
-    ctx.strokeStyle = 'rgba(174, 219, 255, ' + (weather.rainIntensity * 0.45) + ')';
-    ctx.lineWidth = 1.2;
-    const count = Math.floor(weather.rainIntensity * 45);
-    for (let i = 0; i < count; i++) {
-      const rx = (i * 47 + performance.now() * 0.8) % vw;
-      const ry = (i * 23 + performance.now() * 1.5) % vh;
-      ctx.beginPath();
-      ctx.moveTo(rx, ry);
-      ctx.lineTo(rx - 3, ry + 12);
-      ctx.stroke();
-    }
-  }
-}
-</script>
+/* ---------- Главный цикл ---------- */
+let lastTs = 0, dtAcc = 0;
 
-<script>
-'use strict';
-/* ============================================================
-   ОСНОВНОЙ ТАКТ ИНИЦИАЛИЗАЦИИ И ЗАПУСКА ИГРЫ
-   ============================================================ */
-let lastTs = 0, acc = 0;
-
-function stepGame() {
-  const now = performance.now();
-  updateDynamicWeatherAndSeasons(now);
-
-  // Обновление телепортации
-  if (teleportAnim) {
-    teleportAnim.progress += 1;
-    const t = teleportAnim.progress / teleportAnim.duration;
-    
-    const ease = 1 - Math.pow(1 - t, 3);
-    P.x = lerp(teleportAnim.sx, teleportAnim.tx, ease);
-    P.y = lerp(teleportAnim.sy, teleportAnim.ty, ease);
-
-    if (Math.random() < 0.6) {
-      spawnP(P.x + P.w/2, P.y + P.h/2, (Math.random()-0.5)*3, (Math.random()-0.5)*3, 15, '#60a5fa', 2, 0);
-    }
-
-    if (teleportAnim.progress >= teleportAnim.duration) {
-      P.x = teleportAnim.tx;
-      P.y = teleportAnim.ty;
-      P.vx = 0; P.vy = 0;
-      teleportAnim = null;
-      for (let i = 0; i < 20; i++) {
-        spawnP(P.x + P.w/2, P.y + P.h/2, (Math.random()-0.5)*6, (Math.random()-0.5)*6, 25, '#34d399', 3, 0.05);
-      }
-      saveProgressExact();
-    }
-  } else {
-    stepPlayer();
-  }
-
-  updateMobs();
-  updateMining();
+function update(){
+  stepPlayer();
+  updParticles();
   smoothRemotes();
-
-  // Падающие розовые листья сакуры от процедурных сакур
-  if (Math.random() < 0.12) {
-    const sTrees = spawnedTrees.filter(tr => tr.isSakura);
-    if (sTrees.length > 0) {
-      const chosen = sTrees[Math.floor(Math.random() * sTrees.length)];
-      const leafX = chosen.x * TILE + (Math.random() - 0.5) * 64;
-      const leafY = chosen.y * TILE + (Math.random() - 0.5) * 32;
-      spawnP(leafX, leafY, -0.4 + Math.random() * 0.8, 0.6 + Math.random() * 0.5, 120, '#f472b6', 2.5, 0.02);
-    }
-  }
-
-  for (let i = particles.length - 1; i >= 0; i--) {
-    const p = particles[i];
-    p.x += p.vx; p.y += p.vy; p.vy += p.grav; p.life--;
-    if (p.life <= 0) particles.splice(i, 1);
-  }
-
-  $('hpBarFill').style.width = (P.hp / P.maxHp * 100) + '%';
-  $('hpTxt').textContent = `${Math.round(P.hp)} / ${P.maxHp} HP`;
-  $('xpBarFill').style.width = (P.xp / P.maxXp * 100) + '%';
-  $('levelBadge').textContent = `LVL ${P.level}`;
-  
-  if (Math.random() < 0.04) renderBoard();
 }
 
-function loop(ts) {
+function loop(ts){
   requestAnimationFrame(loop);
   if (!lastTs) lastTs = ts;
-  acc += Math.min(100, ts - lastTs); lastTs = ts;
-  while (acc >= 16.66) {
-    acc -= 16.66;
-    stepGame();
+  dtAcc += Math.min(100, ts - lastTs);
+  lastTs = ts;
+
+  while(dtAcc >= 16.66) {
+    update();
+    dtAcc -= 16.66;
   }
 
-  drawSkyBackground();
-  drawParallaxMountains();
-  drawProceduralClouds();
-  drawBlocks();
-  drawAmbientWeather();
-
-  for (const e of enemies) {
-    ctx.fillStyle = e.color;
-    ctx.fillRect(e.x - cam.x, e.y - cam.y, e.w, e.h);
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(e.x - cam.x + (e.dir > 0 ? e.w - 5 : 1), e.y - cam.y + 3, 3, 3);
-  }
-
-  for (const k in remotes) {
-    const r = remotes[k];
-    drawPlayer(r.rx - cam.x, r.ry - cam.y, r.d, r.n, r.skin, false);
-  }
-
-  drawPlayer(P.x - cam.x, P.y - cam.y, P.dir, MY_NAME, P.activeSkin, true);
-
-  if (teleportAnim) {
-    const cx = teleportAnim.px - cam.x + P.w/2;
-    const cy = teleportAnim.py - cam.y + P.h/2;
-    const radius = 10 + (teleportAnim.progress * 4.5);
-    ctx.strokeStyle = 'rgba(96, 165, 250, ' + (1 - teleportAnim.progress / teleportAnim.duration) + ')';
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-    ctx.stroke();
-  }
-
-  drawParticles();
-  drawDamageTexts();
+  drawSky();
+  drawWorldAndPlayers();
   drawLighting();
 }
 
-// НЕБЛОКИРУЮЩАЯ ЗАГРУЗКА И СВЯЗЬ С REALTIME DATABASE
-function loadWorldAndStart() {
-  let loaded = false;
-
-  // Жесткий таймаут: если база Realtime зависла — стартуем локальный мир через 1.2 секунды
-  const fallbackTimeout = setTimeout(() => {
-    if (!loaded) {
-      loaded = true;
-      console.warn("Таймаут подключения к базе. Запуск локального сида.");
-      generateSharedWorld(11011);
-      launchGame();
-    }
-  }, 1200);
-
-  db.ref('world_seed').once('value').then(snap => {
-    if (loaded) return;
-    loaded = true;
-    clearTimeout(fallbackTimeout);
-    let seed = snap.val();
-    if (!seed) {
-      seed = Math.floor(Math.random() * 200000) + 12345;
-      db.ref('world_seed').set(seed);
-    }
-    generateSharedWorld(seed);
-    launchGame();
-  }).catch(err => {
-    if (loaded) return;
-    loaded = true;
-    clearTimeout(fallbackTimeout);
-    console.error("Ошибка Firebase. Запуск с сидом по умолчанию.", err);
-    generateSharedWorld(3030);
-    launchGame();
-  });
+/* Навешиваем системные тосты */
+let toastT = null;
+function toast(msg, ms = 2200){
+  const el = $('toast'); el.innerHTML = msg; el.classList.add('show');
+  clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('show'), ms);
 }
-
-async function launchGame() {
-  // 1. ЗАГРУЗКА ПЕРСОНАЛЬНОГО ПРОГРЕССА ИГРОКА
-  const local = localStorage.getItem('blockran_survival_save_v2');
-  if (local) {
-    try {
-      const d = JSON.parse(local);
-      P.hp = d.hp || 100;
-      P.level = d.level || 1;
-      P.xp = d.xp || 0;
-      P.coins = d.coins || 0;
-      P.activeSkin = d.activeSkin || 'default';
-      ownedSkins = d.ownedSkins || ['default'];
-      P.inventory = d.inventory;
-      P.x = d.x; P.y = d.y;
-    } catch(e){}
-  } else {
-    try {
-      const snap = await Promise.race([
-        db.ref('saves/' + MY_UID).once('value'),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 1500))
-      ]);
-      const d = snap.val();
-      if (d) {
-        P.hp = d.hp || 100;
-        P.level = d.level || 1;
-        P.xp = d.xp || 0;
-        P.coins = d.coins || 0;
-        P.activeSkin = d.activeSkin || 'default';
-        ownedSkins = d.ownedSkins || ['default'];
-        P.inventory = d.inventory;
-        P.x = d.x; P.y = d.y;
-      }
-    } catch(e){}
-  }
-
-  // 2. СВЯЗЫВАЕМ СЕТЕВЫЕ СЛУШАТЕЛИ РЕАЛТАЙМ БАЗЫ
-  joinNet();
-
-  // 3. СКРЫВАЕМ СТАРТОВЫЙ ЭКРАН И ВКЛЮЧАЕМ ИГРУ
-  $('loading').classList.add('hidden');
-  $('auth').classList.add('hidden');
-  $('hud').classList.add('on');
-
-  checkSkillsUnlock();
-  renderHotbar();
-  
-  toast(`🌲 Общий мир загружен! Добро пожаловать, ${MY_NAME}!`, 3000);
-  Audio8.init();
-  Audio8.playTrack(0);
-
-  requestAnimationFrame(loop);
-}
-
-const keyMap = {
-  'KeyA': () => keys.left = true, 'KeyD': () => keys.right = true,
-  'ArrowLeft': () => keys.left = true, 'ArrowRight': () => keys.right = true,
-  'Space': () => keys.jump = true, 'ArrowUp': () => keys.jump = true, 'KeyW': () => keys.jump = true
-};
-const keyUpMap = {
-  'KeyA': () => keys.left = false, 'KeyD': () => keys.right = false,
-  'ArrowLeft': () => keys.left = false, 'ArrowRight': () => keys.right = false,
-  'Space': () => keys.jump = false, 'ArrowUp': () => keys.jump = false, 'KeyW': () => keys.jump = false
-};
-
-window.addEventListener('keydown', e => {
-  if (e.target.tagName === 'INPUT') {
-    if (e.key === 'Enter') { sendChatMessage(); $('chatInput').blur(); }
-    return;
-  }
-  if (keyMap[e.code]) keyMap[e.code]();
-  if (e.code === 'Enter') { e.preventDefault(); $('chatInput').focus(); }
-  if (e.keyCode >= 49 && e.keyCode <= 57) selectHotbarSlot(e.keyCode - 49);
-});
-window.addEventListener('keyup', e => {
-  if (e.target.tagName === 'INPUT') return;
-  if (keyUpMap[e.code]) keyUpMap[e.code]();
-});
-
-function bindTouch(id, on, off){
-  const el = $(id);
-  const start = e => { e.preventDefault(); el.classList.add('act'); on(); };
-  const end = e => { e.preventDefault(); el.classList.remove('act'); off(); };
-  el.addEventListener('touchstart', start, { passive: false });
-  el.addEventListener('touchend', end, { passive: false });
-  el.addEventListener('touchcancel', end, { passive: false });
-}
-bindTouch('tLeft', () => keys.left = true, () => keys.left = false);
-bindTouch('tRight', () => keys.right = true, () => keys.right = false);
-bindTouch('tJump', () => keys.jump = true, () => keys.jump = false);
-
-if ('ontouchstart' in window) document.body.classList.add('touch');
 </script>
 </body>
 </html>
