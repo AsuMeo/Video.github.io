@@ -3,158 +3,396 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>БЛОКРАН — Мультиплеерное Выживание</title>
+<title>БЛОКРАН SURVIVAL — Мультиплеерная Песочница в реальном времени</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Rubik:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-  html,body { width:100%; height:100%; overflow:hidden; background:#05070f; font-family:'Rubik',sans-serif; user-select:none; color: #fff; }
-  canvas { position:fixed; inset:0; width:100%; height:100%; display:block; image-rendering:pixelated; }
+  html,body { width:100%; height:100%; overflow:hidden; background:#0a0c14; font-family:'Rubik',sans-serif; user-select:none; }
+  #game { position:fixed; inset:0; width:100%; height:100%; display:block; image-rendering:pixelated; }
 
-  /* ---------- UI PANELS ---------- */
-  .hud-layer { position:fixed; inset:0; z-index:20; pointer-events:none; display:none; }
-  .hud-layer.on { display:block; }
+  /* ---------- AUTH ---------- */
+  #auth {
+    position:fixed; inset:0; z-index:50; display:flex; align-items:center; justify-content:center;
+    background:radial-gradient(1200px 700px at 50% -10%, #1b2b5e 0%, #0a1030 45%, #05070f 100%);
+    transition:opacity .5s;
+  }
+  #auth.hidden { opacity:0; pointer-events:none; }
+  .auth-card {
+    width:min(420px, 92vw); padding:30px 24px 24px; border-radius:22px;
+    background:rgba(13,20,46,.82); backdrop-filter:blur(14px);
+    border:1px solid rgba(120,160,255,.22);
+    box-shadow:0 0 60px rgba(60,110,255,.18), inset 0 1px 0 rgba(255,255,255,.08);
+    text-align:center; color:#dfe8ff;
+  }
+  .logo { display:flex; align-items:center; justify-content:center; gap:12px; margin-bottom:6px; }
+  .logo h1 { font-family:'Press Start 2P',monospace; font-size:18px; letter-spacing:1px;
+    background:linear-gradient(180deg,#8ecbff,#4f7cff 60%,#b96bff); -webkit-background-clip:text; background-clip:text; color:transparent;
+    filter:drop-shadow(0 0 12px rgba(90,140,255,.55)); }
+  .tagline { font-size:12px; color:#8fa3d9; margin-bottom:18px; }
+  .field { margin-bottom:10px; text-align:left; }
+  .field label { display:block; font-size:10px; letter-spacing:1px; text-transform:uppercase; color:#7f93c9; margin-bottom:4px; }
+  .field input {
+    width:100%; padding:10px 12px; border-radius:10px; border:1px solid rgba(120,160,255,.25);
+    background:rgba(6,10,28,.75); color:#eaf1ff; font-size:14px; font-family:'Rubik'; outline:none; transition:.2s;
+  }
+  .field input:focus { border-color:#5f8dff; box-shadow:0 0 0 3px rgba(95,141,255,.18); }
+  .btn {
+    width:100%; padding:11px; border:none; border-radius:10px; cursor:pointer; font-family:'Rubik'; font-weight:800;
+    font-size:14px; letter-spacing:.5px; color:#fff; transition:.15s; margin-top:4px;
+  }
+  .btn:active { transform:scale(.97); }
+  .btn-primary { background:linear-gradient(135deg,#3f7bff,#7b4dff); box-shadow:0 4px 14px rgba(80,110,255,.4); }
+  .btn-primary:hover { filter:brightness(1.12); }
+  .btn-ghost { background:transparent; border:1px solid rgba(120,160,255,.35); color:#a9bcff; margin-top:8px; }
+  .btn-ghost:hover { background:rgba(95,141,255,.1); }
+  #authErr { min-height:16px; color:#ff7d92; font-size:12px; margin-top:8px; }
+  .hint { margin-top:12px; font-size:11px; color:#6f83b8; line-height:1.4; }
+  .spin { display:inline-block; width:12px; height:12px; border:2px solid #fff3; border-top-color:#fff; border-radius:50%; animation:sp 1s linear infinite; vertical-align:-2px; }
+  @keyframes sp { to { transform:rotate(360deg); } }
+
+  /* ---------- HUD ---------- */
+  #hud { position:fixed; inset:0; z-index:20; pointer-events:none; display:none; }
+  #hud.on { display:block; }
   
-  #topUI { position:absolute; top:12px; left:12px; width:300px; padding:12px; background:rgba(10,20,40,0.8); border:1px solid rgba(130,170,255,0.3); border-radius:12px; backdrop-filter:blur(8px); pointer-events:auto; }
-  .bar-container { height:10px; background:rgba(0,0,0,0.5); border-radius:5px; margin:6px 0; overflow:hidden; border:1px solid rgba(255,255,255,0.1); }
-  #hpBar { width:100%; height:100%; background:linear-gradient(90deg, #ff4e50, #f9d423); transition: width 0.3s; }
-  #xpBar { width:0%; height:100%; background:linear-gradient(90deg, #00f2fe, #4facfe); transition: width 0.3s; }
-  .stats-row { display:flex; justify-content:space-between; font-size:12px; font-weight:800; color:#c9d7ff; margin-top:4px; }
+  #topbar {
+    position:absolute; top:10px; left:12px; display:flex; flex-direction:column; gap:5px;
+    color:#eaf1ff; text-shadow:0 2px 4px #000;
+  }
+  #playerStats { display:flex; align-items:center; gap:12px; }
+  #hpBarWrap { width:150px; height:16px; background:rgba(0,0,0,0.5); border:1.5px solid #fff3; border-radius:4px; overflow:hidden; position:relative; }
+  #hpBarFill { height:100%; width:100%; background:linear-gradient(90deg, #ef4444, #f87171); transition:width 0.25s; }
+  #hpTxt { position:absolute; inset:0; text-align:center; font-size:10px; font-weight:800; line-height:14px; color:#fff; }
+
+  #xpBarWrap { width:150px; height:8px; background:rgba(0,0,0,0.5); border:1px solid #fff2; border-radius:3px; overflow:hidden; position:relative; margin-top:2px;}
+  #xpBarFill { height:100%; width:0%; background:#22c55e; transition:width 0.3s; }
   
-  #sideUI { position:absolute; top:12px; right:12px; width:200px; padding:10px; background:rgba(10,20,40,0.6); border-radius:12px; border:1px solid rgba(255,255,255,0.15); pointer-events:auto; text-align:right; }
-  #sideUI h3 { font-size:11px; color:#ffe98a; margin-bottom:5px; font-family:'Press Start 2P'; }
+  #levelBadge { background:#eab308; color:#000; font-weight:800; font-size:11px; padding:2px 6px; border-radius:4px; text-shadow:none; }
+
+  #stats { font-size:12px; color:#c9d7ff; display:flex; gap:12px; margin-top:2px; }
+  #stats b { color:#fff; }
+
+  /* Hotbar UI */
+  #hotbarWrap {
+    position:absolute; bottom:14px; left:50%; transform:translateX(-50%);
+    display:flex; gap:6px; background:rgba(10,14,30,0.85); border:2px solid rgba(130,165,255,0.3);
+    padding:6px; border-radius:14px; pointer-events:auto; z-index:30;
+  }
+  .hot-slot {
+    width:46px; height:46px; background:rgba(20,28,55,0.7); border:2px solid #556c9c;
+    border-radius:10px; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    position:relative; cursor:pointer; transition:transform 0.1s, border-color 0.15s;
+  }
+  .hot-slot.active { border-color:#eab308; background:rgba(234,179,8,0.15); transform:scale(1.06); }
+  .hot-slot img, .hot-slot .icon-mock { width:24px; height:24px; display:flex; align-items:center; justify-content:center; font-size:18px; }
+  .hot-slot .count { position:absolute; bottom:2px; right:4px; font-size:10px; font-weight:800; color:#fff; text-shadow:1px 1px 2px #000; }
+  .hot-slot .key-num { position:absolute; top:1px; left:3px; font-size:8px; color:#7f93c9; }
+
+  /* Dynamic Active Skill button (Level 10) */
+  #activeSkillBtn {
+    position:absolute; bottom:14px; right:120px; width:52px; height:52px; border-radius:50%;
+    background:radial-gradient(#b96bff, #7b4dff); border:2.5px solid #fff; color:#fff;
+    font-size:24px; display:none; align-items:center; justify-content:center; cursor:pointer;
+    box-shadow:0 0 16px rgba(185,107,255,0.6); pointer-events:auto; transition:transform 0.1s;
+  }
+  #activeSkillBtn:active { transform:scale(0.9); }
+
+  /* Controls panel top */
+  #camControls {
+    position:absolute; top:10px; left:50%; transform:translateX(-50%);
+    display:flex; gap:6px; pointer-events:auto; z-index:30;
+  }
+  .hud-btn {
+    width:38px; height:38px; border-radius:10px; border:1px solid rgba(130,165,255,.35);
+    background:rgba(10,16,40,.82); color:#fff; font-size:14px; font-weight:800; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; backdrop-filter:blur(6px);
+    transition:transform 0.1s, background-color 0.15s; user-select:none; touch-action:manipulation;
+  }
+  .hud-btn:active { transform:scale(0.92); background-color:rgba(95,141,255,.45); }
+
+  /* Crafting Panel Toggle Button */
+  #craftToggleBtn { background:linear-gradient(135deg, #10b981, #047857); border-color:#34d399; }
+
+  /* Leaderboard */
+  #board {
+    position:absolute; top:10px; right:12px; min-width:180px; max-width:220px;
+    background:rgba(8,12,30,.7); backdrop-filter:blur(6px);
+    border:1px solid rgba(130,165,255,.22); border-radius:14px; padding:10px 12px; color:#dfe8ff;
+  }
+  #board h3 { font-size:10px; letter-spacing:1px; text-transform:uppercase; color:#8fa3d9; margin-bottom:6px; display:flex; justify-content:space-between; }
+  #board h3 span { color:#5f7ac9; font-size:9px; }
+  .brow { display:flex; justify-content:space-between; gap:10px; font-size:12px; padding:3px 2px; border-radius:6px; }
+  .brow.me { background:rgba(95,141,255,.18); }
+  .brow .nm { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:120px; }
+  .brow .bl { font-weight:800; color:#8ef0b2; font-variant-numeric:tabular-nums; }
+  .brow i { font-style:normal; color:#7f93c9; margin-right:4px; font-size:10px; }
+
+  #toast {
+    position:absolute; top:18%; left:50%; transform:translateX(-50%); padding:12px 24px; border-radius:14px;
+    background:rgba(10,16,40,.85); border:1px solid rgba(130,165,255,.35); color:#fff; font-weight:600; font-size:14px;
+    opacity:0; transition:opacity .3s; text-align:center; max-width:80vw; pointer-events:none; text-shadow:0 1px 3px #000;
+  }
+  #toast.show { opacity:1; }
+
+  #trackName {
+    position:absolute; top:145px; right:12px; font-size:10px; font-weight:bold;
+    color:#ffe98a; background:rgba(10,16,40,0.65); padding:4px 10px; border-radius:8px;
+    border:1px solid rgba(130,165,255,0.25); pointer-events:none; text-shadow:0 1px 3px #000;
+  }
+
+  /* Chat window */
+  #chat {
+    position:absolute; bottom:15px; left:16px; width:280px; height:150px;
+    background:rgba(10,16,40,.55); border:1px solid rgba(130,165,255,.22);
+    border-radius:14px; backdrop-filter:blur(6px); display:flex; flex-direction:column;
+    pointer-events:auto; z-index:25; transition: opacity 0.3s, transform 0.3s;
+  }
+  #chat.hidden { opacity:0; pointer-events:none; transform:translateY(15px); }
+  #chatMsgs { flex:1; overflow-y:auto; padding:8px; font-size:11px; display:flex; flex-direction:column; gap:4px; text-shadow:0 1px 2px #000; }
+  #chatInput {
+    background:rgba(6,10,28,.8); border:none; border-top:1px solid rgba(130,165,255,.2);
+    padding:8px 10px; color:#fff; font-size:12px; border-radius:0 0 14px 14px; outline:none;
+  }
+
+  /* Dynamic Craft Panel */
+  #craftPanel {
+    position:absolute; top:70px; left:12px; width:260px; max-height:calc(100vh - 250px);
+    background:rgba(12, 18, 38, 0.92); border:2px solid rgba(16, 185, 129, 0.4);
+    border-radius:16px; backdrop-filter:blur(10px); display:none; flex-direction:column;
+    pointer-events:auto; z-index:28; box-shadow:0 10px 30px rgba(0,0,0,0.5); overflow:hidden;
+  }
+  #craftPanel.open { display:flex; }
+  .craft-header { background:rgba(16, 185, 129, 0.15); padding:10px 14px; font-size:11px; font-family:'Press Start 2P'; color:#34d399; border-bottom:1px solid rgba(16, 185, 129, 0.25); }
+  .recipe-list { overflow-y:auto; padding:8px; display:flex; flex-direction:column; gap:6px; }
+  .recipe-item {
+    background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:8px;
+    padding:8px; display:flex; justify-content:space-between; align-items:center; transition:background 0.2s;
+  }
+  .recipe-item:hover { background:rgba(255,255,255,0.07); }
+  .recipe-info { display:flex; align-items:center; gap:8px; }
+  .recipe-icon { font-size:20px; }
+  .recipe-name { font-size:12px; font-weight:800; color:#fff; }
+  .recipe-cost { font-size:10px; color:#94a3b8; margin-top:2px; }
+  .recipe-btn {
+    padding:4px 10px; border-radius:6px; font-size:10px; font-weight:800; cursor:pointer;
+    background:#10b981; border:none; color:#fff; transition:transform 0.1s;
+  }
+  .recipe-btn:active { transform:scale(0.92); }
+  .recipe-btn:disabled { background:#334155; color:#64748b; cursor:default; }
+
+  /* BOOK / GUIDE OVERLAY */
+  #bookOverlay {
+    position:fixed; inset:0; z-index:100; display:none; align-items:center; justify-content:center;
+    background:rgba(3,5,15,0.85); backdrop-filter:blur(8px); transition:opacity 0.3s;
+  }
+  #bookOverlay.open { display:flex; }
+  .book-container {
+    width:min(720px, 95vw); height:min(480px, 85vh);
+    background:#3e2723; border:6px solid #2d1a12; border-radius:16px;
+    box-shadow:0 20px 50px rgba(0,0,0,0.6), inset 0 2px 10px rgba(255,255,255,0.25);
+    display:flex; flex-direction:column; overflow:hidden; position:relative;
+  }
+  .book-header {
+    background:#2d1a12; padding:10px 16px; display:flex; justify-content:space-between; align-items:center; color:#ffe98a;
+    font-family:'Press Start 2P', monospace; font-size:10px; border-bottom:3px solid #1a0f0a;
+  }
+  .book-body {
+    flex:1; display:flex; background:#f4eccf; color:#3e2723; padding:18px; gap:20px; overflow:hidden;
+  }
+  .book-page {
+    flex:1; display:flex; flex-direction:column; overflow-y:auto; padding-right:6px;
+  }
+  .book-page.divider {
+    border-right:2px dashed rgba(62, 39, 35, 0.25);
+  }
+  .book-page h3 {
+    font-size:15px; font-weight:800; border-bottom:2px solid #3e2723; padding-bottom:4px; margin-bottom:10px; color:#5d4037;
+    display:flex; align-items:center; gap:6px;
+  }
+  .book-page p { font-size:12px; line-height:1.5; margin-bottom:10px; font-weight:600; }
+  .book-page ul { margin-left:14px; margin-bottom:12px; font-size:11px; font-weight:600; line-height:1.4; }
   
-  /* HOTBAR */
-  #hotbar { position:absolute; bottom:20px; left:50%; transform:translateX(-50%); display:flex; gap:8px; pointer-events:auto; }
-  .slot { width:56px; height:56px; background:rgba(15,25,50,0.85); border:3px solid rgba(130,170,255,0.3); border-radius:12px; display:flex; flex-direction:column; align-items:center; justify-content:center; position:relative; transition: transform 0.1s; }
-  .slot.active { border-color: #ffd94f; box-shadow: 0 0 15px rgba(255,217,79,0.4); transform: scale(1.1); }
-  .slot-icon { font-size:24px; }
-  .slot-count { position:absolute; bottom:2px; right:4px; font-size:10px; font-weight:800; color:#fff; }
-  .slot-key { position:absolute; top:2px; left:4px; font-size:9px; color:rgba(255,255,255,0.5); }
+  /* Skins */
+  .skin-card {
+    background:rgba(62, 39, 35, 0.08); border:2px solid #5d4037; border-radius:10px;
+    padding:8px; display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;
+    transition: transform 0.2s, background-color 0.2s;
+  }
+  .skin-card.equipped { background:rgba(46, 125, 50, 0.15); border-color:#2e7d32; }
+  .skin-info { display:flex; align-items:center; gap:8px; }
+  .skin-preview-box { width:24px; height:24px; border-radius:4px; border:2px solid #3e2723; }
+  .skin-name { font-size:11px; font-weight:800; color:#3e2723; }
+  .skin-price { font-size:10px; font-weight:800; color:#e65100; display:flex; align-items:center; gap:2px; }
+  .skin-btn { padding:4px 8px; border-radius:6px; font-weight:800; font-size:10px; cursor:pointer; border:none; }
+  .skin-btn.buy { background:#e65100; color:#fff; }
+  .skin-btn.equip { background:#3e2723; color:#f4eccf; }
+  .skin-btn.active { background:#2e7d32; color:#fff; cursor:default; }
 
-  /* CHAT */
-  #chatBox { position:absolute; bottom:90px; left:16px; width:280px; height:180px; background:rgba(5,10,25,0.6); border:1px solid rgba(255,255,255,0.1); border-radius:12px; display:flex; flex-direction:column; pointer-events:auto; }
-  #messages { flex:1; overflow-y:auto; padding:8px; font-size:12px; display:flex; flex-direction:column; gap:4px; }
-  #chatInput { background:rgba(0,0,0,0.3); border:none; border-top:1px solid rgba(255,255,255,0.1); padding:10px; color:#fff; font-size:13px; outline:none; border-radius:0 0 12px 12px; }
+  .book-footer {
+    background:#2d1a12; padding:8px 16px; display:flex; justify-content:space-between; align-items:center;
+    border-top:3px solid #1a0f0a;
+  }
+  .book-close-btn { background:#c62828; color:#fff; border:none; padding:6px 12px; border-radius:8px; font-weight:800; font-size:11px; cursor:pointer; }
+  .book-nav-btn { background:#5d4037; color:#ffe98a; border:none; padding:6px 12px; border-radius:8px; font-weight:800; font-size:11px; cursor:pointer; }
+  .book-nav-btn:disabled { opacity:0.3; cursor:default; }
 
-  /* MODALS */
-  .modal { position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:100; display:none; align-items:center; justify-content:center; backdrop-filter:blur(10px); pointer-events:auto; }
-  .modal-content { width:min(600px, 90vw); background:#152035; border:2px solid #3f5a94; border-radius:24px; padding:24px; position:relative; }
-  .close-btn { position:absolute; top:15px; right:20px; font-size:24px; cursor:pointer; color:#7f93c9; }
-  .craft-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap:12px; margin-top:15px; max-height:400px; overflow-y:auto; }
-  .recipe-card { background:rgba(10,20,40,0.5); border:1px solid rgba(130,170,255,0.2); padding:10px; border-radius:12px; text-align:center; transition:0.2s; cursor:pointer; }
-  .recipe-card:hover { background:rgba(130,170,255,0.1); border-color:#ffd94f; }
-  .recipe-icon { font-size:28px; margin-bottom:5px; }
-  .recipe-name { font-size:12px; font-weight:800; margin-bottom:4px; }
-  .recipe-cost { font-size:10px; color:#8fa3d9; }
-
-  /* AUTH */
-  #authScreen { position:fixed; inset:0; z-index:500; display:flex; align-items:center; justify-content:center; background:radial-gradient(circle at center, #1b2b5e 0%, #05070f 100%); }
-  .auth-card { width:360px; padding:30px; background:rgba(13,20,46,0.8); border:1px solid rgba(120,160,255,0.3); border-radius:22px; text-align:center; backdrop-filter:blur(15px); }
-  input[type="text"], input[type="email"], input[type="password"] { width:100%; padding:12px; border-radius:10px; border:1px solid #3f5a94; background:#0a1020; color:#fff; margin-bottom:10px; outline:none; }
-  .primary-btn { width:100%; padding:14px; background:linear-gradient(135deg, #3f7bff, #7b4dff); border:none; border-radius:12px; color:#fff; font-weight:800; cursor:pointer; margin-top:5px; }
-
-  #toast { position:fixed; top:20%; left:50%; transform:translateX(-50%); padding:12px 24px; background:rgba(10,16,40,0.9); border:1px solid #ffd94f; border-radius:14px; opacity:0; transition:0.3s; z-index:1000; pointer-events:none; }
-  #toast.on { opacity:1; }
-
-  .mobile-ctrl { position:fixed; bottom:20px; z-index:30; display:none; gap:10px; pointer-events:auto; }
-  body.touch .mobile-ctrl { display:flex; }
-  .joy-btn { width:70px; height:70px; background:rgba(255,255,255,0.1); border:2px solid rgba(255,255,255,0.3); border-radius:20px; display:flex; align-items:center; justify-content:center; font-size:30px; color:#fff; backdrop-filter:blur(5px); }
-  .joy-btn.active { background:rgba(255,255,255,0.3); }
-
-  #bossHealthUI { position:fixed; top:80px; left:50%; transform:translateX(-50%); width:400px; display:none; text-align:center; }
-  #bossName { font-family:'Press Start 2P'; font-size:12px; color:#ff4e50; margin-bottom:5px; }
+  /* Touch controls override */
+  #touch { position:absolute; inset:0; display:none; }
+  body.touch #touch { display:block; }
+  .tbtn {
+    position:absolute; bottom:18px; width:68px; height:68px; border-radius:18px; pointer-events:auto;
+    background:rgba(20,30,70,.4); border:2px solid rgba(140,175,255,.35); color:#fff; font-size:26px;
+    display:flex; align-items:center; justify-content:center; backdrop-filter:blur(4px); user-select:none; touch-action:none;
+  }
+  .tbtn.act { background:rgba(95,141,255,.45); }
+  #tLeft { left:16px; } #tRight { left:96px; }
+  #tJump { right:16px; width:80px; height:80px; border-radius:50%; font-size:32px; background:rgba(60,180,120,.3); border-color:rgba(120,255,170,.4); }
+  
+  #vignette { position:fixed; inset:0; z-index:10; pointer-events:none;
+    background:radial-gradient(ellipse at center, transparent 55%, rgba(0,0,10,.5) 100%); }
+  #loading { position:fixed; inset:0; z-index:80; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:14px;
+    background:#0a0c14; color:#8fa3d9; font-size:14px; letter-spacing:1px; transition:opacity .4s; }
+  #loading.hidden { opacity:0; pointer-events:none; }
 </style>
 </head>
 <body>
-
 <canvas id="game"></canvas>
+<div id="vignette"></div>
 
-<!-- HUD LAYER -->
-<div id="hud" class="hud-layer">
-  <div id="topUI">
-    <div style="font-size:14px; font-weight:800; display:flex; justify-content:space-between;">
-      <span id="pName">Загрузка...</span>
-      <span style="color:#ffd94f;">🪙 <span id="coinCount">0</span></span>
+<div id="hud">
+  <div id="topbar">
+    <div id="playerStats">
+      <span id="levelBadge">LVL 1</span>
+      <div style="display:flex; flex-direction:column;">
+        <div id="hpBarWrap">
+          <div id="hpBarFill"></div>
+          <div id="hpTxt">100 / 100 HP</div>
+        </div>
+        <div id="xpBarWrap">
+          <div id="xpBarFill"></div>
+        </div>
+      </div>
     </div>
-    <div class="bar-container"><div id="hpBar"></div></div>
-    <div class="bar-container"><div id="xpBar"></div></div>
-    <div class="stats-row">
-      <span>⭐ LVL <span id="lvlVal">1</span></span>
-      <span>👥 ОНЛАЙН: <span id="onlineVal">1</span></span>
-      <span>XP: <span id="xpVal">0</span></span>
-    </div>
-  </div>
-
-  <div id="sideUI">
-    <h3 id="seasonName">ЛЕТО</h3>
-    <div style="font-size:10px; color:#8fa3d9;" id="weatherText">ЯСНО</div>
-    <div style="margin-top:10px;">
-      <button onclick="toggleModal('craftModal')" style="padding:5px 10px; background:#3f5a94; border:none; color:#fff; border-radius:5px; cursor:pointer; font-weight:bold; font-size:10px;">🎒 КРАФТ (E)</button>
-    </div>
-    <div style="margin-top:5px;">
-      <button onclick="requestBoss()" style="padding:5px 10px; background:#ff4e50; border:none; color:#fff; border-radius:5px; cursor:pointer; font-weight:bold; font-size:10px;">👑 БОСС (B)</button>
+    <div id="stats">
+      <span>🪙 <b id="coinsCount">0</b></span>
+      <span style="color:#ffe98a;">🍂 <b id="seasonLabel">ЛЕТО</b></span>
+      <span>👥 <b id="online">1</b></span>
     </div>
   </div>
 
-  <div id="bossHealthUI">
-    <div id="bossName">ОКО ПУСТОТЫ</div>
-    <div class="bar-container" style="height:14px;"><div id="bossHP" style="width:100%; background: #ff4e50; height:100%;"></div></div>
+  <div id="camControls">
+    <button class="hud-btn" id="zoomOutBtn" title="Отдалить">🔍−</button>
+    <button class="hud-btn" id="zoomInBtn" title="Приблизить">🔍+</button>
+    <button class="hud-btn" id="craftToggleBtn" title="Крафт">🛠️</button>
+    <button class="hud-btn" id="guideBookBtn" title="Гайды и скины">📖</button>
+    <button class="hud-btn" id="musBtn" title="Радио">📻</button>
+    <button class="hud-btn" id="musMuteBtn" title="Музыка">🎵</button>
+    <button class="hud-btn" id="muteBtn" title="Звуки">🔊</button>
+    <button class="hud-btn" id="chatToggleBtn" title="Чат">💬</button>
   </div>
 
-  <div id="chatBox">
-    <div id="messages"></div>
-    <input id="chatInput" maxlength="80" placeholder="Нажми Enter, чтобы написать...">
+  <!-- Crafting Window Panel -->
+  <div id="craftPanel">
+    <div class="craft-header">🛠️ ВЕРСТАК КРАФТА</div>
+    <div class="recipe-list" id="recipeListContainer"></div>
   </div>
 
-  <div id="hotbar">
-    <!-- Generated by JS -->
+  <!-- Inventory Hotbar (9 slots) -->
+  <div id="hotbarWrap"></div>
+
+  <!-- Level 10 Active Super Skill (Meteor drill) -->
+  <button id="activeSkillBtn" title="Супер Огненный Удар!">🔥</button>
+
+  <div id="chat">
+    <div id="chatMsgs"></div>
+    <input id="chatInput" maxlength="64" placeholder="Нажмите Enter для чата..." autocomplete="off">
   </div>
 
-  <div class="mobile-ctrl" style="left:20px;">
-    <div class="joy-btn" id="mLeft">◀</div>
-    <div class="joy-btn" id="mRight">▶</div>
+  <div id="board">
+    <h3>🏆 Игроки мира <span id="boardUpd"></span></h3>
+    <div id="boardRows"></div>
   </div>
-  <div class="mobile-ctrl" style="right:20px;">
-    <div class="joy-btn" id="mJump">▲</div>
-    <div class="joy-btn" id="mAction">⛏</div>
+  <div id="toast"></div>
+  <div id="trackName"></div>
+  
+  <div id="touch">
+    <div class="tbtn" id="tLeft">◀</div>
+    <div class="tbtn" id="tRight">▶</div>
+    <div class="tbtn" id="tJump">⤒</div>
   </div>
 </div>
 
-<!-- MODALS -->
-<div id="craftModal" class="modal">
-  <div class="modal-content">
-    <span class="close-btn" onclick="toggleModal('craftModal')">&times;</span>
-    <h2 style="font-family:'Press Start 2P'; font-size:16px; margin-bottom:15px; color:#ffd94f;">🔨 КРАФТИНГ</h2>
-    <p style="font-size:12px; color:#8fa3d9;">Создавай предметы из добытых ресурсов.</p>
-    <div class="craft-grid" id="craftGrid"></div>
+<!-- GUIDE BOOK & SKINS SHOP MODAL -->
+<div id="bookOverlay">
+  <div class="book-container">
+    <div class="book-header">
+      <span>📖 ВЫЖИВАНИЕ И ГАРДЕРОБ</span>
+      <span id="bookProgress">Уровень 1</span>
+    </div>
+    <div class="book-body">
+      <!-- Left Page: Guide text -->
+      <div class="book-page divider" id="bookLeftPage"></div>
+      <!-- Right Page: Skins Shop -->
+      <div class="book-page" id="bookRightPage">
+        <h3>👗 ГАРДЕРОБ СКИНОВ</h3>
+        <p style="font-size:11px; margin-bottom:10px;">Собирай 🪙 монетки в мире (выпадают из золотых жил и мобов) и покупай скины!</p>
+        <div id="skinsShopContainer"></div>
+      </div>
+    </div>
+    <div class="book-footer">
+      <button class="book-nav-btn" id="bookPrevBtn">◀ Назад</button>
+      <button class="book-close-btn" id="bookCloseBtn">Закрыть книгу</button>
+      <button class="book-nav-btn" id="bookNextBtn">Вперед ▶</button>
+    </div>
   </div>
 </div>
 
-<!-- AUTH -->
-<div id="authScreen">
+<div id="auth">
   <div class="auth-card">
-    <h1 style="font-family:'Press Start 2P'; font-size:22px; margin-bottom:10px; color:#5cb8ff;">БЛОКРАН</h1>
-    <p style="font-size:12px; color:#8fa3d9; margin-bottom:20px;">Мультиплеерное выживание</p>
-    <input type="text" id="nickInput" placeholder="Ваш никнейм" maxlength="12">
-    <input type="email" id="emailInput" placeholder="Email">
-    <input type="password" id="passInput" placeholder="Пароль (мин. 6 симв.)">
-    <button class="primary-btn" onclick="handleAuth('login')">ВОЙТИ</button>
-    <button class="primary-btn" onclick="handleAuth('reg')" style="background:#152035; border:1px solid #3f7bff; margin-top:10px;">РЕГИСТРАЦИЯ</button>
-    <div id="authErr" style="color:#ff4e50; font-size:12px; margin-top:10px;"></div>
+    <div class="logo">
+      <svg width="36" height="36" viewBox="0 0 48 48">
+        <defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#6ee7ff"/><stop offset=".55" stop-color="#4f7cff"/><stop offset="1" stop-color="#b96bff"/>
+        </linearGradient></defs>
+        <rect x="4" y="26" width="18" height="18" rx="3" fill="url(#lg)"/>
+        <rect x="26" y="26" width="18" height="18" rx="3" fill="#39d98a"/>
+        <rect x="15" y="4" width="18" height="18" rx="3" fill="#ffd94f"/>
+        <circle cx="21" cy="11" r="2.4" fill="#20263f"/><circle cx="27" cy="11" r="2.4" fill="#20263f"/>
+      </svg>
+      <h1>БЛОКРАН SURVIVAL</h1>
+    </div>
+    <div class="tagline">Шахты, Строительство, Крафт, Монстры и Совместное выживание! 🌲</div>
+    <div class="field" id="nickField">
+      <label>Ник персонажа</label>
+      <input id="nick" maxlength="14" placeholder="Имя игрока" autocomplete="off">
+    </div>
+    <div class="field">
+      <label>Почта</label>
+      <input id="email" type="email" placeholder="you@example.com" autocomplete="email">
+    </div>
+    <div class="field">
+      <label>Пароль</label>
+      <input id="pass" type="password" placeholder="Минимум 6 символов" autocomplete="current-password">
+    </div>
+    <button class="btn btn-primary" id="loginBtn">ВОЙТИ В ИГРУ</button>
+    <button class="btn btn-ghost" id="regBtn">СОЗДАТЬ АККАУНТ</button>
+    <div id="authErr"></div>
+    <div class="hint">🏃 A/D или ←/→ — бег · ПРОБЕЛ — прыжок · ЛКМ/Касание экрана — рубить / ставить блоки<br>
+    🛠️ Добывайте дерево и камни, чтобы скрафтить инструменты, факелы и прочные блоки!<br>
+    ⚡ Накапливайте XP! Уровень 10 разблокирует огненный разрушительный спелл! 🔥</div>
   </div>
 </div>
 
-<div id="toast"></div>
+<div id="loading">
+  <div class="spin" style="width:26px;height:26px;border-width:3px"></div>
+  <div id="loadTxt">ГЕНЕРАЦИЯ БЕЗГРАНИЧНОГО МИРА…</div>
+</div>
 
-<!-- SCRIPTS -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-
 <script>
 'use strict';
-
 const firebaseConfig = {
   apiKey: "AIzaSyBm0mIvHVznIeF2PoFk6dtdaiT5r877wyA",
   authDomain: "meow-874ce.firebaseapp.com",
@@ -164,483 +402,1835 @@ const firebaseConfig = {
   messagingSenderId: "471541334599",
   appId: "1:471541334599:web:567af3e7dbe70a37572762"
 };
-
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
 
 const $ = id => document.getElementById(id);
-const toast = (m) => { const e = $('toast'); e.textContent = m; e.classList.add('on'); setTimeout(() => e.classList.remove('on'), 2000); };
+const clamp = (v,a,b) => v<a?a:(v>b?b:v);
+const lerp = (a,b,t) => a+(b-a)*t;
+function mulberry32(seed){ return function(){ seed|=0; seed=seed+0x6D2B79F5|0; let t=Math.imul(seed^seed>>>15,1|seed); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
+function hexToRGBA(hex, alpha) {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+function toggleFullscreen() {
+  const doc = window.document;
+  const docEl = doc.documentElement;
+  const requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
+  const cancelFullScreen = doc.exitFullscreen || doc.mozCancelFullScreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
+  if(!doc.fullscreenElement && !doc.mozFullScreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement) {
+    requestFullScreen.call(docEl).catch(() => {});
+  } else {
+    cancelFullScreen.call(doc);
+  }
+}
+
+const AUTH_ERR = {
+  'auth/invalid-email':'Некорректная почта',
+  'auth/user-not-found':'Пользователь не найден',
+  'auth/wrong-password':'Неверный пароль',
+  'auth/invalid-credential':'Неверный логин или пароль',
+  'auth/email-already-in-use':'Почта уже зарегистрирована',
+  'auth/weak-password':'Пароль слишком слабый (мин. 6 символов)',
+  'auth/too-many-requests':'Слишком много попыток. Подождите',
+  'auth/network-request-failed':'Проблемы с сетью'
+};
+function authError(e){ $('authErr').textContent = AUTH_ERR[e.code] || ('Ошибка: ' + (e.code||e.message)); }
+function validNick(n){ return /^[A-Za-zА-Яа-яЁё0-9_\-]{2,14}$/.test(n); }
+let busyAuth = false;
+
+async function doRegister(){
+  if (busyAuth) return;
+  const nick = $('nick').value.trim(), email = $('email').value.trim(), pass = $('pass').value;
+  $('authErr').textContent = '';
+  if (!validNick(nick)) { $('authErr').textContent = 'Ник: 2–14 символов (буквы, цифры, _ и -)'; return; }
+  if (!email || !pass) { $('authErr').textContent = 'Заполните все поля'; return; }
+  busyAuth = true; $('regBtn').innerHTML = '<span class="spin"></span> СОЗДАЮ…';
+  try {
+    const cr = await auth.createUserWithEmailAndPassword(email, pass);
+    await db.ref('users/' + cr.user.uid).set({ name: nick, created: firebase.database.ServerValue.TIMESTAMP });
+    MY_NAME = nick;
+  } catch(e){ authError(e); }
+  busyAuth = false; $('regBtn').textContent = 'СОЗДАТЬ АККАУНТ';
+}
+async function doLogin(){
+  if (busyAuth) return;
+  const email = $('email').value.trim(), pass = $('pass').value;
+  $('authErr').textContent = '';
+  if (!email || !pass) { $('authErr').textContent = 'Введите почту и пароль'; return; }
+  busyAuth = true; $('loginBtn').innerHTML = '<span class="spin"></span> ВХОЖУ…';
+  try {
+    await auth.signInWithEmailAndPassword(email, pass);
+  } catch(e){ authError(e); }
+  busyAuth = false; $('loginBtn').textContent = 'ВОЙТИ В ИГРУ';
+}
+$('regBtn').onclick = doRegister;
+$('loginBtn').onclick = doLogin;
+$('pass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+</script>
+
+<script>
+'use strict';
 /* ============================================================
-   WORLD ENGINE & GENERATION
+   АУДИО: Саундтрек в стиле Майнкрафт/Террария + Процедурные звуки
    ============================================================ */
-const TILE = 32, WW = 400, WH = 100; // 2D Grid
-const B = { AIR: 0, DIRT: 1, GRASS: 2, STONE: 3, WOOD: 4, LEAF: 5, COAL: 6, IRON: 7, GOLD: 8, WATER: 9, BRICK: 10, CHEST: 11, TORCH: 12 };
-const world = new Uint8Array(WW * WH);
-const worldEdits = new Map(); // Local store for synchronized edits
+const Audio8 = {
+  ctx:null, master:null, musG:null, sfxG:null, noiseBuf:null, rainG:null, rainSrc:null,
+  trackIdx:-1, step:0, nextT:0, timer:null, musicMuted:false, sfxMuted:false, ready:false,
+  manualRadio:false,
 
-function getTile(x, y) {
-  if (x < 0 || x >= WW || y < 0 || y >= WH) return B.STONE;
-  return world[y * WW + x];
+  init(){
+    if (this.ready) return;
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    this.ctx = new AC();
+    this.master = this.ctx.createGain(); this.master.gain.value = 0.5; this.master.connect(this.ctx.destination);
+    
+    this.musG = this.ctx.createGain(); this.musG.gain.value = this.musicMuted ? 0 : 0.28; this.musG.connect(this.master);
+    this.sfxG = this.ctx.createGain(); this.sfxG.gain.value = this.sfxMuted ? 0 : 0.45; this.sfxG.connect(this.master);
+    this.rainG = this.ctx.createGain(); this.rainG.gain.value = 0.0; this.rainG.connect(this.master);
+
+    const len = this.ctx.sampleRate * 0.5, buf = this.ctx.createBuffer(1, len, this.ctx.sampleRate), d = buf.getChannelData(0);
+    for (let i=0;i<len;i++) d[i] = Math.random()*2-1;
+    this.noiseBuf = buf;
+
+    // Звук дождя
+    const rainBufLen = this.ctx.sampleRate * 2;
+    const rainBuf = this.ctx.createBuffer(1, rainBufLen, this.ctx.sampleRate);
+    const rd = rainBuf.getChannelData(0);
+    for(let i=0; i<rainBufLen; i++) rd[i] = Math.random() * 2 - 1;
+
+    this.rainSrc = this.ctx.createBufferSource();
+    this.rainSrc.buffer = rainBuf;
+    this.rainSrc.loop = true;
+    const rainFilter = this.ctx.createBiquadFilter();
+    rainFilter.type = 'lowpass';
+    rainFilter.frequency.value = 700;
+    this.rainSrc.connect(rainFilter);
+    rainFilter.connect(this.rainG);
+    this.rainSrc.start(0);
+
+    this.ready = true;
+    this.nextT = this.ctx.currentTime + 0.1;
+    this.timer = setInterval(()=>this.schedule(), 50);
+  },
+  resume(){ if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume(); },
+  toggleMusic() {
+    this.musicMuted = !this.musicMuted;
+    if (this.musG) this.musG.gain.value = this.musicMuted ? 0 : 0.28;
+    return this.musicMuted;
+  },
+  toggleSfx() {
+    this.sfxMuted = !this.sfxMuted;
+    if (this.sfxG) this.sfxG.gain.value = this.sfxMuted ? 0 : 0.45;
+    if (this.rainG) this.rainG.gain.value = this.sfxMuted ? 0 : (weather.rainIntensity * 0.2);
+    return this.sfxMuted;
+  },
+  updateRainSound(intensity) {
+    if (!this.ready || this.sfxMuted) return;
+    if (this.rainG) this.rainG.gain.setTargetAtTime(intensity * 0.2, this.ctx.currentTime, 0.3);
+  },
+  tracks: [
+    { name:'🌲 Зелёный Шёпот (Утро)', bpm:80, wave:'sine', vol:.35,
+      mel:[60,64,67,71,67,64,60,0, 62,65,69,72,69,65,62,0, 60,64,67,71,72,71,67,0, 59,62,65,67,65,62,59,0],
+      bass:[36,0,40,0,43,0,36,0, 38,0,41,0,45,0,38,0] },
+    { name:'✨ Атмосфера Пещеры', bpm:65, wave:'sine', vol:.4,
+      mel:[67,74,79,0,74,67,0,0, 66,73,78,0,73,66,0,0, 64,71,76,0,71,64,0,0, 62,69,74,0,69,62,0,0],
+      bass:[31,0,31,0,30,0,30,0, 28,0,28,0,26,0,26,0] },
+    { name:'🔥 Опасная Ночь (Фонк)', bpm:120, wave:'sawtooth', vol:.08,
+      mel:[60,60,63,60,65,60,67,0, 60,60,63,60,67,65,63,0, 58,58,61,58,63,58,65,0, 58,58,61,58,65,63,61,0],
+      bass:[36,36,36,36,36,36,36,36, 34,34,34,34,34,34,34,34] }
+  ],
+  playTrack(i){
+    if (i === this.trackIdx) return;
+    this.trackIdx = i; this.step = 0;
+    if (this.ctx) this.nextT = this.ctx.currentTime + 0.1;
+    const curName = this.tracks[i] ? this.tracks[i].name : 'Звуки Природы';
+    $('trackName').textContent = '📻 ' + curName;
+  },
+  nextTrack(){
+    this.manualRadio = true;
+    let next = (this.trackIdx + 1) % this.tracks.length;
+    this.playTrack(next);
+    toast('📻 Плейлист: ' + this.tracks[next].name, 1500);
+  },
+  f(m){ return m === 0 ? 0 : 440*Math.pow(2,(m-69)/12); },
+  note(midi, t, dur, wave, vol, dest){
+    if (midi === 0 || vol <= 0) return;
+    const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+    o.type = wave; o.frequency.value = this.f(midi);
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(vol, t+0.01);
+    g.gain.setValueAtTime(vol, t+dur*0.6);
+    g.gain.exponentialRampToValueAtTime(0.001, t+dur);
+    o.connect(g); g.connect(dest||this.musG);
+    o.start(t); o.stop(t+dur+0.05);
+  },
+  kick(t){
+    const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+    o.type='sine'; o.frequency.setValueAtTime(120,t); o.frequency.exponentialRampToValueAtTime(35,t+0.15);
+    g.gain.setValueAtTime(.4,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.15);
+    o.connect(g); g.connect(this.musG); o.start(t); o.stop(t+0.18);
+  },
+  schedule(){
+    if (!this.ready || this.musicMuted) return;
+    const tr = this.tracks[this.trackIdx];
+    if (!tr) return;
+    const stepDur = 60 / tr.bpm / 2;
+    while (this.nextT < this.ctx.currentTime + 0.15){
+      const s = this.step, t = this.nextT;
+      const m = tr.mel[s % tr.mel.length];
+      if (m) this.note(m, t, stepDur*1.8, tr.wave, tr.vol);
+      const b = tr.bass[s % tr.bass.length];
+      if (b) this.note(b, t, stepDur*1.5, 'triangle', .18);
+      if (tr.bpm > 100) {
+        if (s % 4 === 0) this.kick(t);
+      }
+      this.step++;
+      this.nextT += stepDur;
+    }
+  },
+  blip(f0, f1, dur, wave, vol){
+    if (!this.ready || this.sfxMuted) return;
+    const t = this.ctx.currentTime;
+    const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+    o.type = wave; o.frequency.setValueAtTime(f0,t); o.frequency.exponentialRampToValueAtTime(Math.max(f1,1), t+dur);
+    g.gain.setValueAtTime(vol,t); g.gain.exponentialRampToValueAtTime(0.001,t+dur);
+    o.connect(g); g.connect(this.sfxG); o.start(t); o.stop(t+dur+0.02);
+  },
+  noise(dur, vol, freq){
+    if (!this.ready || this.sfxMuted) return;
+    const t = this.ctx.currentTime;
+    const s = this.ctx.createBufferSource(), g = this.ctx.createGain(), f = this.ctx.createBiquadFilter();
+    s.buffer=this.noiseBuf; f.type='lowpass'; f.frequency.value=freq||1000;
+    g.gain.setValueAtTime(vol,t); g.gain.exponentialRampToValueAtTime(0.001,t+dur);
+    s.connect(f); f.connect(g); g.connect(this.sfxG); s.start(t); s.stop(t+dur+0.02);
+  },
+  jump(){ this.blip(250,550,.08,'sine',.15); },
+  land(){ this.noise(.05,.08,400); },
+  hit(){ this.blip(180,50,.12,'triangle',.25); this.noise(.1,.15,800); },
+  breakBlock(){ this.noise(.12, .22, 350); },
+  placeBlock(){ this.blip(180,120,.05,'triangle',.15); },
+  lvlUp(){
+    [400, 500, 600, 800].forEach((f, i) => {
+      setTimeout(() => this.blip(f, f + 100, 0.15, 'square', 0.2), i * 100);
+    });
+  },
+  coin(){ this.blip(880,1500,0.12,'sine',0.18); },
+  skill(){ this.blip(150, 900, 0.35, 'sawtooth', 0.25); this.noise(0.4, 0.3, 1500); }
+};
+['pointerdown','keydown','touchstart'].forEach(ev =>
+  window.addEventListener(ev, ()=>{ Audio8.init(); Audio8.resume(); }, { passive:true }));
+</script>
+
+<script>
+'use strict';
+/* ============================================================
+   МИР СУРВАЙВАЛА: Сетка блоков, Руда, Генерация Пещер, Деревья
+   ============================================================ */
+const TILE = 32, WW = 400, WH = 100, WORLD_PX = WW * TILE;
+const world = new Uint16Array(WW * WH);
+const backWorld = new Uint16Array(WW * WH);
+
+// ИДЕНТИФИКАТОРЫ БЛОКОВ
+const B = {
+  AIR: 0,
+  GRASS: 1,
+  DIRT: 2,
+  STONE: 3,
+  COAL: 4,
+  IRON: 5,
+  GOLD: 6,
+  DIAMOND: 7,
+  WOOD: 8,
+  LEAVES: 9,
+  STONE_BRICK: 10,
+  WOOD_PLANK: 11,
+  TORCH: 12,
+  LAVA: 13,
+  WATER: 14,
+  SAND: 15,
+  GRASS_TALL: 16
+};
+
+// ХАРАКТЕРИСТИКИ ТАЙЛОВ
+const TILES_INFO = {
+  [B.AIR]: { solid: false, mineTime: 0, color: 'transparent' },
+  [B.GRASS]: { solid: true, mineTime: 300, color: '#4ade80', bg: '#2b1e15' },
+  [B.DIRT]: { solid: true, mineTime: 250, color: '#7c2d12' },
+  [B.STONE]: { solid: true, mineTime: 600, color: '#64748b' },
+  [B.COAL]: { solid: true, mineTime: 650, color: '#1e293b' },
+  [B.IRON]: { solid: true, mineTime: 800, color: '#b45309' },
+  [B.GOLD]: { solid: true, mineTime: 1200, color: '#fbbf24' },
+  [B.DIAMOND]: { solid: true, mineTime: 1800, color: '#22d3ee' },
+  [B.WOOD]: { solid: false, mineTime: 400, color: '#451a03' },
+  [B.LEAVES]: { solid: false, mineTime: 100, color: '#15803d' },
+  [B.STONE_BRICK]: { solid: true, mineTime: 700, color: '#475569' },
+  [B.WOOD_PLANK]: { solid: true, mineTime: 300, color: '#a16207' },
+  [B.TORCH]: { solid: false, mineTime: 20, color: '#fbbf24', light: [255,160,40, 1.0] },
+  [B.LAVA]: { solid: false, mineTime: 9999, color: '#ef4444', hazard: true, light: [255,50,0, 0.95] },
+  [B.WATER]: { solid: false, mineTime: 9999, color: '#3b82f6' },
+  [B.SAND]: { solid: true, mineTime: 200, color: '#fef08a' },
+  [B.GRASS_TALL]: { solid: false, mineTime: 10, color: '#22c55e' }
+};
+
+function blockAt(tx, ty) {
+  if (tx < 0 || tx >= WW || ty < 0 || ty >= WH) return B.STONE;
+  return world[ty * WW + tx];
+}
+function setBlock(tx, ty, blockId) {
+  if (tx >= 0 && tx < WW && ty >= 0 && ty < WH) {
+    world[ty * WW + tx] = blockId;
+  }
+}
+function solidAt(tx, ty) {
+  const b = blockAt(tx, ty);
+  return TILES_INFO[b] ? TILES_INFO[b].solid : false;
 }
 
-function setTile(x, y, v) {
-  if (x < 0 || x >= WW || y < 0 || y >= WH) return;
-  world[y * WW + x] = v;
-}
+// Генерация мира (2D Террария вайб)
+function generateSurvivalWorld() {
+  const R = mulberry32(2026);
+  const noise = (x) => Math.sin(x * 0.05) * 6 + Math.cos(x * 0.12) * 2;
 
-// Seed-based procedural terrain
-function generateBaseTerrain() {
-  const seed = 12345;
-  const rng = (x) => {
-    let t = Math.sin(x * 12.9898 + seed) * 43758.5453;
-    return t - Math.floor(t);
-  };
-  
-  const surfaceY = 40;
+  // 1. Неровный рельеф
+  const skyLimit = 35;
   for (let x = 0; x < WW; x++) {
-    const h = Math.floor(surfaceY + Math.sin(x * 0.1) * 5 + rng(x) * 2);
+    const h = Math.round(skyLimit + noise(x));
     for (let y = 0; y < WH; y++) {
-      let b = B.AIR;
-      if (y > h + 5) b = B.STONE;
-      else if (y > h) b = B.DIRT;
-      else if (y === h) b = B.GRASS;
-      
-      // Ores
-      if (b === B.STONE && rng(x + y * 10) < 0.05) {
-        const r = rng(x * y);
-        if (r < 0.1) b = B.GOLD;
-        else if (r < 0.4) b = B.IRON;
-        else b = B.COAL;
+      const idx = y * WW + x;
+      if (y < h) {
+        world[idx] = B.AIR;
+      } else if (y === h) {
+        world[idx] = B.GRASS;
+      } else if (y < h + 10) {
+        world[idx] = B.DIRT;
+      } else {
+        world[idx] = B.STONE;
       }
       
-      setTile(x, y, b);
+      // Задние стены (background tiles)
+      if (y >= h) {
+        backWorld[idx] = (y < h + 10) ? B.DIRT : B.STONE;
+      } else {
+        backWorld[idx] = B.AIR;
+      }
     }
-    
-    // Trees
-    if (x % 15 === 0 && rng(x) > 0.5) {
-      const hLimit = Math.floor(surfaceY + Math.sin(x * 0.1) * 5 + rng(x) * 2) - 1;
-      for (let ty = hLimit; ty > hLimit - 5; ty--) setTile(x, ty, B.WOOD);
-      for (let lx = -2; lx <= 2; lx++) {
-        for (let ly = -2; ly <= 0; ly++) {
-          if (getTile(x + lx, hLimit - 5 + ly) === B.AIR) setTile(x + lx, hLimit - 5 + ly, B.LEAF);
+  }
+
+  // 2. Генерация пещер (Червеобразные ходы)
+  const caveCount = 35;
+  for (let i = 0; i < caveCount; i++) {
+    let cx = R() * WW | 0;
+    let cy = R() * (WH - skyLimit - 15) + skyLimit + 10 | 0;
+    let len = 40 + R() * 80 | 0;
+    for (let s = 0; s < len; s++) {
+      cx += Math.round((R() - 0.5) * 3);
+      cy += Math.round((R() - 0.5) * 2);
+      cx = clamp(cx, 2, WW - 3);
+      cy = clamp(cy, skyLimit + 4, WH - 6);
+      
+      // Вырезаем круг радиусом ~2-3 блока
+      for (let dx = -2; dx <= 2; dx++) {
+        for (let dy = -2; dy <= 2; dy++) {
+          if (dx*dx + dy*dy <= 5) {
+            setBlock(cx + dx, cy + dy, B.AIR);
+          }
         }
       }
     }
   }
-}
 
+  // 3. Рудные жилы (Уголь, Железо, Золото, Алмазы)
+  function seedVein(blockId, depthMin, depthMax, spawnChance, rSize) {
+    for (let x = 3; x < WW - 3; x += 5) {
+      if (R() < spawnChance) {
+        const y = Math.round(depthMin + R() * (depthMax - depthMin));
+        for (let dx = -rSize; dx <= rSize; dx++) {
+          for (let dy = -rSize; dy <= rSize; dy++) {
+            if (R() < 0.7 && blockAt(x + dx, y + dy) === B.STONE) {
+              setBlock(x + dx, y + dy, blockId);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  seedVein(B.COAL, skyLimit + 10, WH - 10, 0.65, 2);
+  seedVein(B.IRON, skyLimit + 15, WH - 15, 0.45, 1);
+  seedVein(B.GOLD, skyLimit + 30, WH - 10, 0.35, 1);
+  seedVein(B.DIAMOND, WH - 30, WH - 4, 0.18, 1);
+
+  // 4. Лавовые озёра на самом дне
+  for (let x = 0; x < WW; x++) {
+    for (let y = WH - 10; y < WH; y++) {
+      if (blockAt(x, y) === B.AIR || (R() < 0.4 && y > WH - 8)) {
+        setBlock(x, y, B.LAVA);
+      }
+    }
+  }
+
+  // 5. Деревья на поверхности
+  for (let x = 4; x < WW - 4; x += 8 + Math.round(R() * 6)) {
+    // Находим блок поверхности
+    let surfaceY = -1;
+    for (let y = 0; y < WH; y++) {
+      if (blockAt(x, y) === B.GRASS) {
+        surfaceY = y;
+        break;
+      }
+    }
+    if (surfaceY !== -1) {
+      // Спавним ствол дерева
+      const treeHeight = 5 + Math.round(R() * 4);
+      for (let ty = 1; ty <= treeHeight; ty++) {
+        setBlock(x, surfaceY - ty, B.WOOD);
+      }
+      // Спавним листву
+      const ly = surfaceY - treeHeight;
+      for (let ldx = -2; ldx <= 2; ldx++) {
+        for (let ldy = -2; ldy <= 2; ldy++) {
+          if (Math.abs(ldx) + Math.abs(ldy) <= 3) {
+            setBlock(x + ldx, ly + ldy, B.LEAVES);
+          }
+        }
+      }
+    }
+  }
+
+  // 6. Высокая трава на свободной поверхности
+  for (let x = 0; x < WW; x++) {
+    for (let y = 0; y < WH - 1; y++) {
+      if (blockAt(x, y) === B.GRASS && blockAt(x, y - 1) === B.AIR) {
+        if (R() < 0.4) setBlock(x, y - 1, B.GRASS_TALL);
+      }
+    }
+  }
+}
+generateSurvivalWorld();
+</script>
+
+<script>
+'use strict';
 /* ============================================================
-   PLAYER & SYSTEMS
+   ПЕРСОНАЖ: Уровни, XP, Инвентарь, Локальная Выносливость
    ============================================================ */
 const P = {
-  uid: null, nick: "Игрок",
-  x: 200 * TILE, y: 30 * TILE, vx: 0, vy: 0,
-  w: 20, h: 28, ground: false,
-  hp: 100, maxHp: 100, xp: 0, level: 1, coins: 0,
-  inv: { [B.DIRT]: 10, [B.WOOD]: 5 },
-  activeSkin: 'default'
+  x: WW * TILE / 2, y: 15 * TILE, w: 22, h: 26, vx: 0, vy: 0, dir: 1,
+  ground: false, hp: 100, maxHp: 100, xp: 0, level: 1, maxXp: 100,
+  coins: 0, activeSkin: 'default', deadT: 0, runT:0, squash: 0,
+  activeHotbarSlot: 0,
+  // 9 слотов инвентаря: { type, count }
+  inventory: [
+    { type: 'pickaxe_wood', count: 1 },
+    { type: 'sword_wood', count: 1 },
+    { type: B.TORCH, count: 15 },
+    { type: B.DIRT, count: 64 },
+    { type: B.STONE_BRICK, count: 20 },
+    { type: null, count: 0 },
+    { type: null, count: 0 },
+    { type: null, count: 0 },
+    { type: null, count: 0 }
+  ]
 };
 
-const ITEMS = {
-  [B.DIRT]: { n: "Земля", i: "🟫", place: B.DIRT },
-  [B.STONE]: { n: "Камень", i: "🪨", place: B.STONE },
-  [B.WOOD]: { n: "Дерево", i: "🪵", place: B.WOOD },
-  [B.BRICK]: { n: "Кирпич", i: "🧱", place: B.BRICK },
-  [B.COAL]: { n: "Уголь", i: "🌑", place: null },
-  [B.IRON]: { n: "Железо", i: "🔘", place: null },
-  [B.GOLD]: { n: "Золото", i: "🟡", place: null },
-  [B.TORCH]: { n: "Факел", i: "🔥", place: B.TORCH },
-  [B.CHEST]: { n: "Сундук", i: "📦", place: B.CHEST }
-};
+const SKINS = [
+  { id: 'default', name: 'Выживший', color: '#5cb8ff', price: 0, desc: 'Обычный пиксельный путник.' },
+  { id: 'woodcutter', name: 'Лесоруб', color: '#fb923c', price: 10, desc: 'Любитель свежего дуба.' },
+  { id: 'miner', name: 'Шахтёр', color: '#64748b', price: 25, desc: 'Обладает каменным телом.' },
+  { id: 'golden', name: 'Король', color: '#facc15', price: 50, desc: 'Настоящая корона и царский блеск.' },
+  { id: 'void', name: 'Демон бездны', color: '#c084fc', price: 100, desc: 'Фиолетовый неоновый дух.' }
+];
+let ownedSkins = ['default'];
 
-const hotbarSlots = [B.DIRT, B.STONE, B.WOOD, B.BRICK, B.TORCH, B.CHEST];
-let activeSlotIdx = 0;
+const cam = { x: 0, y: 0 };
+const keys = { left: false, right: false, jump: false };
+const particles = [];
+const damageTexts = []; // Всплывающие цифры урона / XP
+let screenShake = 0;
 
-const RECIPES = [
-  { out: B.BRICK, count: 4, needs: { [B.STONE]: 2 }, n: "Кирпич", i: "🧱" },
-  { out: B.TORCH, count: 4, needs: { [B.WOOD]: 1, [B.COAL]: 1 }, n: "Факел", i: "🔥" },
-  { out: B.CHEST, count: 1, needs: { [B.WOOD]: 8 }, n: "Сундук", i: "📦" }
+function spawnP(x, y, vx, vy, life, color, size, grav){
+  if (particles.length > 200) particles.shift();
+  particles.push({ x, y, vx, vy, life, maxLife: life, color, size, grav: grav ?? 0.25 });
+}
+function textPop(x, y, text, color) {
+  damageTexts.push({ x, y, text, color, life: 40 });
+}
+
+function gainXP(amt) {
+  P.xp += amt;
+  textPop(P.x + P.w/2, P.y - 10, `+${amt} XP`, '#22c55e');
+  if (P.xp >= P.maxXp) {
+    P.xp -= P.maxXp;
+    P.level++;
+    P.maxXp = P.level * 100 + 50;
+    P.maxHp = 100 + (P.level - 1) * 10;
+    P.hp = P.maxHp;
+    Audio8.lvlUp();
+    textPop(P.x + P.w/2, P.y - 30, `LEVEL UP! (LVL ${P.level})`, '#eab308');
+    for (let i = 0; i < 30; i++) {
+      spawnP(P.x + P.w/2, P.y + P.h/2, (Math.random()-0.5)*6, (Math.random()-0.5)*6 - 2, 40, '#facc15', 3, 0.1);
+    }
+    checkSkillsUnlock();
+    saveProgressExact();
+  }
+}
+
+function checkSkillsUnlock() {
+  if (P.level >= 10) {
+    $('activeSkillBtn').style.display = 'flex';
+  } else {
+    $('activeSkillBtn').style.display = 'none';
+  }
+}
+
+// Поиск и добавление предметов в инвентарь
+function addToInventory(type, amt = 1) {
+  // Ищем существующий стак (если это блок/ресурс)
+  if (typeof type === 'number') {
+    for (const slot of P.inventory) {
+      if (slot.type === type && slot.count < 99) {
+        slot.count += amt;
+        renderHotbar();
+        return true;
+      }
+    }
+  }
+  // Ищем пустое место
+  for (const slot of P.inventory) {
+    if (slot.type === null) {
+      slot.type = type;
+      slot.count = amt;
+      renderHotbar();
+      return true;
+    }
+  }
+  toast('🎒 Инвентарь переполнен!', 1200);
+  return false;
+}
+
+function getActiveTool() {
+  const slot = P.inventory[P.activeHotbarSlot];
+  if (slot && slot.type) return slot.type;
+  return null;
+}
+
+function useHotbarItem(tx, ty) {
+  const slot = P.inventory[P.activeHotbarSlot];
+  if (!slot || !slot.type) return;
+
+  // 1. Использование строительного блока
+  if (typeof slot.type === 'number') {
+    if (blockAt(tx, ty) === B.AIR || blockAt(tx, ty) === B.GRASS_TALL) {
+      // Строим блок!
+      setBlock(tx, ty, slot.type);
+      Audio8.placeBlock();
+      slot.count--;
+      if (slot.count <= 0) {
+        slot.type = null;
+        slot.count = 0;
+      }
+      renderHotbar();
+      saveProgressExact();
+    }
+  }
+}
+</script>
+
+<script>
+'use strict';
+/* ============================================================
+   ОКРУЖЕНИЕ И ВРАГИ (MOBS): Слизни, Зомби, Глаза
+   ============================================================ */
+const enemies = [];
+const bloodParticles = [];
+
+function spawnEnemy(type, x, y) {
+  enemies.push({
+    id: Math.random(),
+    type,
+    x, y,
+    w: type === 'slime' ? 24 : 20,
+    h: type === 'slime' ? 18 : 28,
+    vx: 0, vy: 0,
+    hp: type === 'zombie' ? 80 : (type === 'eye' ? 40 : 30),
+    maxHp: type === 'zombie' ? 80 : (type === 'eye' ? 40 : 30),
+    dir: 1,
+    color: type === 'slime' ? '#10b981' : (type === 'zombie' ? '#047857' : '#ef4444'),
+    lastHit: 0,
+    jumpCooldown: 0
+  });
+}
+
+function updateMobs() {
+  for (let i = enemies.length - 1; i >= 0; i--) {
+    const e = enemies[i];
+    
+    // Гравитация
+    if (e.type !== 'eye') {
+      e.vy += 0.45;
+    }
+
+    const distToPlayer = Math.hypot((P.x - e.x), (P.y - e.y));
+    
+    // Простой ИИ погони
+    if (distToPlayer < 300) {
+      e.dir = Math.sign(P.x - e.x) || 1;
+      
+      if (e.type === 'eye') {
+        // Летающий монстр
+        e.vx = e.dir * 1.5;
+        e.vy = Math.sign(P.y - e.y) * 1.2;
+      } else {
+        e.vx = e.dir * 1.2;
+        // Прыжок через препятствия
+        const txInFront = Math.floor((e.x + e.dir * 15) / TILE);
+        const tyFeet = Math.floor((e.y + e.h - 4) / TILE);
+        if (solidAt(txInFront, tyFeet) && e.jumpCooldown <= 0) {
+          e.vy = -7.5;
+          e.jumpCooldown = 40;
+        }
+      }
+    } else {
+      // Блуждание
+      if (Math.random() < 0.01) e.dir = -e.dir;
+      e.vx = e.dir * 0.6;
+    }
+
+    if (e.jumpCooldown > 0) e.jumpCooldown--;
+
+    // Применение скоростей
+    e.x += e.vx;
+    // Коллизия по X с блоками
+    const txLeft = Math.floor(e.x / TILE);
+    const txRight = Math.floor((e.x + e.w) / TILE);
+    const tyTop = Math.floor(e.y / TILE);
+    const tyBot = Math.floor((e.y + e.h) / TILE);
+    
+    if (solidAt(txLeft, tyTop) || solidAt(txLeft, tyBot)) {
+      e.x = (txLeft + 1) * TILE;
+      e.dir = -e.dir;
+    }
+    if (solidAt(txRight, tyTop) || solidAt(txRight, tyBot)) {
+      e.x = txRight * TILE - e.w;
+      e.dir = -e.dir;
+    }
+
+    e.y += e.vy;
+    // Коллизия по Y
+    const newTxLeft = Math.floor(e.x / TILE);
+    const newTxRight = Math.floor((e.x + e.w) / TILE);
+    const newTyTop = Math.floor(e.y / TILE);
+    const newTyBot = Math.floor((e.y + e.h) / TILE);
+
+    if (solidAt(newTxLeft, newTyBot) || solidAt(newTxRight, newTyBot)) {
+      e.y = newTyBot * TILE - e.h;
+      e.vy = 0;
+    }
+    if (solidAt(newTxLeft, newTyTop) || solidAt(newTxRight, newTyTop)) {
+      e.y = (newTyTop + 1) * TILE;
+      e.vy = 0.5;
+    }
+
+    // Столкновение с игроком
+    if (e.x + e.w > P.x && e.x < P.x + P.w && e.y + e.h > P.y && e.y < P.y + P.h) {
+      if (P.deadT <= 0) {
+        playerDamage(15);
+      }
+    }
+
+    // Смерть моба
+    if (e.hp <= 0) {
+      // Взрыв крови
+      for (let p = 0; p < 15; p++) {
+        spawnP(e.x + e.w/2, e.y + e.h/2, (Math.random()-0.5)*5, -Math.random()*4, 25, e.color, 3, 0.2);
+      }
+      gainXP(30);
+      P.coins += 2 + Math.floor(Math.random() * 4);
+      $('coinsCount').textContent = P.coins;
+      Audio8.coin();
+      enemies.splice(i, 1);
+    }
+  }
+
+  // Спавн мобов ночью на поверхности
+  if (weather.timeOfDay > 0.4 && weather.timeOfDay < 0.8 && enemies.length < 8 && Math.random() < 0.015) {
+    const rx = P.x + (Math.random() - 0.5) * 500;
+    const ry = P.y - 100;
+    if (rx > 0 && rx < WORLD_PX) {
+      const type = Math.random() < 0.5 ? 'zombie' : 'eye';
+      spawnEnemy(type, rx, ry);
+    }
+  } else if (enemies.length < 3 && Math.random() < 0.005) {
+    const rx = P.x + (Math.random() - 0.5) * 400;
+    const ry = P.y - 80;
+    spawnEnemy('slime', rx, ry);
+  }
+}
+
+function playerDamage(amt) {
+  P.hp = Math.max(0, P.hp - amt);
+  screenShake = 10;
+  Audio8.hit();
+  textPop(P.x + P.w/2, P.y, `-${amt} HP`, '#ef4444');
+  if (P.hp <= 0) {
+    die();
+  }
+}
+
+function die() {
+  P.hp = P.maxHp;
+  P.x = WW * TILE / 2;
+  P.y = 10 * TILE;
+  P.vx = 0; P.vy = 0;
+  P.deadT = 40;
+  toast('💀 Вы погибли! Возрождение на спавне.', 2500);
+  saveProgressExact();
+}
+</script>
+
+<script>
+'use strict';
+/* ============================================================
+   ДИНАМИЧЕСКИЙ КРАФТ И СМЕНА СЕЗОНОВ
+   ============================================================ */
+const CRAFT_RECIPES = [
+  { id: 'torch', name: 'Факел', icon: '🕯️', cost: '1 Каменный Уголь + 1 Дерево', req: { [B.COAL]: 1, [B.WOOD]: 1 }, result: B.TORCH, amt: 4 },
+  { id: 'wood_plank', name: 'Деревянная Доска', icon: '🪵', cost: '1 Блок Дерева', req: { [B.WOOD]: 1 }, result: B.WOOD_PLANK, amt: 4 },
+  { id: 'stone_brick', name: 'Каменный Кирпич', icon: '🧱', cost: '2 Камня', req: { [B.STONE]: 2 }, result: B.STONE_BRICK, amt: 1 },
+  { id: 'sword_iron', name: 'Железный Меч', icon: '⚔️', cost: '5 Железа + 2 Дерева', req: { [B.IRON]: 5, [B.WOOD]: 2 }, result: 'sword_iron', amt: 1 },
+  { id: 'pickaxe_iron', name: 'Железная Кирка', icon: '⛏️', cost: '6 Железа + 3 Дерева', req: { [B.IRON]: 6, [B.WOOD]: 3 }, result: 'pickaxe_iron', amt: 1 },
+  { id: 'heal_potion', name: 'Зелье лечения', icon: '🧪', cost: '10 Травы + 3 Золота', req: { [B.GRASS_TALL]: 10, [B.GOLD]: 3 }, result: 'heal_potion', amt: 1 }
 ];
 
+function renderCraftingPanel() {
+  const container = $('recipeListContainer');
+  container.innerHTML = CRAFT_RECIPES.map(rec => {
+    // Проверка доступности
+    let hasIngredients = true;
+    for (const key in rec.req) {
+      const need = rec.req[key];
+      let have = 0;
+      // Считаем сколько у нас в инвентаре
+      for (const slot of P.inventory) {
+        if (slot.type === parseInt(key)) {
+          have += slot.count;
+        }
+      }
+      if (have < need) hasIngredients = false;
+    }
+
+    return `
+      <div class="recipe-item">
+        <div class="recipe-info">
+          <span class="recipe-icon">${rec.icon}</span>
+          <div>
+            <div class="recipe-name">${rec.name}</div>
+            <div class="recipe-cost">${rec.cost}</div>
+          </div>
+        </div>
+        <button class="recipe-btn" ${hasIngredients ? '' : 'disabled'} onclick="craftItem('${rec.id}')">Создать</button>
+      </div>
+    `;
+  }).join('');
+}
+
+window.craftItem = function(recipeId) {
+  const rec = CRAFT_RECIPES.find(r => r.id === recipeId);
+  if (!rec) return;
+
+  // Проверим ещё раз и вычтем ингредиенты
+  for (const key in rec.req) {
+    let need = rec.req[key];
+    for (const slot of P.inventory) {
+      if (slot.type === parseInt(key)) {
+        const take = Math.min(slot.count, need);
+        slot.count -= take;
+        need -= take;
+        if (slot.count <= 0) { slot.type = null; slot.count = 0; }
+        if (need <= 0) break;
+      }
+    }
+  }
+
+  addToInventory(rec.result, rec.amt);
+  Audio8.lvlUp();
+  toast(`🛠️ Скрафчено: ${rec.name}!`, 1200);
+  renderCraftingPanel();
+  saveProgressExact();
+};
+
+const SEASONS = ['ЛЕТО', 'ОСЕНЬ', 'ЗИМА', 'ВЕСНА'];
+const SEASON_LIGHTING = {
+  'ЛЕТО': { r: 85, g: 195, b: 77 },
+  'ОСЕНЬ': { r: 217, g: 119, b: 6 },
+  'ЗИМА': { r: 226, g: 232, b: 240 },
+  'ВЕСНА': { r: 244, g: 114, b: 182 }
+};
+
+let weather = {
+  rainIntensity: 0.0,
+  isRaining: false,
+  timeOfDay: 0.2, // 0 - полдень, 0.5 - полночь
+  season: 'ЛЕТО',
+  lastSeasonSwitch: 0
+};
+
+function updateDynamicWeatherAndSeasons(now) {
+  // Движение солнца
+  weather.timeOfDay = (Date.now() % 360000) / 360000; // Цикл 6 минут
+
+  // Вероятность дождя каждые 2 минуты
+  const weatherCycle = Date.now() % 120000;
+  weather.isRaining = weatherCycle < 30000; // Идет 30 секунд
+
+  if (weather.isRaining) {
+    weather.rainIntensity = lerp(weather.rainIntensity, 1.0, 0.005);
+  } else {
+    weather.rainIntensity = lerp(weather.rainIntensity, 0.0, 0.005);
+  }
+  Audio8.updateRainSound(weather.rainIntensity);
+
+  // Смена времен года
+  if (now - weather.lastSeasonSwitch > 90000) {
+    weather.lastSeasonSwitch = now;
+    const curIdx = SEASONS.indexOf(weather.season);
+    weather.season = SEASONS[(curIdx + 1) % SEASONS.length];
+    $('seasonLabel').textContent = weather.season;
+    toast(`🍁 Новое время года: ${weather.season}!`, 2500);
+  }
+}
+</script>
+
+<script>
+'use strict';
 /* ============================================================
-   NETWORKING & REALTIME WORLD
+   ФИЗИКА И ДВИЖЕНИЕ: Коллизии с блоками сетки мира
    ============================================================ */
-function syncBlock(tx, ty, type) {
-  const key = `${tx}_${ty}`;
-  db.ref('world_edits/' + key).set(type);
-}
+function stepPlayer() {
+  P.vy += 0.5; // Гравитация
 
-function listenToWorld() {
-  db.ref('world_edits').on('child_added', snap => {
-    const [tx, ty] = snap.key.split('_').map(Number);
-    setTile(tx, ty, snap.val());
-  });
-  db.ref('world_edits').on('child_changed', snap => {
-    const [tx, ty] = snap.key.split('_').map(Number);
-    setTile(tx, ty, snap.val());
-  });
-}
+  if (keys.left) { P.vx -= 0.6; P.dir = -1; }
+  else if (keys.right) { P.vx += 0.6; P.dir = 1; }
+  else {
+    P.vx *= P.ground ? 0.72 : 0.94;
+    if (Math.abs(P.vx) < 0.05) P.vx = 0;
+  }
 
-const remotes = {};
-function syncPlayer() {
-  if (!P.uid) return;
-  db.ref('players/' + P.uid).set({
-    n: P.nick, x: P.x, y: P.y, hp: P.hp, lvl: P.level, skin: P.activeSkin, t: Date.now()
-  });
-}
+  // Ограничение скорости
+  const maxSpeed = 4.5 + (P.level * 0.1);
+  P.vx = clamp(P.vx, -maxSpeed, maxSpeed);
 
-function listenPlayers() {
-  db.ref('players').on('value', snap => {
-    const now = Date.now();
-    snap.forEach(s => {
-      if (s.key === P.uid) return;
-      const v = s.val();
-      if (now - v.t < 10000) remotes[s.key] = v;
-      else delete remotes[s.key];
-    });
-    $('onlineVal').textContent = Object.keys(remotes).length + 1;
-  });
-}
+  // Коллизия по оси X
+  P.x += P.vx;
+  const tx0_x = Math.floor(P.x / TILE);
+  const tx1_x = Math.floor((P.x + P.w) / TILE);
+  const ty0_x = Math.floor(P.y / TILE);
+  const ty1_x = Math.floor((P.y + P.h) / TILE);
 
-/* ============================================================
-   CORE GAME LOGIC
-   ============================================================ */
-const keys = {};
-const mouse = { x: 0, y: 0, down: false };
-let cam = { x: P.x, y: P.y };
+  if (P.vx > 0) {
+    for (let y = ty0_x; y <= ty1_x; y++) {
+      if (solidAt(tx1_x, y)) {
+        P.x = tx1_x * TILE - P.w - 0.01;
+        P.vx = 0;
+        break;
+      }
+    }
+  } else if (P.vx < 0) {
+    for (let y = ty0_x; y <= ty1_x; y++) {
+      if (solidAt(tx0_x, y)) {
+        P.x = (tx0_x + 1) * TILE + 0.01;
+        P.vx = 0;
+        break;
+      }
+    }
+  }
 
-function handleInput() {
-  // Movement
-  let ax = 0;
-  if (keys['a'] || keys['ArrowLeft']) ax -= 1;
-  if (keys['d'] || keys['ArrowRight']) ax += 1;
-  
-  const speed = P.level >= 3 ? 5.5 : 4.2;
-  P.vx += ax * 0.6;
-  P.vx *= P.ground ? 0.8 : 0.92;
-  
-  if ((keys[' '] || keys['w']) && P.ground) {
+  // Коллизия по оси Y
+  P.y += P.vy;
+  P.ground = false;
+  const tx0_y = Math.floor(P.x / TILE);
+  const tx1_y = Math.floor((P.x + P.w) / TILE);
+  const ty0_y = Math.floor(P.y / TILE);
+  const ty1_y = Math.floor((P.y + P.h) / TILE);
+
+  if (P.vy > 0) {
+    for (let x = tx0_y; x <= tx1_y; x++) {
+      if (solidAt(x, ty1_y)) {
+        P.y = ty1_y * TILE - P.h;
+        P.vy = 0;
+        P.ground = true;
+        break;
+      }
+    }
+  } else if (P.vy < 0) {
+    for (let x = tx0_y; x <= tx1_y; x++) {
+      if (solidAt(x, ty0_y)) {
+        P.y = (ty0_y + 1) * TILE + 0.01;
+        P.vy = 0;
+        break;
+      }
+    }
+  }
+
+  if (P.vy > 12) P.vy = 12;
+
+  // Прыжок
+  if (keys.jump && P.ground) {
     P.vy = -10.5;
     P.ground = false;
+    Audio8.jump();
   }
-  
-  P.vy += 0.5; // Gravity
-  
-  P.x += P.vx;
-  checkCollision('x');
-  P.y += P.vy;
-  checkCollision('y');
-  
-  // Interaction
-  if (mouse.down) {
-    const worldX = mouse.x + cam.x;
-    const worldY = mouse.y + cam.y;
-    const tx = Math.floor(worldX / TILE);
-    const ty = Math.floor(worldY / TILE);
-    
-    // Range check
-    const dist = Math.hypot(P.x + P.w/2 - worldX, P.y + P.h/2 - worldY);
-    if (dist < TILE * 5) {
-      if (mouse.btn === 0) mine(tx, ty);
-      else if (mouse.btn === 2) build(tx, ty);
-    }
+
+  // Смертельное падение / Лава коллизия
+  const ctx = Math.floor((P.x + P.w/2)/TILE);
+  const cty = Math.floor((P.y + P.h/2)/TILE);
+  if (blockAt(ctx, cty) === B.LAVA) {
+    playerDamage(4);
   }
-}
 
-function checkCollision(axis) {
-  const x1 = Math.floor(P.x / TILE);
-  const x2 = Math.floor((P.x + P.w) / TILE);
-  const y1 = Math.floor(P.y / TILE);
-  const y2 = Math.floor((P.y + P.h) / TILE);
+  P.runT += Math.abs(P.vx);
 
-  if (axis === 'x') {
-    for (let y = y1; y <= y2; y++) {
-      if (getTile(P.vx > 0 ? x2 : x1, y) !== B.AIR) {
-        if (P.vx > 0) P.x = x2 * TILE - P.w - 1;
-        else P.x = (x1 + 1) * TILE + 1;
-        P.vx = 0;
-      }
-    }
-  } else {
-    P.ground = false;
-    for (let x = x1; x <= x2; x++) {
-      if (getTile(x, P.vy > 0 ? y2 : y1) !== B.AIR) {
-        if (P.vy > 0) {
-          P.y = y2 * TILE - P.h - 1;
-          P.ground = true;
-        } else {
-          P.y = (y1 + 1) * TILE + 1;
-        }
-        P.vy = 0;
-      }
-    }
+  // Камера плавно следует за персонажем
+  cam.x = lerp(cam.x, P.x - vw / 2 + P.w / 2, 0.12);
+  cam.y = lerp(cam.y, P.y - vh / 2 + P.h / 2, 0.08);
+
+  // Не выпускаем камеру за границы мира
+  cam.x = clamp(cam.x, 0, WORLD_PX - vw);
+  cam.y = clamp(cam.y, 0, WH * TILE - vh);
+
+  if (screenShake > 0) {
+    cam.x += (Math.random() - 0.5) * screenShake;
+    cam.y += (Math.random() - 0.5) * screenShake;
+    screenShake *= 0.9;
   }
 }
+</script>
 
-function mine(tx, ty) {
-  const t = getTile(tx, ty);
-  if (t === B.AIR || t === B.WATER) return;
-  
-  setTile(tx, ty, B.AIR);
-  syncBlock(tx, ty, B.AIR);
-  
-  P.inv[t] = (P.inv[t] || 0) + 1;
-  P.xp += (t >= B.COAL ? 20 : 2);
-  checkLevel();
-  updateHUD();
-}
-
-function build(tx, ty) {
-  if (getTile(tx, ty) !== B.AIR) return;
-  const itemType = hotbarSlots[activeSlotIdx];
-  const item = ITEMS[itemType];
-  if (!item || !item.place || (P.inv[itemType] || 0) <= 0) return;
-  
-  setTile(tx, ty, item.place);
-  syncBlock(tx, ty, item.place);
-  P.inv[itemType]--;
-  updateHUD();
-}
-
-function checkLevel() {
-  const nextXp = P.level * 200;
-  if (P.xp >= nextXp) {
-    P.xp -= nextXp;
-    P.level++;
-    toast(`⭐ НОВЫЙ УРОВЕНЬ: ${P.level}!`);
-    if (P.level === 6) P.activeSkin = 'golden';
-  }
-}
-
+<script>
+'use strict';
 /* ============================================================
-   RENDERING
+   СЕТЬ: Синхронизация общего мира, игроков, инвентаря и чата
    ============================================================ */
-const cv = $('game'), ctx = cv.getContext('2d');
-function render() {
-  ctx.fillStyle = "#0a1020";
-  ctx.fillRect(0, 0, cv.width, cv.height);
+let MY_UID = null, MY_NAME = '', joined = false;
+const remotes = {};
+let meRef = null, lastSend = 0, lastSX = 0, lastSY = 0;
+
+function joinNet(){
+  meRef = db.ref('players/' + MY_UID);
+  db.ref('.info/connected').on('value', s => {
+    if (s.val() === true){ meRef.onDisconnect().remove(); sendNow(); }
+  });
   
-  // Camera smooth follow
-  cam.x = lerp(cam.x, P.x - cv.width/2, 0.1);
-  cam.y = lerp(cam.y, P.y - cv.height/2, 0.1);
-  
-  // Draw Tiles
-  const tx0 = Math.floor(cam.x / TILE);
-  const ty0 = Math.floor(cam.y / TILE);
-  const tx1 = tx0 + Math.ceil(cv.width / TILE) + 1;
-  const ty1 = ty0 + Math.ceil(cv.height / TILE) + 1;
-  
-  for (let y = ty0; y <= ty1; y++) {
-    for (let x = tx0; x <= tx1; x++) {
-      const t = getTile(x, y);
-      if (t === B.AIR) continue;
-      
-      const px = x * TILE - cam.x;
-      const py = y * TILE - cam.y;
-      
-      ctx.fillStyle = getTileColor(t);
-      ctx.fillRect(px, py, TILE, TILE);
-      
-      // Highlight top of grass
-      if (t === B.GRASS) {
-        ctx.fillStyle = "#82e66c";
-        ctx.fillRect(px, py, TILE, 4);
-      }
-    }
-  }
-  
-  // Draw Players
-  drawChar(P.x - cam.x, P.y - cam.y, P.nick, P.activeSkin);
-  for (let id in remotes) {
-    const r = remotes[id];
-    drawChar(r.x - cam.x, r.y - cam.y, r.n, r.skin);
-  }
-  
-  requestAnimationFrame(render);
+  db.ref('players').on('value', snap => {
+    const now = Date.now(), seen = new Set();
+    snap.forEach(ch => {
+      const v = ch.val();
+      if (!v || ch.key === MY_UID) return;
+      if (v.t && now - v.t > 15000) return;
+      seen.add(ch.key);
+      let r = remotes[ch.key];
+      if (!r) r = remotes[ch.key] = { rx: v.x, ry: v.y, tx: v.x, ty: v.y };
+      r.n = v.n; r.tx = v.x; r.ty = v.y; r.d = v.d || 1; r.s = v.s || 0;
+      r.skin = v.skin || 'default'; r.lvl = v.lvl || 1; r.tool = v.tool || null;
+    });
+    for (const k in remotes) if (!seen.has(k)) delete remotes[k];
+    $('online').textContent = seen.size + 1;
+  });
+
+  // ЧАТ
+  db.ref('chat').limitToLast(18).on('child_added', snap => {
+    const data = snap.val();
+    if (!data) return;
+    const msgEl = document.createElement('div');
+    const color = getSkinColor(data.skin || 'default');
+    msgEl.innerHTML = `<span style="color:${color};font-weight:800;">${esc(data.name)}:</span> <span style="color:#fff;">${esc(data.text)}</span>`;
+    const box = $('chatMsgs');
+    box.appendChild(msgEl);
+    box.scrollTop = box.scrollHeight;
+  });
+
+  // Быстрый тикер положения
+  setInterval(() => { if (Date.now() - lastSend > 100) sendNow(); }, 100);
 }
 
-function getTileColor(t) {
-  switch(t) {
-    case B.DIRT: return "#8c5e3c";
-    case B.GRASS: return "#55b848";
-    case B.STONE: return "#5d6a7a";
-    case B.WOOD: return "#6d4328";
-    case B.LEAF: return "#2d5a27";
-    case B.COAL: return "#1a1a1a";
-    case B.IRON: return "#9aa5b1";
-    case B.GOLD: return "#ffd94f";
-    case B.BRICK: return "#a04a3c";
-    case B.WATER: return "rgba(0, 150, 255, 0.6)";
-    default: return "#f00";
-  }
+function sendChatMessage() {
+  const input = $('chatInput');
+  const txt = input.value.trim();
+  if (txt.length === 0) return;
+  db.ref('chat').push({
+    name: MY_NAME,
+    skin: P.activeSkin,
+    text: txt,
+    t: firebase.database.ServerValue.TIMESTAMP
+  });
+  input.value = '';
 }
 
-function drawChar(x, y, name, skin) {
-  const col = skin === 'golden' ? '#ffd94f' : '#5cb8ff';
-  ctx.fillStyle = col;
-  ctx.fillRect(x, y, P.w, P.h);
-  // Eyes
-  ctx.fillStyle = "#fff";
-  ctx.fillRect(x + 4, y + 6, 4, 4);
-  ctx.fillRect(x + 12, y + 6, 4, 4);
-  // Name
-  ctx.fillStyle = "#fff";
-  ctx.font = "bold 10px Arial";
-  ctx.textAlign = "center";
-  ctx.fillText(name, x + P.w/2, y - 8);
-}
-
-/* ============================================================
-   UI & EVENTS
-   ============================================================ */
-function updateHUD() {
-  $('hpBar').style.width = (P.hp / P.maxHp * 100) + '%';
-  const nextXp = P.level * 200;
-  $('xpBar').style.width = (P.xp / nextXp * 100) + '%';
-  $('lvlVal').textContent = P.level;
-  $('xpVal').textContent = P.xp;
-  $('coinCount').textContent = P.coins;
-  $('pName').textContent = P.nick;
-  
-  renderHotbar();
-}
-
-function renderHotbar() {
-  const hb = $('hotbar');
-  hb.innerHTML = '';
-  hotbarSlots.forEach((type, i) => {
-    const item = ITEMS[type];
-    const slot = document.createElement('div');
-    slot.className = `slot ${activeSlotIdx === i ? 'active' : ''}`;
-    slot.innerHTML = `
-      <span class="slot-key">${i+1}</span>
-      <span class="slot-icon">${item.i}</span>
-      <span class="slot-count">${P.inv[type] || 0}</span>
-    `;
-    slot.onclick = () => { activeSlotIdx = i; renderHotbar(); };
-    hb.appendChild(slot);
+function sendNow(){
+  if (!meRef) return;
+  meRef.update({
+    n: MY_NAME, skin: P.activeSkin,
+    x: Math.round(P.x), y: Math.round(P.y), d: P.dir,
+    lvl: P.level, tool: getActiveTool(),
+    t: firebase.database.ServerValue.TIMESTAMP
   });
 }
 
-function toggleModal(id) {
-  const m = $(id);
-  const isOpening = m.style.display !== 'flex';
-  m.style.display = isOpening ? 'flex' : 'none';
-  if (isOpening && id === 'craftModal') renderCrafting();
+function saveProgressExact() {
+  if (!joined || !MY_UID) return;
+  const saveState = {
+    hp: P.hp,
+    level: P.level,
+    xp: P.xp,
+    coins: P.coins,
+    activeSkin: P.activeSkin,
+    ownedSkins: ownedSkins,
+    inventory: P.inventory,
+    x: Math.round(P.x),
+    y: Math.round(P.y)
+  };
+  localStorage.setItem('blockran_survival_save_v1', JSON.stringify(saveState));
+  db.ref('saves/' + MY_UID).set(saveState).catch(() => {});
 }
 
-function renderCrafting() {
-  const grid = $('craftGrid');
-  grid.innerHTML = '';
-  RECIPES.forEach(r => {
-    const card = document.createElement('div');
-    card.className = 'recipe-card';
-    let costText = "";
-    for (let id in r.needs) costText += `${ITEMS[id].i}x${r.needs[id]} `;
-    
-    card.innerHTML = `
-      <div class="recipe-icon">${r.i}</div>
-      <div class="recipe-name">${r.n}</div>
-      <div class="recipe-cost">${costText}</div>
-    `;
-    card.onclick = () => craft(r);
-    grid.appendChild(card);
-  });
+function getSkinColor(skinId) {
+  const sk = SKINS.find(s => s.id === skinId);
+  return sk ? sk.color : '#5cb8ff';
 }
 
-function craft(r) {
-  for (let id in r.needs) {
-    if ((P.inv[id] || 0) < r.needs[id]) { toast("Недостаточно ресурсов!"); return; }
+function smoothRemotes(){
+  for (const k in remotes){
+    const r = remotes[k];
+    if (Math.abs(r.tx - r.rx) > 200 || Math.abs(r.ty - r.ry) > 200){ r.rx = r.tx; r.ry = r.ty; }
+    else { r.rx = lerp(r.rx, r.tx, 0.25); r.ry = lerp(r.ry, r.ty, 0.25); }
   }
-  // All good
-  for (let id in r.needs) P.inv[id] -= r.needs[id];
-  P.inv[r.out] = (P.inv[r.out] || 0) + r.count;
-  toast(`Скрафчено: ${r.n}`);
-  updateHUD();
-  renderCrafting();
-}
-
-/* ============================================================
-   SYSTEMS & LIFECYCLE
-   ============================================================ */
-async function handleAuth(type) {
-  const email = $('emailInput').value, pass = $('passInput').value, nick = $('nickInput').value;
-  try {
-    if (type === 'reg') {
-      const res = await auth.createUserWithEmailAndPassword(email, pass);
-      await db.ref('users/' + res.user.uid).set({ n: nick });
-    } else {
-      await auth.signInWithEmailAndPassword(email, pass);
-    }
-  } catch(e) { $('authErr').textContent = e.message; }
 }
 
 auth.onAuthStateChanged(async user => {
-  if (user) {
-    P.uid = user.uid;
-    const snap = await db.ref('users/' + user.uid).once('value');
-    P.nick = snap.val()?.n || "Странник";
-    $('authScreen').style.display = 'none';
-    $('hud').classList.add('on');
-    initGame();
+  if (user && !joined){
+    joined = true;
+    MY_UID = user.uid;
+    try {
+      const s = await db.ref('users/' + user.uid + '/name').once('value');
+      MY_NAME = s.val() || user.email.split('@')[0].slice(0, 14);
+    } catch(e){ MY_NAME = user.email.split('@')[0].slice(0, 14); }
+    startGame();
+  } else if (!user){
+    $('loading').classList.add('hidden');
+    $('auth').classList.remove('hidden');
   }
 });
+</script>
 
-function initGame() {
-  generateBaseTerrain();
-  listenToWorld();
-  listenPlayers();
-  
-  // Game loops
-  setInterval(handleInput, 1000/60);
-  setInterval(syncPlayer, 100);
-  
-  updateHUD();
-  render();
+<script>
+'use strict';
+/* ============================================================
+   ИНТЕРФЕЙС, ИНВЕНТАРЬ И ГОРЯЧАЯ ПАНЕЛЬ СЛОТОВ
+   ============================================================ */
+function renderHotbar() {
+  const wrap = $('hotbarWrap');
+  wrap.innerHTML = P.inventory.map((slot, idx) => {
+    const active = idx === P.activeHotbarSlot ? 'active' : '';
+    let inner = '';
+    if (slot.type !== null) {
+      if (typeof slot.type === 'string') {
+        const icons = {
+          'pickaxe_wood': '⛏️', 'sword_wood': '⚔️',
+          'pickaxe_iron': '🔩⛏️', 'sword_iron': '🔩⚔️',
+          'heal_potion': '🧪'
+        };
+        inner = `<span class="icon-mock">${icons[slot.type] || '🛠️'}</span>`;
+      } else {
+        const emoji = {
+          [B.GRASS]: '🌱', [B.DIRT]: '🟫', [B.STONE]: '🪨', [B.COAL]: '🌑',
+          [B.IRON]: '🧲', [B.GOLD]: '🟡', [B.DIAMOND]: '💎', [B.WOOD]: '🪵',
+          [B.LEAVES]: '🍃', [B.STONE_BRICK]: '🧱', [B.WOOD_PLANK]: '🪵',
+          [B.TORCH]: '🕯️', [B.SAND]: '🟡', [B.GRASS_TALL]: '🌿'
+        };
+        inner = `<span class="icon-mock">${emoji[slot.type] || '📦'}</span>`;
+      }
+    }
+    const count = slot.count > 1 ? `<span class="count">${slot.count}</span>` : '';
+    return `
+      <div class="hot-slot ${active}" onclick="selectHotbarSlot(${idx})">
+        <span class="key-num">${idx + 1}</span>
+        ${inner}
+        ${count}
+      </div>
+    `;
+  }).join('');
 }
 
-// Global Events
-window.onresize = () => { cv.width = window.innerWidth; cv.height = window.innerHeight; };
-window.onresize();
-
-window.onkeydown = e => {
-  keys[e.key.toLowerCase()] = true;
-  if (e.key >= '1' && e.key <= '6') { activeSlotIdx = parseInt(e.key) - 1; renderHotbar(); }
-  if (e.key === 'e') toggleModal('craftModal');
+window.selectHotbarSlot = function(idx) {
+  P.activeHotbarSlot = idx;
+  renderHotbar();
 };
-window.onkeyup = e => keys[e.key.toLowerCase()] = false;
 
-cv.onmousedown = e => { mouse.down = true; mouse.btn = e.button; };
-window.onmouseup = () => mouse.down = false;
-cv.onmousemove = e => { mouse.x = e.clientX; mouse.y = e.clientY; };
-cv.oncontextmenu = e => e.preventDefault();
-
-// Chat
-$('chatInput').onkeydown = e => {
-  if (e.key === 'Enter') {
-    const t = e.target.value.trim();
-    if (t) db.ref('chat').push({ n: P.nick, m: t, skin: P.activeSkin });
-    e.target.value = '';
+function renderBoard() {
+  const rows = [];
+  rows.push({ n: MY_NAME, lvl: P.level, me: true });
+  for (const k in remotes) {
+    rows.push({ n: remotes[k].n, lvl: remotes[k].lvl || 1, me: false });
   }
+  rows.sort((a,b) => b.lvl - a.lvl);
+  $('boardRows').innerHTML = rows.map((r, i) => `
+    <div class="brow ${r.me ? 'me' : ''}">
+      <span class="nm"><i>${i+1}.</i>${esc(r.n)}</span>
+      <span class="bl">LVL ${r.lvl}</span>
+    </div>
+  `).join('');
+  $('boardUpd').textContent = new Date().toLocaleTimeString('ru-RU');
+}
+
+let toastT = null;
+function toast(msg, ms = 2200){
+  const el = $('toast'); el.innerHTML = msg; el.classList.add('show');
+  clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('show'), ms);
+}
+
+// Поведение UI кнопок
+$('zoomOutBtn').onclick = () => { ZOOM = clamp(ZOOM - 0.2, 0.8, 2.2); resize(); };
+$('zoomInBtn').onclick = () => { ZOOM = clamp(ZOOM + 0.2, 0.8, 2.2); resize(); };
+$('craftToggleBtn').onclick = () => {
+  const p = $('craftPanel');
+  p.classList.toggle('open');
+  if (p.classList.contains('open')) renderCraftingPanel();
 };
-db.ref('chat').limitToLast(10).on('child_added', snap => {
-  const v = snap.val();
-  const d = document.createElement('div');
-  d.innerHTML = `<span style="color:#ffd94f">${v.n}:</span> ${v.m}`;
-  $('messages').appendChild(d);
-  $('messages').scrollTop = $('messages').scrollHeight;
+$('muteBtn').onclick = () => {
+  const m = Audio8.toggleSfx();
+  $('muteBtn').textContent = m ? '🔇' : '🔊';
+  toast(m ? 'Звуковые эффекты выключены' : 'Звуки включены');
+};
+$('musMuteBtn').onclick = () => {
+  const m = Audio8.toggleMusic();
+  $('musMuteBtn').textContent = m ? '🔇' : '🎵';
+  toast(m ? 'Музыка выключена' : 'Музыка включена');
+};
+$('musBtn').onclick = () => { Audio8.init(); Audio8.nextTrack(); };
+$('chatToggleBtn').onclick = () => {
+  $('chat').classList.toggle('hidden');
+};
+
+/* СТРОИТЕЛЬСТВО И ДОБЫЧА МЫШКОЙ (ЛКМ / ПКМ) */
+const mouse = { x: 0, y: 0, isDown: false, targetBlock: { tx: 0, ty: 0 }, mineProgress: 0 };
+
+window.addEventListener('mousemove', e => {
+  const rect = cv.getBoundingClientRect();
+  mouse.x = (e.clientX - rect.left) / ZOOM + cam.x;
+  mouse.y = (e.clientY - rect.top) / ZOOM + cam.y;
 });
 
-// Mobile Controls
-const bindJoy = (id, k) => {
-  $(id).ontouchstart = (e) => { e.preventDefault(); keys[k] = true; };
-  $(id).ontouchend = () => keys[k] = false;
+window.addEventListener('mousedown', e => {
+  if (e.target.tagName === 'BUTTON' || e.target.closest('#hud')) return;
+  const tx = Math.floor(mouse.x / TILE);
+  const ty = Math.floor(mouse.y / TILE);
+  
+  // Дистанция воздействия
+  const dist = Math.hypot((P.x + P.w/2) - (tx * TILE + 16), (P.y + P.h/2) - (ty * TILE + 16));
+  if (dist > 180) return; // Слишком далеко
+
+  if (e.button === 0) { // ЛКМ: Добыча или атака
+    const activeTool = getActiveTool();
+    
+    // Проверим, нет ли моба под кликом
+    let hitMob = false;
+    for (const mob of enemies) {
+      if (mouse.x > mob.x && mouse.x < mob.x + mob.w && mouse.y > mob.y && mouse.y < mob.y + mob.h) {
+        // Наносим удар мечом!
+        const isSword = typeof activeTool === 'string' && activeTool.includes('sword');
+        const dmg = isSword ? (activeTool.includes('iron') ? 35 : 20) : 6;
+        mob.hp -= dmg;
+        mob.vx = P.dir * 4; // Отбрасывание
+        mob.vy = -3;
+        Audio8.hit();
+        textPop(mob.x + mob.w/2, mob.y, `-${dmg} HP`, '#f87171');
+        hitMob = true;
+        break;
+      }
+    }
+
+    if (!hitMob) {
+      // Пьем зелье
+      if (activeTool === 'heal_potion') {
+        P.hp = Math.min(P.maxHp, P.hp + 50);
+        Audio8.lvlUp();
+        textPop(P.x + P.w/2, P.y, `+50 HP`, '#4ade80');
+        // Тратим зелье
+        P.inventory[P.activeHotbarSlot].count--;
+        if (P.inventory[P.activeHotbarSlot].count <= 0) {
+          P.inventory[P.activeHotbarSlot].type = null;
+        }
+        renderHotbar();
+        return;
+      }
+
+      // Добыча блоков
+      mouse.targetBlock = { tx, ty };
+      mouse.isDown = true;
+    }
+  } else if (e.button === 2) { // ПКМ: Поставить блок
+    e.preventDefault();
+    useHotbarItem(tx, ty);
+  }
+});
+
+window.addEventListener('mouseup', () => {
+  mouse.isDown = false;
+  mouse.mineProgress = 0;
+});
+window.addEventListener('contextmenu', e => e.preventDefault());
+
+function updateMining() {
+  if (mouse.isDown) {
+    const { tx, ty } = mouse.targetBlock;
+    const b = blockAt(tx, ty);
+    if (b !== B.AIR) {
+      const info = TILES_INFO[b];
+      const activeTool = getActiveTool();
+      
+      // Вычисляем скорость копания
+      let mult = 1.0;
+      if (typeof activeTool === 'string' && activeTool.includes('pickaxe')) {
+        mult = activeTool.includes('iron') ? 4.0 : 2.0;
+      }
+
+      mouse.mineProgress += 16.66 * mult;
+      
+      // Спавн пыли
+      if (Math.random() < 0.4) {
+        spawnP(tx * TILE + 16, ty * TILE + 16, (Math.random()-0.5)*3, -Math.random()*2, 12, info.color, 3, 0.15);
+      }
+
+      if (mouse.mineProgress >= info.mineTime) {
+        // Разрушаем!
+        Audio8.breakBlock();
+        setBlock(tx, ty, B.AIR);
+        
+        // Даём XP и кладем в инвентарь
+        const xpMap = { [B.STONE]: 3, [B.COAL]: 5, [B.IRON]: 8, [B.GOLD]: 15, [B.DIAMOND]: 35 };
+        gainXP(xpMap[b] || 1);
+        
+        // Попытка уложить в инвентарь
+        addToInventory(b, 1);
+
+        mouse.isDown = false;
+        mouse.mineProgress = 0;
+        saveProgressExact();
+      }
+    }
+  }
+}
+
+// Кнопка Активного супер-удара (Уровень 10)
+$('activeSkillBtn').onclick = () => {
+  if (P.level < 10) return;
+  Audio8.skill();
+  toast('🔥 ОГНЕННЫЙ ВЗРЫВ ПРЕИСПОДНЕЙ!', 2000);
+  
+  // Разрушает всё в радиусе 4 блоков вокруг персонажа
+  const pTx = Math.floor((P.x + P.w/2)/TILE);
+  const pTy = Math.floor((P.y + P.h/2)/TILE);
+  
+  for (let dx = -3; dx <= 3; dx++) {
+    for (let dy = -3; dy <= 3; dy++) {
+      if (dx*dx + dy*dy <= 10) {
+        const b = blockAt(pTx + dx, pTy + dy);
+        if (b !== B.AIR && b !== B.LAVA) {
+          setBlock(pTx + dx, pTy + dy, B.AIR);
+          if (Math.random() < 0.5) addToInventory(b, 1);
+        }
+      }
+    }
+  }
+  // Наносим массовый урон всем мобам рядом
+  for (const mob of enemies) {
+    if (Math.hypot(mob.x - P.x, mob.y - P.y) < 150) {
+      mob.hp -= 80;
+      textPop(mob.x + mob.w/2, mob.y, `-80 FIRE`, '#f59e0b');
+    }
+  }
+  saveProgressExact();
 };
-bindJoy('mLeft', 'a'); bindJoy('mRight', 'd'); bindJoy('mJump', ' ');
-$('mAction').ontouchstart = (e) => { e.preventDefault(); mouse.down = true; mouse.btn = 0; mouse.x = cv.width/2; mouse.y = cv.height/2; };
-$('mAction').ontouchend = () => mouse.down = false;
+</script>
+
+<script>
+'use strict';
+/* ============================================================
+   📖 ИНТЕРАКТИВНЫЕ ГАЙДЫ И СКИНОДЕЛЬНЯ
+   ============================================================ */
+let currentGuidePage = 0;
+const GUIDE_PAGES = [
+  {
+    title: '🌿 Глава 1: Начало Выживания',
+    content: `Добро пожаловать в живой мир БЛОКРАН!<br><br>
+    Здесь вы предоставлены сами себе. Копайте шахты, стройте дома и защищайтесь от угроз.<br>
+    • У вас есть <b>Деревянная Кирка</b> и <b>Меч</b> в хотбаре.<br>
+    • Нажимайте клавиши <b>1–9</b> или колесико мыши для выбора слотов.<br>
+    • <b>ЛКМ</b> — добыча / атака. <b>ПКМ</b> — установить выбранный блок.`
+  },
+  {
+    title: '🛠️ Глава 2: Система Крафта',
+    content: `Используйте кнопку <b>[🛠️ Крафт]</b> в верхней панели меню!<br><br>
+    Для крафта качественных инструментов нужны ресурсы:<br>
+    • Рубите Деревья на поверхности, чтобы получить дерево.<br>
+    • Добывайте Камень глубоко под землей.<br>
+    • Крафтите доски, прочные кирпичи и факелы для освещения темных пещер.`
+  },
+  {
+    title: '🧟 Глава 3: Монстры и Уровни',
+    content: `Каждое действие повышает ваш опыт (XP)!<br><br>
+    С каждым новым уровнем увеличивается ваше максимальное здоровье.<br>
+    • Опасайтесь Ночи! В темноте спавнятся сильные Зомби и Демонические глаза.<br>
+    • На <b>10 Уровне</b> вы овладеете магией огня — Огненный Спелл, мгновенно разрушающий пласты земли!`
+  }
+];
+
+function updateGuideBookContent() {
+  const page = GUIDE_PAGES[currentGuidePage];
+  $('bookLeftPage').innerHTML = `
+    <h3>${page.title}</h3>
+    <p>${page.content}</p>
+  `;
+  $('bookPrevBtn').disabled = currentGuidePage === 0;
+  $('bookNextBtn').disabled = currentGuidePage === GUIDE_PAGES.length - 1;
+}
+
+function renderSkinsShop() {
+  const container = $('skinsShopContainer');
+  container.innerHTML = SKINS.map(s => {
+    const isOwned = ownedSkins.includes(s.id);
+    const isEquipped = P.activeSkin === s.id;
+    let btnHtml = '';
+    if (isEquipped) {
+      btnHtml = `<button class="skin-btn active">Надето</button>`;
+    } else if (isOwned) {
+      btnHtml = `<button class="skin-btn equip" onclick="equipSkin('${s.id}')">Надеть</button>`;
+    } else {
+      btnHtml = `<button class="skin-btn buy" onclick="buySkin('${s.id}', ${s.price})">Купить</button>`;
+    }
+
+    return `
+      <div class="skin-card ${isEquipped ? 'equipped' : ''}">
+        <div class="skin-info">
+          <div class="skin-preview-box" style="background:${s.color};"></div>
+          <div>
+            <div class="skin-name">${esc(s.name)}</div>
+            <div style="font-size:10px; color:#5d4037;">${esc(s.desc)}</div>
+          </div>
+        </div>
+        <div>
+          ${!isOwned ? `<div class="skin-price">🪙 ${s.price}</div>` : ''}
+          ${btnHtml}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+window.buySkin = function(skinId, price) {
+  if (P.coins >= price) {
+    P.coins -= price;
+    ownedSkins.push(skinId);
+    P.activeSkin = skinId;
+    $('coinsCount').textContent = P.coins;
+    toast('👗 Скин успешно куплен и экипирован!', 1800);
+    Audio8.lvlUp();
+    renderSkinsShop();
+    saveProgressExact();
+  } else {
+    toast('🪙 Недостаточно монет!', 1500);
+  }
+};
+
+window.equipSkin = function(skinId) {
+  if (ownedSkins.includes(skinId)) {
+    P.activeSkin = skinId;
+    toast('👗 Скин изменен!', 1500);
+    Audio8.coin();
+    renderSkinsShop();
+    saveProgressExact();
+  }
+};
+
+$('guideBookBtn').onclick = () => {
+  $('bookOverlay').classList.add('open');
+  updateGuideBookContent();
+  renderSkinsShop();
+};
+$('bookCloseBtn').onclick = () => { $('bookOverlay').classList.remove('open'); };
+$('bookPrevBtn').onclick = () => { if (currentGuidePage > 0) { currentGuidePage--; updateGuideBookContent(); } };
+$('bookNextBtn').onclick = () => { if (currentGuidePage < GUIDE_PAGES.length - 1) { currentGuidePage++; updateGuideBookContent(); } };
+</script>
+
+<script>
+'use strict';
+/* ============================================================
+   ОТРИСОВКА И ВИЗУАЛ: Параллакс, Динамический день/ночь свет, RTX
+   ============================================================ */
+const cv = $('game'), ctx = cv.getContext('2d');
+const lcv = document.createElement('canvas'), lctx = lcv.getContext('2d');
+const LIGHT_SCALE = 4;
+
+let vw = 0, vh = 0, dpr = 1, ZOOM = 1.35;
+
+function resize(){
+  dpr = Math.min(1.8, window.devicePixelRatio || 1);
+  vw = Math.ceil(innerWidth / ZOOM); vh = Math.ceil(innerHeight / ZOOM);
+  cv.width = innerWidth * dpr; cv.height = innerHeight * dpr;
+  lcv.width = Math.ceil(innerWidth * dpr / LIGHT_SCALE);
+  lcv.height = Math.ceil(innerHeight * dpr / LIGHT_SCALE);
+  ctx.setTransform(dpr * ZOOM, 0, 0, dpr * ZOOM, 0, 0);
+  lctx.setTransform((dpr * ZOOM) / LIGHT_SCALE, 0, 0, (dpr * ZOOM) / LIGHT_SCALE, 0, 0);
+}
+window.addEventListener('resize', resize); resize();
+
+function drawSkyBackground() {
+  // Цветовая гамма неба в зависимости от времени суток
+  const tod = weather.timeOfDay;
+  let skyColor1, skyColor2;
+
+  if (tod < 0.25 || tod > 0.75) {
+    // ДЕНЬ
+    skyColor1 = '#7dd3fc'; skyColor2 = '#e0f2fe';
+  } else if (tod >= 0.25 && tod < 0.35) {
+    // ЗАКАТ
+    const t = (tod - 0.25) / 0.1;
+    skyColor1 = mixCol('#7dd3fc', '#f97316', t);
+    skyColor2 = mixCol('#e0f2fe', '#fef08a', t);
+  } else if (tod >= 0.35 && tod < 0.65) {
+    // НОЧЬ
+    skyColor1 = '#090d16'; skyColor2 = '#05050a';
+  } else {
+    // РАССВЕТ
+    const t = (tod - 0.65) / 0.1;
+    skyColor1 = mixCol('#090d16', '#a78bfa', t);
+    skyColor2 = mixCol('#05050a', '#fed7aa', t);
+  }
+
+  const grad = ctx.createLinearGradient(0, 0, 0, vh);
+  grad.addColorStop(0, skyColor1);
+  grad.addColorStop(1, skyColor2);
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, vw, vh);
+
+  // Звезды ночью
+  if (tod > 0.35 && tod < 0.65) {
+    ctx.fillStyle = '#fff';
+    const seedR = mulberry32(101);
+    for (let i = 0; i < 40; i++) {
+      const sx = (seedR() * 2000 - cam.x * 0.1) % vw;
+      const sy = seedR() * vh * 0.7;
+      ctx.fillRect(sx, sy, 1.5, 1.5);
+    }
+  }
+}
+
+function mixCol(c1, c2, t) {
+  const hex = c => parseInt(c.slice(1), 16);
+  const r1 = hex(c1) >> 16, g1 = (hex(c1) >> 8) & 0xff, b1 = hex(c1) & 0xff;
+  const r2 = hex(c2) >> 16, g2 = (hex(c2) >> 8) & 0xff, b2 = hex(c2) & 0xff;
+  const r = Math.round(lerp(r1, r2, t));
+  const g = Math.round(lerp(g1, g2, t));
+  const b = Math.round(lerp(b1, b2, t));
+  return `rgb(${r},${g},${b})`;
+}
+
+// Отрисовка блоков в пределах видимости
+function drawBlocks() {
+  const tx0 = Math.max(0, Math.floor(cam.x / TILE));
+  const tx1 = Math.min(WW - 1, Math.ceil((cam.x + vw) / TILE));
+  const ty0 = Math.max(0, Math.floor(cam.y / TILE));
+  const ty1 = Math.min(WH - 1, Math.ceil((cam.y + vh) / TILE));
+
+  for (let ty = ty0; ty <= ty1; ty++) {
+    for (let tx = tx0; tx <= tx1; tx++) {
+      const b = blockAt(tx, ty);
+      const bx = tx * TILE - cam.x;
+      const by = ty * TILE - cam.y;
+
+      // Отрисовка задних фоновых стенок
+      const bgB = backWorld[ty * WW + tx];
+      if (b === B.AIR && bgB !== B.AIR) {
+        ctx.fillStyle = bgB === B.DIRT ? '#451a03' : '#334155';
+        ctx.fillRect(bx, by, TILE, TILE);
+      }
+
+      if (b === B.AIR) continue;
+      
+      const info = TILES_INFO[b];
+      ctx.fillStyle = info.color;
+      
+      if (b === B.TORCH) {
+        // Простая отрисовка красивого факела
+        ctx.fillStyle = '#78350f';
+        ctx.fillRect(bx + 14, by + 10, 4, 22);
+        ctx.fillStyle = '#f97316';
+        ctx.beginPath();
+        ctx.arc(bx + 16, by + 8 + Math.sin(performance.now()/80)*2, 6, 0, 7);
+        ctx.fill();
+      } else if (b === B.GRASS_TALL) {
+        ctx.fillStyle = '#22c55e';
+        ctx.fillRect(bx + 6, by + 12, 4, 20);
+        ctx.fillRect(bx + 16, by + 6, 3, 26);
+        ctx.fillRect(bx + 24, by + 14, 4, 18);
+      } else {
+        ctx.fillRect(bx, by, TILE, TILE);
+        
+        // Красивая окантовка для блоков земли и травы
+        if (b === B.GRASS) {
+          ctx.fillStyle = '#22c55e';
+          ctx.fillRect(bx, by, TILE, 6);
+        } else if (b === B.STONE) {
+          ctx.fillStyle = '#475569';
+          ctx.fillRect(bx, by, TILE, 3);
+        }
+      }
+    }
+  }
+
+  // Сетка-выделитель блока под мышкой
+  const mouseTx = Math.floor(mouse.x / TILE);
+  const mouseTy = Math.floor(mouse.y / TILE);
+  const dist = Math.hypot((P.x + P.w/2) - (mouseTx * TILE + 16), (P.y + P.h/2) - (mouseTy * TILE + 16));
+  
+  if (dist <= 180 && mouseTx >= 0 && mouseTx < WW && mouseTy >= 0 && mouseTy < WH) {
+    ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(mouseTx * TILE - cam.x, mouseTy * TILE - cam.y, TILE, TILE);
+    
+    // Прогресс разрушения блока
+    if (mouse.isDown && blockAt(mouseTx, mouseTy) !== B.AIR) {
+      ctx.fillStyle = 'rgba(255,0,0,0.3)';
+      const h = TILE * (mouse.mineProgress / TILES_INFO[blockAt(mouseTx, mouseTy)].mineTime);
+      ctx.fillRect(mouseTx * TILE - cam.x, mouseTy * TILE - cam.y + TILE - h, TILE, h);
+    }
+  }
+}
+
+// Рендеринг игрока
+function drawPlayer(x, y, dir, name, skinId, isMe) {
+  ctx.save();
+  ctx.translate(x + 11, y + 26);
+  const skinColor = getSkinColor(skinId);
+
+  // Световая аура вокруг персонажа
+  ctx.save();
+  const aura = ctx.createRadialGradient(0, -13, 2, 0, -13, 40);
+  aura.addColorStop(0, hexToRGBA(skinColor, 0.35));
+  aura.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = aura;
+  ctx.beginPath(); ctx.arc(0, -13, 40, 0, 7); ctx.fill();
+  ctx.restore();
+
+  // Ноги бегущего
+  const run = isMe && Math.abs(P.vx) > 0.5 ? Math.sin(performance.now() * 0.015) * 4 : 0;
+  ctx.fillStyle = 'rgba(0,0,0,0.4)';
+  ctx.fillRect(-8 + run, -4, 5, 4);
+  ctx.fillRect(3 - run, -4, 5, 4);
+
+  // Тело
+  ctx.fillStyle = skinColor;
+  ctx.fillRect(-11, -24, 22, 20);
+
+  // Глаза
+  const eyeOffset = dir * 2.5;
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(-5 + eyeOffset, -18, 3.5, 3.5);
+  ctx.fillRect(2 + eyeOffset, -18, 3.5, 3.5);
+  ctx.fillStyle = '#0f172a';
+  ctx.fillRect(-4 + eyeOffset + dir, -17, 2, 2);
+  ctx.fillRect(3 + eyeOffset + dir, -17, 2, 2);
+
+  // Имя и Уровень
+  ctx.font = '700 11px Rubik'; ctx.textAlign = 'center';
+  ctx.fillStyle = isMe ? '#eab308' : '#ffffff';
+  ctx.fillText(name, 0, -30);
+
+  ctx.restore();
+}
+
+// Отрисовка Мягкого Освещения Пещер (RTX Свет)
+function drawLighting() {
+  const tod = weather.timeOfDay;
+  let ambientDark = 0.0;
+  if (tod > 0.3 && tod < 0.7) {
+    ambientDark = 0.82; // Глубокая ночь
+  } else if (tod >= 0.25 && tod <= 0.3) {
+    ambientDark = lerp(0.0, 0.82, (tod - 0.25)/0.05);
+  } else if (tod >= 0.7 && tod <= 0.75) {
+    ambientDark = lerp(0.82, 0.0, (tod - 0.7)/0.05);
+  }
+
+  lctx.clearRect(0, 0, vw, vh);
+  lctx.globalCompositeOperation = 'source-over';
+  // В пещерах темно ВСЕГДА
+  lctx.fillStyle = `rgba(5, 7, 16, ${ambientDark})`;
+  lctx.fillRect(0, 0, vw, vh);
+
+  // Вырезаем пещеры из общего дневного света
+  const tx0 = Math.max(0, Math.floor(cam.x / TILE));
+  const tx1 = Math.min(WW - 1, Math.ceil((cam.x + vw) / TILE));
+  const ty0 = Math.max(0, Math.floor(cam.y / TILE));
+  const ty1 = Math.min(WH - 1, Math.ceil((cam.y + vh) / TILE));
+
+  for (let ty = ty0; ty <= ty1; ty++) {
+    for (let tx = tx0; tx <= tx1; tx++) {
+      if (ty > 45) {
+        // Подземный мрак
+        const depthFactor = clamp((ty - 45)/10, 0.0, 0.94);
+        lctx.fillStyle = `rgba(5, 7, 16, ${depthFactor})`;
+        lctx.fillRect((tx * TILE - cam.x)/LIGHT_SCALE, (ty * TILE - cam.y)/LIGHT_SCALE, TILE/LIGHT_SCALE, TILE/LIGHT_SCALE);
+      }
+    }
+  }
+
+  lctx.globalCompositeOperation = 'destination-out';
+
+  const drawLightHole = (x, y, r, alpha) => {
+    const lx = x / LIGHT_SCALE, ly = y / LIGHT_SCALE, lr = r / LIGHT_SCALE;
+    const g = lctx.createRadialGradient(lx, ly, lr * 0.15, lx, ly, lr);
+    g.addColorStop(0, `rgba(0,0,0,${alpha})`);
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    lctx.fillStyle = g;
+    lctx.beginPath(); lctx.arc(lx, ly, lr, 0, 7); lctx.fill();
+  };
+
+  // Факелы, Лава и Свет игрока
+  drawLightHole(P.x + P.w/2 - cam.x, P.y + P.h/2 - cam.y, 140, 1.0);
+  for (const k in remotes) {
+    drawLightHole(remotes[k].rx + 11 - cam.x, remotes[k].ry + 13 - cam.y, 100, 0.8);
+  }
+
+  for (let ty = ty0; ty <= ty1; ty++) {
+    for (let tx = tx0; tx <= tx1; tx++) {
+      const b = blockAt(tx, ty);
+      if (b === B.TORCH) {
+        drawLightHole(tx * TILE + 16 - cam.x, ty * TILE + 16 - cam.y, 160, 1.0);
+      } else if (b === B.LAVA) {
+        drawLightHole(tx * TILE + 16 - cam.x, ty * TILE + 16 - cam.y, 110, 0.9);
+      }
+    }
+  }
+
+  ctx.save();
+  ctx.globalCompositeOperation = 'multiply';
+  ctx.drawImage(lcv, 0, 0, vw, vh);
+  ctx.restore();
+}
+
+function drawParticles() {
+  for (const p of particles) {
+    ctx.globalAlpha = p.life / p.maxLife;
+    ctx.fillStyle = p.color;
+    ctx.fillRect(p.x - cam.x - p.size/2, p.y - cam.y - p.size/2, p.size, p.size);
+  }
+  ctx.globalAlpha = 1.0;
+}
+
+function drawDamageTexts() {
+  ctx.save();
+  ctx.font = '800 11px Rubik';
+  ctx.textAlign = 'center';
+  for (let i = damageTexts.length - 1; i >= 0; i--) {
+    const t = damageTexts[i];
+    ctx.fillStyle = t.color;
+    ctx.fillText(t.text, t.x - cam.x, t.y - cam.y);
+    t.y -= 0.6;
+    t.life--;
+    if (t.life <= 0) damageTexts.splice(i, 1);
+  }
+  ctx.restore();
+}
+
+function drawAmbientWeather() {
+  if (weather.rainIntensity > 0.02) {
+    ctx.strokeStyle = 'rgba(174, 219, 255, ' + (weather.rainIntensity * 0.45) + ')';
+    ctx.lineWidth = 1.2;
+    const count = Math.floor(weather.rainIntensity * 50);
+    for (let i = 0; i < count; i++) {
+      const rx = (i * 47 + performance.now() * 0.8) % vw;
+      const ry = (i * 23 + performance.now() * 1.5) % vh;
+      ctx.beginPath();
+      ctx.moveTo(rx, ry);
+      ctx.lineTo(rx - 3, ry + 12);
+      ctx.stroke();
+    }
+  }
+}
+</script>
+
+<script>
+'use strict';
+/* ============================================================
+   ОСНОВНОЙ ИГРОВОЙ ЦИКЛ И СТАРТ
+   ============================================================ */
+let lastTs = 0, acc = 0;
+
+function stepGame() {
+  const now = performance.now();
+  updateDynamicWeatherAndSeasons(now);
+  stepPlayer();
+  updateMobs();
+  updateMining();
+  smoothRemotes();
+
+  // Удаление старых частиц
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+    p.x += p.vx; p.y += p.vy; p.vy += p.grav; p.life--;
+    if (p.life <= 0) particles.splice(i, 1);
+  }
+
+  // Обновление HUD
+  $('hpBarFill').style.width = (P.hp / P.maxHp * 100) + '%';
+  $('hpTxt').textContent = `${Math.round(P.hp)} / ${P.maxHp} HP`;
+  $('xpBarFill').style.width = (P.xp / P.maxXp * 100) + '%';
+  $('levelBadge').textContent = `LVL ${P.level}`;
+  
+  if (Math.random() < 0.05) renderBoard();
+}
+
+function loop(ts) {
+  requestAnimationFrame(loop);
+  if (!lastTs) lastTs = ts;
+  acc += Math.min(100, ts - lastTs); lastTs = ts;
+  while (acc >= 16.66) {
+    acc -= 16.66;
+    stepGame();
+  }
+
+  drawSkyBackground();
+  drawBlocks();
+  drawAmbientWeather();
+
+  // Отрисовка мобов
+  for (const e of enemies) {
+    ctx.fillStyle = e.color;
+    ctx.fillRect(e.x - cam.x, e.y - cam.y, e.w, e.h);
+    // Глазки мобам
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(e.x - cam.x + (e.dir > 0 ? e.w - 6 : 2), e.y - cam.y + 4, 4, 4);
+  }
+
+  // Другие игроки
+  for (const k in remotes) {
+    const r = remotes[k];
+    drawPlayer(r.rx - cam.x, r.ry - cam.y, r.d, r.n, r.skin, false);
+  }
+
+  // Текущий игрок
+  drawPlayer(P.x - cam.x, P.y - cam.y, P.dir, MY_NAME, P.activeSkin, true);
+
+  drawParticles();
+  drawDamageTexts();
+  drawLighting();
+}
+
+async function startGame() {
+  $('auth').classList.add('hidden');
+  $('loading').classList.add('hidden');
+  $('hud').classList.add('on');
+
+  // Восстановление сохранений
+  const local = localStorage.getItem('blockran_survival_save_v1');
+  if (local) {
+    try {
+      const d = JSON.parse(local);
+      P.hp = d.hp || 100;
+      P.level = d.level || 1;
+      P.xp = d.xp || 0;
+      P.coins = d.coins || 0;
+      P.activeSkin = d.activeSkin || 'default';
+      ownedSkins = d.ownedSkins || ['default'];
+      P.inventory = d.inventory;
+      P.x = d.x; P.y = d.y;
+    } catch(e){}
+  } else {
+    try {
+      const snap = await db.ref('saves/' + MY_UID).once('value');
+      const d = snap.val();
+      if (d) {
+        P.hp = d.hp || 100;
+        P.level = d.level || 1;
+        P.xp = d.xp || 0;
+        P.coins = d.coins || 0;
+        P.activeSkin = d.activeSkin || 'default';
+        ownedSkins = d.ownedSkins || ['default'];
+        P.inventory = d.inventory;
+        P.x = d.x; P.y = d.y;
+      }
+    } catch(e){}
+  }
+
+  checkSkillsUnlock();
+  renderHotbar();
+  joinNet();
+  
+  toast(`🌲 Добро пожаловать, ${MY_NAME}! Копайте, стройте и выживайте сообща! 🛠️`, 4000);
+  Audio8.init();
+  Audio8.playTrack(0);
+
+  requestAnimationFrame(loop);
+}
+
+/* КЛАВИАТУРА И КОНТРОЛЛЕРЫ */
+const keyMap = {
+  'KeyA': () => keys.left = true,
+  'KeyD': () => keys.right = true,
+  'ArrowLeft': () => keys.left = true,
+  'ArrowRight': () => keys.right = true,
+  'Space': () => keys.jump = true,
+  'ArrowUp': () => keys.jump = true,
+  'KeyW': () => keys.jump = true
+};
+const keyUpMap = {
+  'KeyA': () => keys.left = false,
+  'KeyD': () => keys.right = false,
+  'ArrowLeft': () => keys.left = false,
+  'ArrowRight': () => keys.right = false,
+  'Space': () => keys.jump = false,
+  'ArrowUp': () => keys.jump = false,
+  'KeyW': () => keys.jump = false
+};
+
+window.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT') {
+    if (e.key === 'Enter') { sendChatMessage(); $('chatInput').blur(); }
+    return;
+  }
+  if (keyMap[e.code]) keyMap[e.code]();
+  if (e.code === 'Enter') { e.preventDefault(); $('chatInput').focus(); }
+  
+  // Цифры хотбара 1-9
+  if (e.keyCode >= 49 && e.keyCode <= 57) {
+    selectHotbarSlot(e.keyCode - 49);
+  }
+});
+window.addEventListener('keyup', e => {
+  if (e.target.tagName === 'INPUT') return;
+  if (keyUpMap[e.code]) keyUpMap[e.code]();
+});
+
+// Мобильное управление
+function bindTouch(id, on, off){
+  const el = $(id);
+  const start = e => { e.preventDefault(); el.classList.add('act'); on(); };
+  const end = e => { e.preventDefault(); el.classList.remove('act'); off(); };
+  el.addEventListener('touchstart', start, { passive:false });
+  el.addEventListener('touchend', end, { passive:false });
+  el.addEventListener('touchcancel', end, { passive:false });
+}
+bindTouch('tLeft', () => keys.left = true, () => keys.left = false);
+bindTouch('tRight', () => keys.right = true, () => keys.right = false);
+bindTouch('tJump', () => keys.jump = true, () => keys.jump = false);
 
 if ('ontouchstart' in window) document.body.classList.add('touch');
 </script>
