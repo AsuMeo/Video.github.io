@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>TERRARIA MOBILE — Выживание и Строительство онлайн</title>
+<title>TERRARIA MOBILE ONLINE</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Rubik:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
@@ -266,23 +266,27 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
 <script>
 'use strict';
 
-const firebaseConfig = {
-  apiKey: "AIzaSyBm0mIvHVznIeF2PoFk6dtdaiT5r877wyA",
-  authDomain: "meow-874ce.firebaseapp.com",
-  databaseURL: "https://meow-874ce-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "meow-874ce",
-  storageBucket: "meow-874ce.firebasestorage.app",
-  messagingSenderId: "471541334599",
-  appId: "1:471541334599:web:567af3e7dbe70a37572762"
-};
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.database();
-
+/* ============================================================
+   ОБЪЯВЛЕНИЕ ГЛОБАЛЬНЫХ ПЕРЕМЕННЫХ И ИНИЦИАЛИЗАЦИЯ ХОЛСТА (ФИКС)
+   ============================================================ */
 const $ = id => document.getElementById(id);
+const cv = $('game');
+const ctx = cv.getContext('2d');
+
+let vw = 0, vh = 0, dpr = 1, ZOOM = 1.25;
+let activeTouchWorldX = -1;
+let activeTouchWorldY = -1;
+
+const TILE = 32;
+const WW = 1200; // Ширина мира в блоках
+const WH = 100;  // Высота мира в блоках
+const WORLD_PX_W = WW * TILE;
+const WORLD_PX_H = WH * TILE;
+
 const clamp = (v,a,b) => v<a?a:(v>b?b:v);
 const lerp = (a,b,t) => a+(b-a)*t;
 const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -298,6 +302,20 @@ function toggleFullscreen() {
     cancel.call(doc);
   }
 }
+
+/* FIREBASE CONFIG */
+const firebaseConfig = {
+  apiKey: "AIzaSyBm0mIvHVznIeF2PoFk6dtdaiT5r877wyA",
+  authDomain: "meow-874ce.firebaseapp.com",
+  databaseURL: "https://meow-874ce-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "meow-874ce",
+  storageBucket: "meow-874ce.firebasestorage.app",
+  messagingSenderId: "471541334599",
+  appId: "1:471541334599:web:567af3e7dbe70a37572762"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.database();
 
 /* АВТОРИЗАЦИЯ */
 const AUTH_ERR = {
@@ -341,12 +359,9 @@ async function doLogin(){
 }
 $('regBtn').onclick = doRegister;
 $('loginBtn').onclick = doLogin;
-</script>
 
-<script>
-'use strict';
 /* ============================================================
-   ПРОЦЕДУРНЫЙ МОБИЛЬНЫЙ ЗВУКОВОЙ СИНТЕЗАТОР
+   ПРОЦЕДУРНЫЙ ЗВУКОВОЙ СИНТЕЗАТОР
    ============================================================ */
 const Audio8 = {
   ctx:null, master:null, musG:null, sfxG:null, noiseBuf:null,
@@ -374,7 +389,7 @@ const Audio8 = {
   toggleSfx() { this.sfxMuted = !this.sfxMuted; if (this.sfxG) this.sfxG.gain.value = this.sfxMuted ? 0 : 0.45; return this.sfxMuted; },
 
   tracks: [
-    { name:'🌲 Мобильный Саундтрек (День)', bpm:90, wave:'sine', vol:.18,
+    { name:'🌲 Террария Дзен (День)', bpm:90, wave:'sine', vol:.18,
       mel:[60,64,67,72,0,67,64,0, 62,65,69,74,0,69,65,0],
       bass:[36,0,43,0,38,0,45,0] },
     { name:'🦇 Эхо Подземелий (Ночь)', bpm:72, wave:'triangle', vol:.22,
@@ -414,7 +429,7 @@ const Audio8 = {
     }
   },
 
-  /* Звуковые эффекты */
+  /* Звуки */
   blip(f0, f1, dur, wave, vol){
     if (!this.ready || this.sfxMuted) return;
     const t = this.ctx.currentTime;
@@ -440,18 +455,11 @@ const Audio8 = {
 };
 ['pointerdown','keydown','touchstart'].forEach(ev =>
   window.addEventListener(ev, ()=>{ Audio8.init(); Audio8.resume(); }, { passive:true }));
-</script>
 
-<script>
-'use strict';
+
 /* ============================================================
    ПРОЦЕДУРНЫЙ КАРКАС МИРА ТЕРРАРИИ
    ============================================================ */
-const WW = 1200; // Ширина мира в блоках
-const WH = 100;  // Высота мира в блоках
-const WORLD_PX_W = WW * TILE;
-const WORLD_PX_H = WH * TILE;
-
 const B = { AIR: 0, GRASS: 1, STONE: 2, WOOD: 3, LEAVES: 4, PLANKS: 5, BRICK: 6, TORCH: 7, LAVA: 8 };
 
 const BLOCK_DATA = {
@@ -468,7 +476,6 @@ const BLOCK_DATA = {
 
 const worldMutations = new Map();
 
-// Генерация ландшафта (Холмы, Деревья, Недра и Лава на дне)
 function getBaseTile(tx, ty) {
   if (tx < 0 || tx >= WW || ty < 0 || ty >= WH) return B.STONE;
   if (ty >= WH - 4) return B.LAVA;
@@ -476,15 +483,15 @@ function getBaseTile(tx, ty) {
   let surfaceY = Math.floor(40 + Math.sin(tx * 0.04) * 8 + Math.cos(tx * 0.12) * 3);
   
   if (ty < surfaceY) {
-    if (ty === surfaceY - 1 && (tx * 17) % 19 === 0) return B.WOOD; // Стволы деревьев
-    if (ty >= surfaceY - 4 && ty < surfaceY - 1 && ((tx + 1) * 17) % 19 === 1) return B.LEAVES; // Листва
+    if (ty === surfaceY - 1 && (tx * 17) % 19 === 0) return B.WOOD; 
+    if (ty >= surfaceY - 4 && ty < surfaceY - 1 && ((tx + 1) * 17) % 19 === 1) return B.LEAVES; 
     return B.AIR;
   }
   
   if (ty === surfaceY) return B.GRASS;
   if (ty > surfaceY && ty < surfaceY + 10) return B.GRASS;
   
-  return B.STONE; // Недра
+  return B.STONE; 
 }
 
 function tileAt(tx, ty) {
@@ -494,16 +501,18 @@ function tileAt(tx, ty) {
 }
 
 function isSolid(tx, ty) {
+  if (tx < 0 || tx >= WW || ty < 0 || ty >= WH) return true;
   const t = tileAt(tx, ty);
   return BLOCK_DATA[t] ? BLOCK_DATA[t].solid : false;
 }
-</script>
 
-<script>
-'use strict';
+
 /* ============================================================
-   ПЕРСОНАЖ: СТРОИТЕЛЬСТВО, КЛИКИ, ЗДОРОВЬЕ, МОНЕТЫ
+   ПЕРСОНАЖ: ФИЗИКА, СТРОИТЕЛЬСТВО, ЗДОРОВЬЕ, МОНЕТЫ
    ============================================================ */
+const keys = { left:false, right:false, jump:false };
+let jumpBuf = false;
+
 const P = {
   x: 100 * TILE, y: 30 * TILE, w: 20, h: 28, vx: 0, vy: 0, dir: 1,
   ground: false, hp: 100, maxHp: 100, coins: 0,
@@ -511,9 +520,7 @@ const P = {
   deadT: 0
 };
 
-// Режим взаимодействия на мобильных: 'dig' (ломать) или 'build' (строить)
 let mobileInteractMode = 'dig'; 
-
 const cam = { x: 0, y: 0 };
 let screenShake = 0;
 const particles = [];
@@ -587,11 +594,10 @@ function collideY(){
   }
 }
 
-// МОБИЛЬНОЕ ВЗАИМОДЕЙСТВИЕ (ТАПЫ ПО ЭКРАНУ)
+/* МОБИЛЬНЫЙ ТАП КЛИК */
 function handleMobileScreenTouch(touchX, touchY) {
   if (P.deadT > 0) return;
 
-  // Конвертация координат касания на Canvas с учетом камеры и масштаба
   const rect = cv.getBoundingClientRect();
   const scaleX = vw / rect.width;
   const scaleY = vh / rect.height;
@@ -601,22 +607,19 @@ function handleMobileScreenTouch(touchX, touchY) {
   const tx = Math.floor(worldX / TILE);
   const ty = Math.floor(worldY / TILE);
 
-  // Радиус действия тача (макс. 5 блоков от игрока)
   const px = Math.floor((P.x + P.w/2) / TILE);
   const py = Math.floor((P.y + P.h/2) / TILE);
   const dist = Math.hypot(tx - px, ty - py);
   
   if (dist > 5.8) {
-    toast('🛑 Слишком далеко для касания!', 800);
+    toast('🛑 Слишком далеко!', 800);
     return;
   }
 
   const key = `${tx}_${ty}`;
 
   if (mobileInteractMode === 'build') {
-    // Режим "Строить"
     if (tileAt(tx, ty) === B.AIR) {
-      // Проверка на то, чтобы не застроить самого игрока
       const tRect = { x: tx*TILE, y: ty*TILE, w: TILE, h: TILE };
       if (P.x < tRect.x + tRect.w && P.x + P.w > tRect.x && P.y < tRect.y + tRect.h && P.y + P.h > tRect.y && BLOCK_DATA[P.selectedBlock].solid) {
         return; 
@@ -625,18 +628,16 @@ function handleMobileScreenTouch(touchX, touchY) {
       Audio8.blockPlace();
     }
   } else {
-    // Режим "Копать"
     const currentBlock = tileAt(tx, ty);
     if (currentBlock !== B.AIR) {
       db.ref('world_changes/' + key).set(B.AIR);
       Audio8.blockBreak();
       
-      // Выпадают случайные монетки при добыче руды/камня
       if (currentBlock === B.STONE && Math.random() < 0.14) {
         P.coins += 1;
         $('coinsCount').textContent = P.coins;
         Audio8.coin();
-        toast('🪙 Найдена монета в камне!', 600);
+        toast('🪙 Найдена монета!', 600);
         saveProgressExact();
       }
     }
@@ -656,7 +657,7 @@ function stepPlayer(){
   else { P.vx *= 0.72; if(Math.abs(P.vx) < 0.05) P.vx = 0; }
   P.vx = clamp(P.vx, -4.8, 4.8);
 
-  P.vy += 0.42; // Гравитация
+  P.vy += 0.42; 
   if (P.vy > 16) P.vy = 16;
 
   if (jumpBuf && !inputActive) {
@@ -671,19 +672,16 @@ function stepPlayer(){
   P.x += P.vx; collideX();
   P.y += P.vy; collideY();
 
-  // Нахождение в лаве убивает игрока
   const currentTileUnder = tileAt(Math.floor((P.x + P.w/2)/TILE), Math.floor((P.y + P.h - 2)/TILE));
   if (currentTileUnder === B.LAVA) {
     damagePlayer(1.6, 'сгорел в лаве');
   }
 
-  // Обновление HUD значений
   $('hpFill').style.width = (P.hp / P.maxHp * 100) + '%';
   $('hpTxt').textContent = `${Math.ceil(P.hp)}/${P.maxHp}`;
   $('coordX').textContent = Math.floor(P.x / TILE);
   $('coordY').textContent = Math.floor(P.y / TILE);
 
-  // Центрирование камеры
   const targetCamX = P.x + P.w/2 - vw * 0.5;
   const targetCamY = P.y + P.h/2 - vh * 0.5;
   cam.x = clamp(lerp(cam.x, targetCamX, 0.1), 0, WORLD_PX_W - vw);
@@ -703,10 +701,8 @@ function updParticles(){
     if (p.life <= 0) particles.splice(i, 1);
   }
 }
-</script>
 
-<script>
-'use strict';
+
 /* ============================================================
    СИНХРОНИЗАЦИЯ ЧЕРЕЗ REALTIME DATABASE
    ============================================================ */
@@ -740,12 +736,10 @@ function joinNet(){
     updateLeaderboard();
   });
 
-  // Синхронизация блоков мира в реальном времени
   db.ref('world_changes').on('child_added', snap => { worldMutations.set(snap.key, snap.val()); });
   db.ref('world_changes').on('child_changed', snap => { worldMutations.set(snap.key, snap.val()); });
   db.ref('world_changes').on('child_removed', snap => { worldMutations.delete(snap.key); });
 
-  // Живой чат
   db.ref('chat').limitToLast(12).on('child_added', snap => {
     const data = snap.val();
     if (!data) return;
@@ -834,7 +828,6 @@ async function startGame(){
   $('loading').classList.add('hidden');
   $('hud').classList.add('on');
 
-  // Чтение сохранений
   const local = localStorage.getItem('terra_exact_save_v1');
   if (local) {
     try {
@@ -858,15 +851,11 @@ async function startGame(){
 
   requestAnimationFrame(loop);
 }
-</script>
 
-<script>
-'use strict';
+
 /* ============================================================
    МОБИЛЬНОЕ СЕНСОРНОЕ УПРАВЛЕНИЕ (TOUCH EVENTS)
    ============================================================ */
-
-// Обработка кликов по виртуальным кнопкам влево/вправо/прыжок
 function bindTouch(id, on, off){
   const el = $(id);
   const start = e => { 
@@ -887,9 +876,8 @@ bindTouch('tLeft', () => keys.left = true, () => keys.left = false);
 bindTouch('tRight', () => keys.right = true, () => keys.right = false);
 bindTouch('tJump', () => { if (!keys.jump) jumpBuf = true; keys.jump = true; }, () => keys.jump = false);
 
-// ТАП ПО ЭКРАНУ (Для ломания/строительства блоков)
+// ТАП ПО ЭКРАНУ (КЛАДКА И КОПКА БЛОКОВ)
 cv.addEventListener('touchstart', e => {
-  // Игнорируем тачи, если они пришлись на кнопки интерфейса или виртуальный D-pad
   const target = e.target;
   if (target.tagName === 'BUTTON' || target.classList.contains('tbtn') || target.closest('#hotbar') || target.closest('#chat') || target.closest('#camControls') || target.closest('#tModeToggle')) {
     return;
@@ -900,7 +888,6 @@ cv.addEventListener('touchstart', e => {
   handleMobileScreenTouch(touch.clientX, touch.clientY);
 }, { passive: false });
 
-// Обработка переключения режимов мобильного взаимодействия
 const tModeToggle = $('tModeToggle');
 tModeToggle.addEventListener('touchstart', e => {
   e.preventDefault();
@@ -909,18 +896,17 @@ tModeToggle.addEventListener('touchstart', e => {
     tModeToggle.classList.add('build-active');
     $('tModeIcon').textContent = '🧱';
     $('tModeText').textContent = 'СТРОИТЬ';
-    toast('🧱 Режим: СТРОИТЕЛЬСТВО блоков', 1000);
+    toast('🧱 Режим: СТРОИТЕЛЬСТВО', 1000);
   } else {
     mobileInteractMode = 'dig';
     tModeToggle.classList.remove('build-active');
     $('tModeIcon').textContent = '⛏️';
     $('tModeText').textContent = 'КОПАТЬ';
-    toast('⛏️ Режим: РАЗРУШЕНИЕ блоков', 1000);
+    toast('⛏️ Режим: РАЗРУШЕНИЕ', 1000);
   }
   Audio8.blockPlace();
 });
 
-// Переключение слотов в Hotbar на касание
 document.querySelectorAll('#hotbar .slot').forEach((s, idx) => {
   s.addEventListener('touchstart', e => {
     e.preventDefault();
@@ -935,25 +921,15 @@ if ('ontouchstart' in window) document.body.classList.add('touch');
 function checkOrient(){ document.body.classList.toggle('portrait', innerHeight > innerWidth); }
 window.addEventListener('resize', checkOrient); checkOrient();
 
-// Настройки HUD кнопок сверху
 $('muteBtn').onclick = () => { const muted = Audio8.toggleSfx(); $('muteBtn').textContent = muted ? '🔇' : '🔊'; };
 $('musMuteBtn').onclick = () => { const muted = Audio8.toggleMusic(); $('musMuteBtn').textContent = muted ? '🔇' : '🎵'; };
 $('musBtn').onclick = () => { Audio8.playTrack((Audio8.trackIdx + 1) % Audio8.tracks.length); };
 $('chatToggleBtn').onclick = () => { $('chat').classList.toggle('hidden'); };
-</script>
 
-<script>
-'use strict';
+
 /* ============================================================
-   РЕНДЕРЕР: РИСОВАНИЕ МИРА, ФАХЕЛОВ, RTX-ОСВЕЩЕНИЯ И СЕТКИ-ПРИЦЕЛА
+   РЕНДЕРЕР: РИСОВАНИЕ МИРА, ФАКЕЛОВ, ОСВЕЩЕНИЯ И СЕТКИ
    ============================================================ */
-const cv = $('game'), ctx = cv.getContext('2d');
-let vw = 0, vh = 0, dpr = 1, ZOOM = 1.25;
-
-// Координаты под пальцем игрока для рисования прицела-сетки
-let activeTouchWorldX = -1;
-let activeTouchWorldY = -1;
-
 cv.addEventListener('touchmove', e => {
   const touch = e.touches[0];
   const rect = cv.getBoundingClientRect();
@@ -995,7 +971,6 @@ function drawWorldAndPlayers(){
   const ty0 = Math.max(0, Math.floor(cam.y / TILE) - 1);
   const ty1 = Math.min(WH - 1, Math.floor((cam.y + vh) / TILE) + 1);
 
-  // 1. Отрисовка блоков
   for (let ty = ty0; ty <= ty1; ty++) {
     for (let tx = tx0; tx <= tx1; tx++) {
       const v = tileAt(tx, ty);
@@ -1023,12 +998,11 @@ function drawWorldAndPlayers(){
     }
   }
 
-  // Рисование СЕТКИ-ПРИЦЕЛА под пальцем игрока (упрощает позиционирование блоков на мобилках)
+  // Рисование СЕТКИ под пальцем
   if (activeTouchWorldX !== -1) {
     const targetTX = Math.floor(activeTouchWorldX / TILE);
     const targetTY = Math.floor(activeTouchWorldY / TILE);
     
-    // Проверка расстояния
     const px = Math.floor((P.x + P.w/2) / TILE);
     const py = Math.floor((P.y + P.h/2) / TILE);
     const dist = Math.hypot(targetTX - px, targetTY - py);
@@ -1040,7 +1014,7 @@ function drawWorldAndPlayers(){
     ctx.restore();
   }
 
-  // 2. Частицы
+  // Частицы
   for (const p of particles) {
     ctx.globalAlpha = p.life / p.maxLife;
     ctx.fillStyle = p.color;
@@ -1048,14 +1022,14 @@ function drawWorldAndPlayers(){
   }
   ctx.globalAlpha = 1;
 
-  // 3. Сетевые игроки
+  // Сетевые игроки
   for (const k in remotes) {
     const r = remotes[k];
     if (r.rx + TILE < cam.x || r.rx > cam.x + vw || r.ry + TILE < cam.y || r.ry > cam.y + vh) continue;
     drawChar(r.rx - cam.x, r.ry - cam.y, r.d, r.n, false, r.hp);
   }
 
-  // 4. Твой персонаж
+  // Твой персонаж
   if (P.deadT <= 0) {
     drawChar(P.x - cam.x, P.y - cam.y, P.dir, MY_NAME, true, P.hp);
   }
@@ -1069,7 +1043,6 @@ function drawChar(x, y, dir, name, isMe, hp) {
   ctx.fillStyle = isMe ? '#4f7cff' : '#39d98a';
   ctx.fillRect(-P.w/2, -P.h/2, P.w, P.h);
 
-  // Глаза
   ctx.fillStyle = '#fff';
   ctx.fillRect(P.w/2 - 8, -P.h/2 + 5, 4, 4);
   ctx.fillStyle = '#000';
@@ -1094,7 +1067,7 @@ function drawChar(x, y, dir, name, isMe, hp) {
   }
 }
 
-// RTX Теневое динамическое освещение вокруг факелов и персонажа
+// RTX динамическое освещение вокруг факелов и персонажа
 function drawLighting() {
   ctx.save();
   ctx.globalCompositeOperation = 'multiply';
@@ -1109,7 +1082,6 @@ function drawLighting() {
 
   ctx.globalCompositeOperation = 'screen';
 
-  // Свет игрока
   if (P.deadT <= 0) {
     const pGlow = ctx.createRadialGradient(P.x+P.w/2 - cam.x, P.y+P.h/2 - cam.y, 10, P.x+P.w/2 - cam.x, P.y+P.h/2 - cam.y, 140);
     pGlow.addColorStop(0, 'rgba(255,240,200,0.8)');
@@ -1118,7 +1090,6 @@ function drawLighting() {
     ctx.beginPath(); ctx.arc(P.x+P.w/2 - cam.x, P.y+P.h/2 - cam.y, 140, 0, 7); ctx.fill();
   }
 
-  // Освещение от факелов/лавы
   const tx0 = Math.max(0, Math.floor(cam.x / TILE) - 1);
   const tx1 = Math.min(WW - 1, Math.floor((cam.x + vw) / TILE) + 1);
   const ty0 = Math.max(0, Math.floor(cam.y / TILE) - 1);
