@@ -291,16 +291,15 @@ const clamp = (v,a,b) => v<a?a:(v>b?b:v);
 const lerp = (a,b,t) => a+(b-a)*t;
 const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
-function toggleFullscreen() {
-  const doc = window.document;
-  const docEl = doc.documentElement;
-  const req = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
-  const cancel = doc.exitFullscreen || doc.mozCancelFullScreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
-  if(!doc.fullscreenElement && !doc.mozFullScreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement) {
-    req.call(docEl).catch(() => {});
-  } else {
-    cancel.call(doc);
-  }
+function tryFullscreen() {
+  try {
+    const doc = window.document;
+    const docEl = doc.documentElement;
+    const req = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
+    if(!doc.fullscreenElement && !doc.mozFullScreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement) {
+      if(req) req.call(docEl);
+    }
+  } catch(e){}
 }
 
 /* FIREBASE CONFIG */
@@ -313,9 +312,15 @@ const firebaseConfig = {
   messagingSenderId: "471541334599",
   appId: "1:471541334599:web:567af3e7dbe70a37572762"
 };
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.database();
+
+let auth, db;
+try {
+  firebase.initializeApp(firebaseConfig);
+  auth = firebase.auth();
+  db = firebase.database();
+} catch(e) {
+  $('loadTxt').innerHTML = "<span style='color:#ff5c7a'>Ошибка Firebase! Проверьте интернет.</span>";
+}
 
 /* АВТОРИЗАЦИЯ */
 const AUTH_ERR = {
@@ -338,7 +343,7 @@ async function doRegister(){
   if (!email || !pass) { $('authErr').textContent = 'Заполните все поля!'; return; }
   busyAuth = true; $('regBtn').innerHTML = '<span class="spin"></span> Создание…';
   try {
-    toggleFullscreen();
+    tryFullscreen();
     const cr = await auth.createUserWithEmailAndPassword(email, pass);
     await db.ref('users/' + cr.user.uid).set({ name: nick, created: firebase.database.ServerValue.TIMESTAMP });
     MY_NAME = nick;
@@ -352,7 +357,7 @@ async function doLogin(){
   if (!email || !pass) { $('authErr').textContent = 'Заполните поля входа'; return; }
   busyAuth = true; $('loginBtn').innerHTML = '<span class="spin"></span> Вход…';
   try {
-    toggleFullscreen();
+    tryFullscreen();
     await auth.signInWithEmailAndPassword(email, pass);
   } catch(e){ authError(e); }
   busyAuth = false; $('loginBtn').textContent = 'ВОЙТИ';
@@ -369,20 +374,22 @@ const Audio8 = {
   
   init(){
     if (this.ready) return;
-    const AC = window.AudioContext || window.webkitAudioContext;
-    if (!AC) return;
-    this.ctx = new AC();
-    this.master = this.ctx.createGain(); this.master.gain.value = 0.5; this.master.connect(this.ctx.destination);
-    this.musG = this.ctx.createGain(); this.musG.gain.value = 0.2; this.musG.connect(this.master);
-    this.sfxG = this.ctx.createGain(); this.sfxG.gain.value = 0.45; this.sfxG.connect(this.master);
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      this.ctx = new AC();
+      this.master = this.ctx.createGain(); this.master.gain.value = 0.5; this.master.connect(this.ctx.destination);
+      this.musG = this.ctx.createGain(); this.musG.gain.value = 0.2; this.musG.connect(this.master);
+      this.sfxG = this.ctx.createGain(); this.sfxG.gain.value = 0.45; this.sfxG.connect(this.master);
 
-    const len = this.ctx.sampleRate * 0.5, buf = this.ctx.createBuffer(1, len, this.ctx.sampleRate), d = buf.getChannelData(0);
-    for (let i=0;i<len;i++) d[i] = Math.random()*2-1;
-    this.noiseBuf = buf;
+      const len = this.ctx.sampleRate * 0.5, buf = this.ctx.createBuffer(1, len, this.ctx.sampleRate), d = buf.getChannelData(0);
+      for (let i=0;i<len;i++) d[i] = Math.random()*2-1;
+      this.noiseBuf = buf;
 
-    this.ready = true;
-    this.nextT = this.ctx.currentTime + 0.1;
-    this.timer = setInterval(()=>this.schedule(), 40);
+      this.ready = true;
+      this.nextT = this.ctx.currentTime + 0.1;
+      this.timer = setInterval(()=>this.schedule(), 40);
+    } catch(e){}
   },
   resume(){ if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume(); },
   toggleMusic() { this.musicMuted = !this.musicMuted; if (this.musG) this.musG.gain.value = this.musicMuted ? 0 : 0.2; return this.musicMuted; },
@@ -404,7 +411,7 @@ const Audio8 = {
   },
   f(m){ return m === 0 ? 0 : 440*Math.pow(2,(m-69)/12); },
   note(midi, t, dur, wave, vol){
-    if (midi === 0 || vol <= 0) return;
+    if (midi === 0 || vol <= 0 || !this.ctx) return;
     const o = this.ctx.createOscillator(), g = this.ctx.createGain();
     o.type = wave; o.frequency.value = this.f(midi);
     g.gain.setValueAtTime(0, t);
@@ -429,9 +436,9 @@ const Audio8 = {
     }
   },
 
-  /* Звуки */
+  /* Эффекты звука */
   blip(f0, f1, dur, wave, vol){
-    if (!this.ready || this.sfxMuted) return;
+    if (!this.ready || this.sfxMuted || !this.ctx) return;
     const t = this.ctx.currentTime;
     const o = this.ctx.createOscillator(), g = this.ctx.createGain();
     o.type = wave; o.frequency.setValueAtTime(f0,t); o.frequency.exponentialRampToValueAtTime(Math.max(f1,1), t+dur);
@@ -439,7 +446,7 @@ const Audio8 = {
     o.connect(g); g.connect(this.sfxG); o.start(t); o.stop(t+dur+0.02);
   },
   noise(dur, vol, freq){
-    if (!this.ready || this.sfxMuted) return;
+    if (!this.ready || this.sfxMuted || !this.ctx) return;
     const t = this.ctx.currentTime;
     const s = this.ctx.createBufferSource(), g = this.ctx.createGain(), f = this.ctx.createBiquadFilter();
     s.buffer=this.noiseBuf; f.type='lowpass'; f.frequency.value=freq||1000;
@@ -520,7 +527,6 @@ const P = {
   deadT: 0
 };
 
-let mobileInteractMode = 'dig'; 
 const cam = { x: 0, y: 0 };
 let screenShake = 0;
 const particles = [];
@@ -781,7 +787,9 @@ function saveProgressExact() {
     x: Math.round(P.x), y: Math.round(P.y),
     hp: P.hp, coins: P.coins, t: Date.now()
   };
-  localStorage.setItem('terra_exact_save_v1', JSON.stringify(state));
+  try {
+    localStorage.setItem('terra_exact_save_v1', JSON.stringify(state));
+  } catch(e){}
   db.ref('saves/' + MY_UID).set(state);
 }
 
@@ -828,18 +836,24 @@ async function startGame(){
   $('loading').classList.add('hidden');
   $('hud').classList.add('on');
 
-  const local = localStorage.getItem('terra_exact_save_v1');
+  let local = null;
+  try {
+    local = localStorage.getItem('terra_exact_save_v1');
+  } catch(e){}
+
   if (local) {
     try {
       const d = JSON.parse(local);
       P.x = d.x; P.y = d.y; P.hp = d.hp || 100; P.coins = d.coins || 0;
     } catch(e){}
   } else {
-    const snap = await db.ref('saves/' + MY_UID).once('value');
-    const d = snap.val();
-    if (d) {
-      P.x = d.x; P.y = d.y; P.hp = d.hp || 100; P.coins = d.coins || 0;
-    }
+    try {
+      const snap = await db.ref('saves/' + MY_UID).once('value');
+      const d = snap.val();
+      if (d) {
+        P.x = d.x; P.y = d.y; P.hp = d.hp || 100; P.coins = d.coins || 0;
+      }
+    } catch(e){}
   }
 
   $('coinsCount').textContent = P.coins;
@@ -954,7 +968,7 @@ window.addEventListener('resize', resize); resize();
 
 $('zoomOutBtn').onclick = () => { ZOOM = clamp(ZOOM - 0.12, 0.75, 1.8); resize(); };
 $('zoomInBtn').onclick = () => { ZOOM = clamp(ZOOM + 0.12, 0.75, 1.8); resize(); };
-$('fullScrBtn').onclick = () => { toggleFullscreen(); };
+$('fullScrBtn').onclick = () => { tryFullscreen(); };
 
 function drawSky(){
   const skyG = ctx.createLinearGradient(0, 0, 0, vh);
