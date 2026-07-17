@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="mobile-web-app-capable" content="yes">
-  <title>⛏️ MINECRAFT RTX</title>
+  <meta name="screen-orientation" content="landscape">
+  <title>⛏️ MINECRAFT OPTIMIZED</title>
   <style>
     * {
       margin: 0;
@@ -18,23 +18,42 @@
       -webkit-touch-callout: none;
     }
     
-    body {
-      background: #000;
+    html, body {
+      width: 100%;
+      height: 100%;
       overflow: hidden;
-      height: 100vh;
-      width: 100vw;
+      background: #000;
       position: fixed;
       touch-action: none;
-      font-family: 'Arial', sans-serif;
     }
     
     #gameCanvas {
       display: block;
-      width: 100vw;
-      height: 100vh;
+      width: 100%;
+      height: 100%;
       position: absolute;
       top: 0;
       left: 0;
+    }
+    
+    #fullscreen-btn {
+      position: fixed;
+      top: 15px;
+      right: 15px;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.7);
+      border: 2px solid rgba(255,255,255,0.4);
+      color: #fff;
+      font-size: 24px;
+      z-index: 999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
     }
     
     #crosshair {
@@ -42,268 +61,224 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 40px;
-      height: 40px;
+      width: 30px;
+      height: 30px;
       pointer-events: none;
       z-index: 10;
+      opacity: 0.8;
     }
     
     #crosshair::before,
     #crosshair::after {
       content: '';
       position: absolute;
-      background: rgba(255, 255, 255, 0.9);
+      background: #fff;
     }
     
     #crosshair::before {
-      width: 3px;
-      height: 40px;
-      left: 18px;
+      width: 2px;
+      height: 30px;
+      left: 14px;
       top: 0;
     }
     
     #crosshair::after {
-      width: 40px;
-      height: 3px;
+      width: 30px;
+      height: 2px;
       left: 0;
-      top: 18px;
+      top: 14px;
     }
     
     #hotbar {
       position: fixed;
-      bottom: 80px;
+      bottom: 20px;
       left: 50%;
       transform: translateX(-50%);
       display: flex;
-      gap: 6px;
-      background: rgba(0, 0, 0, 0.8);
-      padding: 10px;
-      border: 3px solid #555;
-      border-radius: 10px;
+      gap: 8px;
+      background: rgba(0,0,0,0.8);
+      padding: 10px 15px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 50px;
       z-index: 20;
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
     }
     
     .hotbar-slot {
-      width: 56px;
-      height: 56px;
-      background: rgba(139, 139, 139, 0.5);
-      border: 3px solid #333;
-      border-radius: 8px;
+      width: 52px;
+      height: 52px;
+      background: rgba(255,255,255,0.1);
+      border: 2px solid rgba(255,255,255,0.2);
+      border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 28px;
+      font-size: 26px;
       position: relative;
+      transition: all 0.15s;
     }
     
     .hotbar-slot.selected {
       border-color: #fff;
-      background: rgba(255, 255, 255, 0.4);
-      box-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
+      background: rgba(255,255,255,0.3);
+      box-shadow: 0 0 25px rgba(255,255,255,0.5);
+      transform: scale(1.1);
     }
     
     .hotbar-slot .count {
       position: absolute;
-      bottom: 4px;
-      right: 6px;
-      font-size: 14px;
+      bottom: -2px;
+      right: -2px;
+      background: rgba(0,0,0,0.8);
       color: #fff;
-      text-shadow: 2px 2px 0 #000;
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 10px;
       font-weight: bold;
+      min-width: 18px;
+      text-align: center;
     }
     
-    #joystick-area {
+    #controls-left {
       position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 50%;
-      height: 250px;
-      z-index: 15;
-    }
-    
-    #joystick {
-      position: absolute;
-      bottom: 40px;
-      left: 40px;
-      width: 140px;
-      height: 140px;
-      background: rgba(255, 255, 255, 0.15);
-      border: 3px solid rgba(255, 255, 255, 0.3);
-      border-radius: 50%;
-      touch-action: none;
-    }
-    
-    #joystick-knob {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 60px;
-      height: 60px;
-      background: rgba(255, 255, 255, 0.5);
-      border: 3px solid rgba(255, 255, 255, 0.7);
-      border-radius: 50%;
-      box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
-    }
-    
-    #action-buttons {
-      position: fixed;
-      bottom: 40px;
-      right: 20px;
-      z-index: 15;
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-    }
-    
-    .action-btn {
-      width: 70px;
-      height: 70px;
-      border-radius: 50%;
-      border: 3px solid rgba(255, 255, 255, 0.5);
-      background: rgba(0, 0, 0, 0.5);
-      color: #fff;
-      font-size: 28px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      touch-action: none;
-      backdrop-filter: blur(10px);
-    }
-    
-    .action-btn:active {
-      background: rgba(255, 255, 255, 0.3);
-      transform: scale(0.9);
-    }
-    
-    #jump-btn {
-      position: fixed;
-      bottom: 200px;
-      right: 30px;
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      border: 3px solid rgba(255, 255, 255, 0.5);
-      background: rgba(0, 0, 0, 0.5);
-      color: #fff;
-      font-size: 32px;
-      z-index: 15;
-      touch-action: none;
-      backdrop-filter: blur(10px);
-    }
-    
-    #inventory-btn {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      border: 3px solid rgba(255, 255, 255, 0.5);
-      background: rgba(0, 0, 0, 0.5);
-      color: #fff;
-      font-size: 24px;
-      z-index: 20;
-      touch-action: none;
-      backdrop-filter: blur(10px);
-    }
-    
-    #health-bar {
-      position: fixed;
-      top: 20px;
+      bottom: 30px;
       left: 20px;
       z-index: 20;
       display: flex;
-      gap: 4px;
-      flex-wrap: wrap;
-      max-width: 160px;
+      flex-direction: column;
+      gap: 12px;
     }
     
-    .heart {
-      font-size: 22px;
-      filter: drop-shadow(2px 2px 0 #000);
-    }
-    
-    #block-info {
+    #controls-right {
       position: fixed;
-      top: 80px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0, 0, 0, 0.8);
-      color: #fff;
-      padding: 8px 20px;
+      bottom: 30px;
+      right: 20px;
       z-index: 20;
-      font-size: 16px;
-      border: 2px solid rgba(255, 255, 255, 0.3);
-      border-radius: 20px;
-      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
     }
     
-    #inventory-screen {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: rgba(30, 30, 30, 0.95);
-      border: 4px solid #555;
-      border-radius: 20px;
-      padding: 20px;
-      z-index: 100;
-      display: none;
+    .ctrl-btn {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.6);
+      border: 2px solid rgba(255,255,255,0.3);
       color: #fff;
-      width: 90%;
-      max-width: 450px;
-      max-height: 80vh;
-      overflow-y: auto;
-    }
-    
-    .inv-grid {
-      display: grid;
-      grid-template-columns: repeat(9, 1fr);
-      gap: 4px;
-      margin: 10px 0;
-    }
-    
-    .inv-slot {
-      aspect-ratio: 1;
-      background: rgba(139, 139, 139, 0.3);
-      border: 2px solid #555;
-      border-radius: 6px;
+      font-size: 24px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 18px;
-      min-width: 30px;
+      touch-action: none;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      transition: all 0.1s;
     }
     
-    .close-btn {
-      background: #ff4444;
-      color: #fff;
-      border: none;
-      padding: 10px 30px;
-      border-radius: 20px;
-      font-size: 18px;
-      cursor: pointer;
-      width: 100%;
-      margin-top: 15px;
+    .ctrl-btn:active {
+      background: rgba(255,255,255,0.3);
+      transform: scale(0.85);
     }
     
-    #fps-counter {
+    .ctrl-btn.jump {
+      width: 64px;
+      height: 64px;
+      font-size: 28px;
+      border-color: rgba(255,255,255,0.5);
+    }
+    
+    #joystick-container {
       position: fixed;
-      top: 20px;
+      bottom: 30px;
+      left: 100px;
+      width: 130px;
+      height: 130px;
+      background: rgba(255,255,255,0.08);
+      border: 2px solid rgba(255,255,255,0.2);
+      border-radius: 50%;
+      z-index: 20;
+      touch-action: none;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+    
+    #joystick-thumb {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 55px;
+      height: 55px;
+      background: rgba(255,255,255,0.5);
+      border: 2px solid rgba(255,255,255,0.7);
+      border-radius: 50%;
+      box-shadow: 0 0 20px rgba(255,255,255,0.3);
+    }
+    
+    #health-display {
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      display: flex;
+      gap: 3px;
+      z-index: 20;
+    }
+    
+    .heart-icon {
+      font-size: 20px;
+      filter: drop-shadow(1px 1px 0 #000);
+    }
+    
+    #block-label {
+      position: fixed;
+      top: 50px;
       left: 50%;
       transform: translateX(-50%);
-      color: rgba(255, 255, 255, 0.5);
-      font-size: 12px;
-      z-index: 5;
+      background: rgba(0,0,0,0.8);
+      color: #fff;
+      padding: 6px 18px;
+      border-radius: 20px;
+      font-size: 13px;
+      z-index: 20;
       pointer-events: none;
+      border: 1px solid rgba(255,255,255,0.2);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    
+    #fps-display {
+      position: fixed;
+      top: 15px;
+      right: 80px;
+      color: rgba(255,255,255,0.5);
+      font-size: 11px;
+      z-index: 20;
+      pointer-events: none;
+    }
+    
+    .hidden {
+      display: none !important;
     }
   </style>
 </head>
 <body>
   <canvas id="gameCanvas"></canvas>
+  
+  <button id="fullscreen-btn" onclick="toggleFullscreen()">⛶</button>
+  
   <div id="crosshair"></div>
-  <div id="fps-counter">FPS: --</div>
+  <div id="fps-display">FPS: --</div>
+  <div id="block-label">🟫 Земля</div>
+  
+  <div id="health-display">
+    <span class="heart-icon">❤️</span><span class="heart-icon">❤️</span>
+    <span class="heart-icon">❤️</span><span class="heart-icon">❤️</span>
+    <span class="heart-icon">❤️</span><span class="heart-icon">❤️</span>
+    <span class="heart-icon">❤️</span><span class="heart-icon">❤️</span>
+    <span class="heart-icon">❤️</span><span class="heart-icon">❤️</span>
+  </div>
   
   <div id="hotbar">
     <div class="hotbar-slot selected" data-slot="0"><span class="count">64</span></div>
@@ -311,289 +286,258 @@
     <div class="hotbar-slot" data-slot="2"></div>
     <div class="hotbar-slot" data-slot="3"></div>
     <div class="hotbar-slot" data-slot="4"></div>
-    <div class="hotbar-slot" data-slot="5"></div>
   </div>
   
-  <div id="health-bar">
-    <span class="heart">❤️</span><span class="heart">❤️</span><span class="heart">❤️</span>
-    <span class="heart">❤️</span><span class="heart">❤️</span><span class="heart">❤️</span>
-    <span class="heart">❤️</span><span class="heart">❤️</span><span class="heart">❤️</span>
-    <span class="heart">❤️</span>
+  <div id="controls-left">
+    <div class="ctrl-btn" id="break-btn">⛏️</div>
+    <div class="ctrl-btn" id="place-btn">🧱</div>
   </div>
   
-  <div id="block-info">🟫 Земля</div>
-  
-  <div id="joystick-area">
-    <div id="joystick">
-      <div id="joystick-knob"></div>
-    </div>
+  <div id="controls-right">
+    <div class="ctrl-btn jump" id="jump-btn">⬆️</div>
   </div>
   
-  <div id="action-buttons">
-    <div class="action-btn" id="break-btn">⛏️</div>
-    <div class="action-btn" id="place-btn">🧱</div>
-  </div>
-  
-  <div id="jump-btn">⬆️</div>
-  <div id="inventory-btn">📦</div>
-  
-  <div id="inventory-screen">
-    <h2>📦 Инвентарь</h2>
-    <div class="inv-grid" id="inventory-grid"></div>
-    <button class="close-btn" id="close-inventory">ЗАКРЫТЬ</button>
+  <div id="joystick-container">
+    <div id="joystick-thumb"></div>
   </div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script>
-    // ==================== MINECRAFT RTX MOBILE ====================
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.157.0/build/three.module.js"
+      }
+    }
+  </script>
+  
+  <script type="module">
+    import * as THREE from 'three';
+    
+    // ============ ОПТИМИЗИРОВАННЫЙ MINECRAFT ============
+    
+    // Форсируем ландшафтный режим
+    function lockOrientation() {
+      if (screen.orientation && screen.orientation.lock) {
+        screen.orientation.lock('landscape').catch(() => {});
+      }
+    }
+    lockOrientation();
+    window.addEventListener('orientationchange', lockOrientation);
+    
+    // Полный экран
+    window.toggleFullscreen = function() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        document.exitFullscreen();
+      }
+    };
+    
+    // ============ THREE.JS ОПТИМИЗАЦИЯ ============
     
     const canvas = document.getElementById('gameCanvas');
     const renderer = new THREE.WebGLRenderer({ 
-      canvas, 
-      antialias: true,
-      powerPreference: "high-performance"
+      canvas,
+      antialias: false,
+      powerPreference: "high-performance",
+      precision: "lowp"
     });
+    
+    renderer.setPixelRatio(1);
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.2;
-    renderer.outputEncoding = THREE.sRGBEncoding;
+    renderer.shadowMap.enabled = false;
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
     
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x87CEEB);
-    scene.fog = new THREE.FogExp2(0x87CEEB, 0.002);
+    scene.fog = new THREE.Fog(0x87CEEB, 20, 50);
     
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 120);
-    camera.position.set(0, 18, 5);
+    const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.5, 60);
+    camera.position.set(0, 12, 8);
     
-    // RTX-подобное освещение
-    const ambientLight = new THREE.AmbientLight(0x404060, 0.6);
-    scene.add(ambientLight);
+    // Простое быстрое освещение
+    const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
+    dirLight.position.set(1, 1, 0.5);
+    scene.add(dirLight);
     
-    const sunLight = new THREE.DirectionalLight(0xffeedd, 1.5);
-    sunLight.position.set(100, 150, 80);
-    sunLight.castShadow = true;
-    sunLight.shadow.mapSize.width = 2048;
-    sunLight.shadow.mapSize.height = 2048;
-    sunLight.shadow.camera.near = 0.5;
-    sunLight.shadow.camera.far = 300;
-    sunLight.shadow.camera.left = -50;
-    sunLight.shadow.camera.right = 50;
-    sunLight.shadow.camera.top = 50;
-    sunLight.shadow.camera.bottom = -50;
-    sunLight.shadow.bias = -0.001;
-    sunLight.shadow.normalBias = 0.02;
-    scene.add(sunLight);
+    const ambLight = new THREE.AmbientLight(0x8899bb, 0.7);
+    scene.add(ambLight);
     
-    // Небесный свет (имитация RTX GI)
-    const hemisphereLight = new THREE.HemisphereLight(0x87CEEB, 0x8B6914, 0.4);
-    scene.add(hemisphereLight);
+    // ============ ПРОСТЫЕ ТЕКСТУРЫ (1 АТЛАС) ============
     
-    // Подповерхностное рассеивание для блоков
-    const sssLight = new THREE.PointLight(0xff9944, 0.5, 20);
-    sssLight.position.set(0, 5, 0);
-    scene.add(sssLight);
-    
-    // Текстуры с PBR эффектами
-    function createPBRTexture(color, roughness = 0.5, metalness = 0) {
-      const canvas = document.createElement('canvas');
-      canvas.width = 128;
-      canvas.height = 128;
-      const ctx = canvas.getContext('2d');
+    function createBlockTexture(r, g, b, darken = false) {
+      const c = document.createElement('canvas');
+      c.width = 16;
+      c.height = 16;
+      const ctx = c.getContext('2d');
       
-      const baseColor = '#' + new THREE.Color(color).getHexString();
-      ctx.fillStyle = baseColor;
-      ctx.fillRect(0, 0, 128, 128);
+      ctx.fillStyle = `rgb(${r},${g},${b})`;
+      ctx.fillRect(0, 0, 16, 16);
       
-      // Микродетали
-      for (let i = 0; i < 200; i++) {
-        const x = Math.random() * 128;
-        const y = Math.random() * 128;
-        const size = 1 + Math.random() * 4;
-        ctx.fillStyle = `rgba(${Math.random() > 0.5 ? 255 : 0},${Math.random() > 0.5 ? 255 : 0},${Math.random() > 0.5 ? 255 : 0},${0.03 + Math.random() * 0.08})`;
-        ctx.fillRect(x, y, size, size);
-      }
+      // Простые детали без циклов
+      ctx.fillStyle = `rgba(0,0,0,0.15)`;
+      ctx.fillRect(0, 0, 8, 8);
+      ctx.fillRect(8, 8, 8, 8);
       
-      // Границы блоков
-      ctx.strokeStyle = 'rgba(0,0,0,0.2)';
-      ctx.lineWidth = 2;
-      ctx.strokeRect(0, 0, 128, 128);
+      ctx.fillStyle = `rgba(255,255,255,0.1)`;
+      ctx.fillRect(8, 0, 8, 8);
+      ctx.fillRect(0, 8, 8, 8);
       
-      // Эффект шероховатости
-      if (roughness > 0.3) {
-        for (let i = 0; i < 50; i++) {
-          ctx.fillStyle = `rgba(0,0,0,${roughness * 0.1})`;
-          ctx.fillRect(Math.random() * 128, Math.random() * 128, 8, 8);
-        }
-      }
+      ctx.strokeStyle = 'rgba(0,0,0,0.3)';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(0, 0, 16, 16);
       
-      // Металлический блеск
-      if (metalness > 0) {
-        const gradient = ctx.createLinearGradient(0, 0, 128, 128);
-        gradient.addColorStop(0, `rgba(255,255,255,${metalness * 0.4})`);
-        gradient.addColorStop(0.5, 'rgba(255,255,255,0)');
-        gradient.addColorStop(1, `rgba(0,0,0,${metalness * 0.3})`);
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, 128, 128);
-      }
-      
-      const texture = new THREE.CanvasTexture(canvas);
-      texture.magFilter = THREE.LinearFilter;
-      texture.minFilter = THREE.LinearMipmapLinearFilter;
-      texture.generateMipmaps = true;
-      return texture;
+      const tex = new THREE.CanvasTexture(c);
+      tex.magFilter = THREE.NearestFilter;
+      tex.minFilter = THREE.NearestFilter;
+      tex.colorSpace = THREE.SRGBColorSpace;
+      return tex;
     }
     
-    const textures = {
-      grass_top: createPBRTexture(0x7ec850, 0.6, 0),
-      grass_side: createPBRTexture(0x6a9e3a, 0.7, 0),
-      dirt: createPBRTexture(0x8b6914, 0.8, 0),
-      stone: createPBRTexture(0x7a7a7a, 0.5, 0.1),
-      wood: createPBRTexture(0x8b6914, 0.6, 0),
-      leaves: createPBRTexture(0x3a7e3a, 0.7, 0),
-      sand: createPBRTexture(0xf4e4a8, 0.4, 0),
-      plank: createPBRTexture(0xc4944a, 0.5, 0),
-      cobblestone: createPBRTexture(0x696969, 0.6, 0.1),
-      brick: createPBRTexture(0xb53c1c, 0.5, 0),
-      glass: createPBRTexture(0xc8e8ff, 0.1, 0.1),
-      gold: createPBRTexture(0xffd700, 0.2, 0.9),
-      diamond: createPBRTexture(0x33e8ff, 0.1, 0.8),
-      bedrock: createPBRTexture(0x1a1a1a, 0.9, 0.2),
-      water: createPBRTexture(0x3355ff, 0.2, 0.1)
+    const TEX = {
+      grass_top: createBlockTexture(100, 180, 60),
+      grass_side: createBlockTexture(80, 150, 40),
+      dirt: createBlockTexture(130, 100, 50),
+      stone: createBlockTexture(120, 120, 120),
+      wood: createBlockTexture(140, 100, 40),
+      leaves: createBlockTexture(40, 140, 40),
+      sand: createBlockTexture(230, 210, 140),
+      plank: createBlockTexture(180, 140, 60),
+      brick: createBlockTexture(170, 60, 40),
+      glass: createBlockTexture(180, 220, 255),
+      gold: createBlockTexture(255, 210, 0),
+      diamond: createBlockTexture(60, 230, 255),
+      bedrock: createBlockTexture(30, 30, 30)
     };
     
-    const blockTypes = {
-      air: { id: 0, solid: false },
-      grass: { id: 1, texture: 'grass_top', sideTexture: 'grass_side', bottomTexture: 'dirt', solid: true, name: 'Трава' },
-      dirt: { id: 2, texture: 'dirt', solid: true, name: 'Земля' },
-      stone: { id: 3, texture: 'stone', solid: true, drop: 'cobblestone', name: 'Камень' },
-      wood: { id: 4, texture: 'wood', solid: true, name: 'Дерево' },
-      leaves: { id: 5, texture: 'leaves', solid: true, transparent: true, name: 'Листья' },
-      sand: { id: 6, texture: 'sand', solid: true, name: 'Песок' },
-      plank: { id: 7, texture: 'plank', solid: true, name: 'Доски' },
-      cobblestone: { id: 8, texture: 'cobblestone', solid: true, name: 'Булыжник' },
-      brick: { id: 9, texture: 'brick', solid: true, name: 'Кирпич' },
-      glass: { id: 10, texture: 'glass', solid: true, transparent: true, name: 'Стекло' },
-      gold: { id: 11, texture: 'gold', solid: true, name: 'Золото' },
-      diamond: { id: 12, texture: 'diamond', solid: true, name: 'Алмаз' },
-      bedrock: { id: 13, texture: 'bedrock', solid: true, name: 'Бедрок' }
-    };
+    // ============ ГЕОМЕТРИЯ (переиспользуем) ============
     
-    // Инвентарь
-    const inventory = {
-      hotbar: new Array(6).fill(null),
-      slots: new Array(27).fill(null),
-      selectedSlot: 0
-    };
+    const boxGeo = new THREE.BoxGeometry(1, 1, 1);
+    const materialCache = {};
     
-    inventory.hotbar[0] = { type: 'plank', count: 64, name: 'Доски' };
-    inventory.hotbar[1] = { type: 'cobblestone', count: 64, name: 'Булыжник' };
-    inventory.hotbar[2] = { type: 'dirt', count: 64, name: 'Земля' };
-    inventory.hotbar[3] = { type: 'brick', count: 64, name: 'Кирпич' };
-    inventory.hotbar[4] = { type: 'glass', count: 64, name: 'Стекло' };
-    
-    // Мир
-    const worldSize = 60;
-    const world = new Map();
-    const blockMeshes = new Map();
-    const blockGeometry = new THREE.BoxGeometry(1, 1, 1);
-    
-    function getBlockKey(x, y, z) {
-      return `${Math.floor(x)},${Math.floor(y)},${Math.floor(z)}`;
-    }
-    
-    function setBlock(x, y, z, type) {
-      const key = getBlockKey(x, y, z);
-      if (type === 'air') {
-        world.delete(key);
-        removeBlockMesh(x, y, z);
-      } else {
-        world.set(key, type);
-        createBlockMesh(x, y, z, type);
+    function getBlockMaterial(type) {
+      if (materialCache[type]) return materialCache[type];
+      
+      let topTex, sideTex, bottomTex;
+      switch(type) {
+        case 'grass':
+          topTex = TEX.grass_top;
+          sideTex = TEX.grass_side;
+          bottomTex = TEX.dirt;
+          break;
+        case 'dirt':
+          topTex = sideTex = bottomTex = TEX.dirt;
+          break;
+        case 'stone':
+          topTex = sideTex = bottomTex = TEX.stone;
+          break;
+        case 'wood':
+          topTex = sideTex = bottomTex = TEX.wood;
+          break;
+        case 'leaves':
+          topTex = sideTex = bottomTex = TEX.leaves;
+          break;
+        case 'sand':
+          topTex = sideTex = bottomTex = TEX.sand;
+          break;
+        case 'plank':
+          topTex = sideTex = bottomTex = TEX.plank;
+          break;
+        case 'brick':
+          topTex = sideTex = bottomTex = TEX.brick;
+          break;
+        case 'glass':
+          topTex = sideTex = bottomTex = TEX.glass;
+          break;
+        case 'gold':
+          topTex = sideTex = bottomTex = TEX.gold;
+          break;
+        case 'diamond':
+          topTex = sideTex = bottomTex = TEX.diamond;
+          break;
+        case 'bedrock':
+          topTex = sideTex = bottomTex = TEX.bedrock;
+          break;
+        default:
+          topTex = sideTex = bottomTex = TEX.dirt;
       }
-    }
-    
-    function getBlock(x, y, z) {
-      return world.get(getBlockKey(x, y, z)) || 'air';
-    }
-    
-    function createBlockMesh(x, y, z, type) {
-      const blockType = blockTypes[type];
-      if (!blockType || !blockType.solid) return;
       
-      const topTex = textures[blockType.texture] || textures.dirt;
-      const sideTex = textures[blockType.sideTexture || blockType.texture] || topTex;
-      const bottomTex = textures[blockType.bottomTexture || blockType.texture] || topTex;
-      
-      const materials = [
-        new THREE.MeshStandardMaterial({ map: sideTex, roughness: 0.7, metalness: 0, transparent: blockType.transparent }),
-        new THREE.MeshStandardMaterial({ map: sideTex, roughness: 0.7, metalness: 0, transparent: blockType.transparent }),
-        new THREE.MeshStandardMaterial({ map: topTex, roughness: 0.6, metalness: 0, transparent: blockType.transparent }),
-        new THREE.MeshStandardMaterial({ map: bottomTex, roughness: 0.8, metalness: 0, transparent: blockType.transparent }),
-        new THREE.MeshStandardMaterial({ map: sideTex, roughness: 0.7, metalness: 0, transparent: blockType.transparent }),
-        new THREE.MeshStandardMaterial({ map: sideTex, roughness: 0.7, metalness: 0, transparent: blockType.transparent })
+      const mats = [
+        new THREE.MeshLambertMaterial({ map: sideTex }),
+        new THREE.MeshLambertMaterial({ map: sideTex }),
+        new THREE.MeshLambertMaterial({ map: topTex }),
+        new THREE.MeshLambertMaterial({ map: bottomTex }),
+        new THREE.MeshLambertMaterial({ map: sideTex }),
+        new THREE.MeshLambertMaterial({ map: sideTex })
       ];
       
-      const mesh = new THREE.Mesh(blockGeometry, materials);
-      mesh.position.set(x, y, z);
-      mesh.castShadow = true;
-      mesh.receiveShadow = true;
-      mesh.userData = { type, x, y, z };
+      materialCache[type] = mats;
+      return mats;
+    }
+    
+    // ============ МИР (ГОТОВЫЙ, БЕЗ ГЕНЕРАЦИИ) ============
+    
+    const world = new Map();
+    const meshes = [];
+    const SIZE = 30;
+    const HEIGHT = 15;
+    
+    function buildWorld() {
+      const halfSize = SIZE / 2;
       
-      scene.add(mesh);
-      blockMeshes.set(getBlockKey(x, y, z), mesh);
-    }
-    
-    function removeBlockMesh(x, y, z) {
-      const key = getBlockKey(x, y, z);
-      const mesh = blockMeshes.get(key);
-      if (mesh) {
-        scene.remove(mesh);
-        blockMeshes.delete(key);
-      }
-    }
-    
-    // Генерация мира
-    function generateWorld() {
-      for (let x = -worldSize/2; x < worldSize/2; x++) {
-        for (let z = -worldSize/2; z < worldSize/2; z++) {
-          const noise1 = Math.sin(x * 0.15) * Math.cos(z * 0.15) * 4;
-          const noise2 = Math.sin(x * 0.06 + 2) * Math.cos(z * 0.06) * 6;
-          const noise3 = Math.sin(x * 0.03) * Math.cos(z * 0.03) * 8;
-          let height = Math.floor(8 + noise1 + noise2 + noise3);
-          height = Math.max(3, Math.min(22, height));
+      for (let x = -halfSize; x < halfSize; x++) {
+        for (let z = -halfSize; z < halfSize; z++) {
+          // Простой ландшафт формулой
+          const h = Math.floor(
+            6 + 
+            Math.sin(x * 0.3) * Math.cos(z * 0.3) * 3 +
+            Math.cos(x * 0.15) * Math.sin(z * 0.2) * 2 +
+            Math.sin((x + z) * 0.1) * 1
+          );
           
-          setBlock(x, 0, z, 'bedrock');
+          // Бедрок
+          addBlock(x, 0, z, 'bedrock');
           
-          for (let y = 1; y < height - 3; y++) {
-            if (Math.random() < 0.04 && y > height - 12) {
-              setBlock(x, y, z, Math.random() < 0.25 ? 'diamond' : 'gold');
-            } else {
-              setBlock(x, y, z, 'stone');
+          // Камень
+          for (let y = 1; y < h - 2; y++) {
+            const isGold = (x + y + z) % 13 === 0 && y > h - 7;
+            const isDiamond = (x * z) % 17 === 0 && y > h - 9;
+            if (isDiamond) addBlock(x, y, z, 'diamond');
+            else if (isGold) addBlock(x, y, z, 'gold');
+            else addBlock(x, y, z, 'stone');
+          }
+          
+          // Земля
+          addBlock(x, h - 2, z, 'dirt');
+          addBlock(x, h - 1, z, 'dirt');
+          
+          // Трава
+          addBlock(x, h, z, 'grass');
+          
+          // Деревья
+          if ((x + z) % 5 === 0 && h > 8 && x % 3 !== 0) {
+            const th = 3 + Math.abs(x % 3);
+            for (let ty = 1; ty <= th; ty++) {
+              addBlock(x, h + ty, z, 'wood');
+            }
+            for (let lx = -2; lx <= 2; lx++) {
+              for (let lz = -2; lz <= 2; lz++) {
+                if (Math.abs(lx) + Math.abs(lz) <= 3) {
+                  addBlock(x + lx, h + th + 1, z + lz, 'leaves');
+                  if (Math.abs(lx) + Math.abs(lz) <= 2) {
+                    addBlock(x + lx, h + th, z + lz, 'leaves');
+                  }
+                }
+              }
             }
           }
           
-          for (let y = height - 3; y < height - 1; y++) {
-            setBlock(x, y, z, 'dirt');
-          }
-          
-          if (height > 2) setBlock(x, height - 1, z, 'grass');
-          
-          // Деревья
-          if (Math.random() < 0.06 && height > 11 && getBlock(x, height - 1, z) === 'grass') {
-            const treeH = 3 + Math.floor(Math.random() * 4);
-            for (let ty = 0; ty < treeH; ty++) setBlock(x, height + ty, z, 'wood');
-            for (let lx = -2; lx <= 2; lx++) {
-              for (let lz = -2; lz <= 2; lz++) {
-                for (let ly = -1; ly <= 1; ly++) {
-                  if (Math.abs(lx) + Math.abs(lz) + Math.abs(ly) <= 3) {
-                    if (getBlock(x + lx, height + treeH + ly, z + lz) === 'air') {
-                      setBlock(x + lx, height + treeH + ly, z + lz, 'leaves');
-                    }
-                  }
-                }
+          // Песок у воды
+          if (h <= 5) {
+            addBlock(x, h, z, 'sand');
+            addBlock(x, h - 1, z, 'sand');
+            if (h <= 3) {
+              for (let wy = h + 1; wy <= 4; wy++) {
+                addBlock(x, wy, z, 'glass');
               }
             }
           }
@@ -601,106 +545,193 @@
       }
     }
     
-    // Игрок
+    function addBlock(x, y, z, type) {
+      const key = `${x},${y},${z}`;
+      if (world.has(key)) return;
+      world.set(key, type);
+      
+      const mats = getBlockMaterial(type);
+      const mesh = new THREE.Mesh(boxGeo, mats);
+      mesh.position.set(x, y, z);
+      mesh.matrixAutoUpdate = false;
+      mesh.updateMatrix();
+      mesh.userData = { type, x, y, z };
+      
+      scene.add(mesh);
+      meshes.push(mesh);
+    }
+    
+    function getBlock(x, y, z) {
+      return world.get(`${Math.round(x)},${Math.round(y)},${Math.round(z)}`) || 'air';
+    }
+    
+    function removeBlock(x, y, z) {
+      const key = `${x},${y},${z}`;
+      world.delete(key);
+      
+      for (let i = meshes.length - 1; i >= 0; i--) {
+        const m = meshes[i];
+        if (m.userData.x === x && m.userData.y === y && m.userData.z === z) {
+          scene.remove(m);
+          meshes.splice(i, 1);
+          break;
+        }
+      }
+    }
+    
+    function setBlock(x, y, z, type) {
+      removeBlock(x, y, z);
+      if (type !== 'air') addBlock(x, y, z, type);
+    }
+    
+    // ============ ИГРОК ============
+    
     const player = {
-      position: new THREE.Vector3(0, 20, 0),
-      velocity: new THREE.Vector3(),
-      rotation: new THREE.Euler(0, 0, 0, 'YXZ'),
+      x: 0, y: 15, z: 0,
+      vx: 0, vy: 0, vz: 0,
+      rotX: 0, rotY: 0,
       onGround: false,
-      health: 10,
-      breakingBlock: null,
-      breakingProgress: 0
+      health: 10
     };
     
-    // Мобильное управление
-    const joystick = document.getElementById('joystick');
-    const joystickKnob = document.getElementById('joystick-knob');
-    let joystickActive = false;
-    let joystickData = { x: 0, y: 0 };
-    let touchLookActive = false;
-    let lastTouchX = 0;
-    let lastTouchY = 0;
+    // ============ ИНВЕНТАРЬ ============
     
-    joystick.addEventListener('touchstart', (e) => {
+    const inv = {
+      hotbar: [
+        { type: 'plank', count: 64 },
+        { type: 'stone', count: 64 },
+        { type: 'dirt', count: 64 },
+        { type: 'brick', count: 64 },
+        { type: 'glass', count: 64 }
+      ],
+      selected: 0
+    };
+    
+    function updateHotbarUI() {
+      const slots = document.querySelectorAll('.hotbar-slot');
+      const emoji = {
+        grass: '🟩', dirt: '🟫', stone: '🪨', wood: '🟤',
+        leaves: '🌿', sand: '🟨', plank: '🟫', brick: '🧱',
+        glass: '🪟', gold: '🟡', diamond: '💎', bedrock: '⬛'
+      };
+      slots.forEach((s, i) => {
+        const item = inv.hotbar[i];
+        if (item && item.count > 0) {
+          s.innerHTML = `${emoji[item.type] || '📦'}<span class="count">${item.count}</span>`;
+        } else {
+          s.innerHTML = '';
+        }
+      });
+    }
+    
+    function getSelectedItem() {
+      const item = inv.hotbar[inv.selected];
+      return (item && item.count > 0) ? item : null;
+    }
+    
+    function addToInv(type) {
+      for (let i = 0; i < 5; i++) {
+        if (inv.hotbar[i] && inv.hotbar[i].type === type && inv.hotbar[i].count < 64) {
+          inv.hotbar[i].count++;
+          updateHotbarUI();
+          return;
+        }
+      }
+      for (let i = 0; i < 5; i++) {
+        if (!inv.hotbar[i] || inv.hotbar[i].count === 0) {
+          inv.hotbar[i] = { type, count: 1 };
+          updateHotbarUI();
+          return;
+        }
+      }
+    }
+    
+    // ============ УПРАВЛЕНИЕ ============
+    
+    const keys = {};
+    let joystickActive = false;
+    let joyDX = 0, joyDY = 0;
+    
+    // Джойстик
+    const joyContainer = document.getElementById('joystick-container');
+    const joyThumb = document.getElementById('joystick-thumb');
+    
+    joyContainer.addEventListener('touchstart', (e) => {
       e.preventDefault();
       joystickActive = true;
       updateJoystick(e.touches[0]);
     });
     
-    joystick.addEventListener('touchmove', (e) => {
+    joyContainer.addEventListener('touchmove', (e) => {
       e.preventDefault();
       if (joystickActive) updateJoystick(e.touches[0]);
     });
     
-    joystick.addEventListener('touchend', () => {
+    joyContainer.addEventListener('touchend', (e) => {
+      e.preventDefault();
       joystickActive = false;
-      joystickKnob.style.transform = 'translate(-50%, -50%)';
-      joystickData.x = 0;
-      joystickData.y = 0;
+      joyThumb.style.transform = 'translate(-50%, -50%)';
+      joyDX = 0;
+      joyDY = 0;
     });
     
     function updateJoystick(touch) {
-      const rect = joystick.getBoundingClientRect();
-      const centerX = rect.left + rect.width / 2;
-      const centerY = rect.top + rect.height / 2;
-      const dx = touch.clientX - centerX;
-      const dy = touch.clientY - centerY;
-      const dist = Math.min(Math.sqrt(dx * dx + dy * dy), 50);
-      const angle = Math.atan2(dy, dx);
+      const rect = joyContainer.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      let dx = touch.clientX - cx;
+      let dy = touch.clientY - cy;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      const maxDist = 45;
       
-      const knobX = Math.cos(angle) * dist;
-      const knobY = Math.sin(angle) * dist;
+      if (dist > maxDist) {
+        dx = dx / dist * maxDist;
+        dy = dy / dist * maxDist;
+      }
       
-      joystickKnob.style.transform = `translate(calc(-50% + ${knobX}px), calc(-50% + ${knobY}px))`;
-      
-      joystickData.x = Math.cos(angle) * (dist / 50);
-      joystickData.y = Math.sin(angle) * (dist / 50);
+      joyThumb.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+      joyDX = dx / maxDist;
+      joyDY = dy / maxDist;
     }
     
-    // Обзор касанием (правая часть экрана)
+    // Обзор
     canvas.addEventListener('touchstart', (e) => {
-      if (e.touches.length === 1 && e.touches[0].clientX > window.innerWidth / 2) {
-        touchLookActive = true;
-        lastTouchX = e.touches[0].clientX;
-        lastTouchY = e.touches[0].clientY;
+      if (e.touches.length === 1) {
+        const tx = e.touches[0].clientX;
+        if (tx < window.innerWidth * 0.4) return;
+        e.preventDefault();
+        window._lookTouch = { x: tx, y: e.touches[0].clientY };
       }
-    });
+    }, { passive: false });
     
     canvas.addEventListener('touchmove', (e) => {
-      if (touchLookActive && e.touches.length === 1) {
-        const dx = e.touches[0].clientX - lastTouchX;
-        const dy = e.touches[0].clientY - lastTouchY;
-        
-        player.rotation.y -= dx * 0.005;
-        player.rotation.x -= dy * 0.005;
-        player.rotation.x = Math.max(-Math.PI / 2.2, Math.min(Math.PI / 2.2, player.rotation.x));
-        
-        lastTouchX = e.touches[0].clientX;
-        lastTouchY = e.touches[0].clientY;
+      if (window._lookTouch && e.touches.length === 1) {
+        e.preventDefault();
+        const dx = e.touches[0].clientX - window._lookTouch.x;
+        const dy = e.touches[0].clientY - window._lookTouch.y;
+        player.rotY -= dx * 0.004;
+        player.rotX -= dy * 0.004;
+        player.rotX = Math.max(-1.4, Math.min(1.4, player.rotX));
+        window._lookTouch = { x: e.touches[0].clientX, y: e.touches[0].clientY };
       }
-    });
+    }, { passive: false });
     
     canvas.addEventListener('touchend', () => {
-      touchLookActive = false;
+      window._lookTouch = null;
     });
     
-    // Кнопки действий
+    // Кнопки
     document.getElementById('jump-btn').addEventListener('touchstart', (e) => {
       e.preventDefault();
       if (player.onGround) {
-        player.velocity.y = 8;
+        player.vy = 7;
         player.onGround = false;
       }
     });
     
     document.getElementById('break-btn').addEventListener('touchstart', (e) => {
       e.preventDefault();
-      startBreaking();
-    });
-    
-    document.getElementById('break-btn').addEventListener('touchend', (e) => {
-      e.preventDefault();
-      stopBreaking();
+      breakBlock();
     });
     
     document.getElementById('place-btn').addEventListener('touchstart', (e) => {
@@ -708,277 +739,307 @@
       placeBlock();
     });
     
-    document.getElementById('inventory-btn').addEventListener('click', toggleInventory);
-    document.getElementById('close-inventory').addEventListener('click', toggleInventory);
-    
-    // Выбор слотов хотбара
+    // Хотбар
     document.querySelectorAll('.hotbar-slot').forEach((slot, i) => {
-      slot.addEventListener('click', () => selectHotbarSlot(i));
+      slot.addEventListener('click', () => {
+        inv.selected = i;
+        document.querySelectorAll('.hotbar-slot').forEach((s, j) => {
+          s.classList.toggle('selected', j === i);
+        });
+      });
     });
     
-    function selectHotbarSlot(index) {
-      inventory.selectedSlot = index;
-      document.querySelectorAll('.hotbar-slot').forEach((s, i) => {
-        s.classList.toggle('selected', i === index);
-      });
-    }
+    // ============ ИГРОВАЯ ЛОГИКА ============
     
-    function updateHotbarUI() {
-      document.querySelectorAll('.hotbar-slot').forEach((slot, i) => {
-        const item = inventory.hotbar[i];
-        const emojiMap = {
-          grass: '🟩', dirt: '🟫', stone: '🪨', wood: '🟤',
-          leaves: '🌿', sand: '🟨', plank: '🟫', cobblestone: '🪨',
-          brick: '🧱', glass: '🪟', water: '💧', gold: '🟡',
-          diamond: '💎', bedrock: '⬛'
-        };
-        slot.innerHTML = item ? `${emojiMap[item.type] || '📦'}<span class="count">${item.count}</span>` : '';
-      });
-    }
-    
-    function toggleInventory() {
-      const screen = document.getElementById('inventory-screen');
-      const isOpen = screen.style.display === 'block';
-      screen.style.display = isOpen ? 'none' : 'block';
-      if (!isOpen) updateInventoryScreen();
-    }
-    
-    function updateInventoryScreen() {
-      const grid = document.getElementById('inventory-grid');
-      grid.innerHTML = '';
-      for (let i = 0; i < 27; i++) {
-        const item = inventory.slots[i];
-        const slot = document.createElement('div');
-        slot.className = 'inv-slot';
-        slot.textContent = item ? '📦' : '';
-        grid.appendChild(slot);
+    function breakBlock() {
+      const ray = getLookRay();
+      const hit = raycast(ray);
+      if (hit) {
+        const type = hit.mesh.userData.type;
+        removeBlock(hit.x, hit.y, hit.z);
+        addToInv(type);
       }
-    }
-    
-    function getSelectedItem() {
-      return inventory.hotbar[inventory.selectedSlot];
-    }
-    
-    function addToInventory(type, name) {
-      for (let i = 0; i < 6; i++) {
-        if (inventory.hotbar[i] && inventory.hotbar[i].type === type && inventory.hotbar[i].count < 64) {
-          inventory.hotbar[i].count++;
-          updateHotbarUI();
-          return;
-        }
-      }
-      for (let i = 0; i < 6; i++) {
-        if (!inventory.hotbar[i]) {
-          inventory.hotbar[i] = { type, count: 1, name };
-          updateHotbarUI();
-          return;
-        }
-      }
-    }
-    
-    function startBreaking() {
-      const raycaster = new THREE.Raycaster();
-      raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
-      const intersects = raycaster.intersectObjects(Array.from(blockMeshes.values()));
-      if (intersects.length > 0 && intersects[0].distance < 8) {
-        player.breakingBlock = intersects[0].object;
-        player.breakingProgress = 0;
-      }
-    }
-    
-    function stopBreaking() {
-      player.breakingBlock = null;
-      player.breakingProgress = 0;
     }
     
     function placeBlock() {
-      const selected = getSelectedItem();
-      if (!selected) return;
+      const item = getSelectedItem();
+      if (!item) return;
       
-      const raycaster = new THREE.Raycaster();
-      raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
-      const intersects = raycaster.intersectObjects(Array.from(blockMeshes.values()));
-      
-      if (intersects.length > 0 && intersects[0].distance < 8) {
-        const point = intersects[0].point;
-        const normal = intersects[0].face.normal;
-        const pos = intersects[0].object.position.clone();
-        const placePos = new THREE.Vector3(
-          Math.round(pos.x + normal.x),
-          Math.round(pos.y + normal.y),
-          Math.round(pos.z + normal.z)
-        );
+      const ray = getLookRay();
+      const hit = raycast(ray);
+      if (hit) {
+        const px = hit.x + hit.nx;
+        const py = hit.y + hit.ny;
+        const pz = hit.z + hit.nz;
         
-        if (getBlock(placePos.x, placePos.y, placePos.z) === 'air') {
-          setBlock(placePos.x, placePos.y, placePos.z, selected.type);
-          selected.count--;
-          if (selected.count <= 0) inventory.hotbar[inventory.selectedSlot] = null;
+        const px2 = Math.round(player.x);
+        const py2 = Math.round(player.y);
+        const pz2 = Math.round(player.z);
+        
+        if (px === px2 && py === py2 && pz === pz2) return;
+        if (px === px2 && py === py2 + 1 && pz === pz2) return;
+        
+        if (getBlock(px, py, pz) === 'air') {
+          setBlock(px, py, pz, item.type);
+          item.count--;
+          if (item.count <= 0) inv.hotbar[inv.selected] = null;
           updateHotbarUI();
         }
       }
     }
     
-    function updateBreaking(dt) {
-      if (!player.breakingBlock) return;
-      player.breakingProgress += dt * 3;
-      if (player.breakingProgress >= 1) {
-        const mesh = player.breakingBlock;
-        const pos = mesh.position;
-        const type = mesh.userData.type;
-        const blockType = blockTypes[type];
-        const dropType = blockType.drop || type;
-        
-        setBlock(pos.x, pos.y, pos.z, 'air');
-        addToInventory(dropType, blockTypes[dropType]?.name || type);
-        
-        player.breakingBlock = null;
-        player.breakingProgress = 0;
-      }
+    function getLookRay() {
+      const dir = new THREE.Vector3(
+        -Math.sin(player.rotY) * Math.cos(player.rotX),
+        -Math.sin(player.rotX),
+        -Math.cos(player.rotY) * Math.cos(player.rotX)
+      );
+      return { origin: new THREE.Vector3(player.x, player.y + 0.8, player.z), direction: dir };
     }
     
-    function updatePhysics(dt) {
-      const speed = 6;
-      const direction = new THREE.Vector3();
+    function raycast(ray) {
+      let bestDist = 6;
+      let bestHit = null;
       
-      direction.x = joystickData.x;
-      direction.z = joystickData.y;
+      for (const mesh of meshes) {
+        const box = new THREE.Box3().setFromObject(mesh);
+        const intersection = new THREE.Vector3();
+        const face = { x: 0, y: 0, z: 0 };
+        
+        if (ray.origin.distanceTo(mesh.position) > 7) continue;
+        
+        const hit = rayBoxIntersect(ray, mesh.position, intersection, face);
+        if (hit) {
+          const dist = ray.origin.distanceTo(intersection);
+          if (dist < bestDist) {
+            bestDist = dist;
+            bestHit = {
+              x: mesh.userData.x,
+              y: mesh.userData.y,
+              z: mesh.userData.z,
+              nx: face.x,
+              ny: face.y,
+              nz: face.z,
+              mesh: mesh
+            };
+          }
+        }
+      }
+      return bestHit;
+    }
+    
+    function rayBoxIntersect(ray, boxCenter, outPoint, outFace) {
+      const min = new THREE.Vector3(boxCenter.x - 0.5, boxCenter.y - 0.5, boxCenter.z - 0.5);
+      const max = new THREE.Vector3(boxCenter.x + 0.5, boxCenter.y + 0.5, boxCenter.z + 0.5);
       
-      if (direction.length() > 0) {
-        direction.normalize();
-        direction.applyEuler(new THREE.Euler(0, player.rotation.y, 0));
-        player.velocity.x = direction.x * speed;
-        player.velocity.z = direction.z * speed;
+      let tmin = -Infinity, tmax = Infinity;
+      let normalX = 0, normalY = 0, normalZ = 0;
+      
+      const invDir = new THREE.Vector3(
+        1 / (ray.direction.x || 0.0001),
+        1 / (ray.direction.y || 0.0001),
+        1 / (ray.direction.z || 0.0001)
+      );
+      
+      const t1 = (min.x - ray.origin.x) * invDir.x;
+      const t2 = (max.x - ray.origin.x) * invDir.x;
+      if (invDir.x >= 0) {
+        if (t1 > tmin) { tmin = t1; normalX = -1; }
+        if (t2 < tmax) tmax = t2;
       } else {
-        player.velocity.x *= 0.85;
-        player.velocity.z *= 0.85;
+        if (t2 > tmin) { tmin = t2; normalX = 1; }
+        if (t1 < tmax) tmax = t1;
       }
       
-      player.velocity.y -= 20 * dt;
+      const t3 = (min.y - ray.origin.y) * invDir.y;
+      const t4 = (max.y - ray.origin.y) * invDir.y;
+      if (invDir.y >= 0) {
+        if (t3 > tmin) { tmin = t3; normalX = 0; normalY = -1; }
+        if (t4 < tmax) tmax = t4;
+      } else {
+        if (t4 > tmin) { tmin = t4; normalX = 0; normalY = 1; }
+        if (t3 < tmax) tmax = t3;
+      }
       
-      const newPos = player.position.clone();
-      newPos.x += player.velocity.x * dt;
-      newPos.y += player.velocity.y * dt;
-      newPos.z += player.velocity.z * dt;
+      const t5 = (min.z - ray.origin.z) * invDir.z;
+      const t6 = (max.z - ray.origin.z) * invDir.z;
+      if (invDir.z >= 0) {
+        if (t5 > tmin) { tmin = t5; normalX = 0; normalY = 0; normalZ = -1; }
+        if (t6 < tmax) tmax = t6;
+      } else {
+        if (t6 > tmin) { tmin = t6; normalX = 0; normalY = 0; normalZ = 1; }
+        if (t5 < tmax) tmax = t5;
+      }
       
-      const pMin = new THREE.Vector3(newPos.x - 0.3, newPos.y - 0.9, newPos.z - 0.3);
-      const pMax = new THREE.Vector3(newPos.x + 0.3, newPos.y + 0.1, newPos.z + 0.3);
+      if (tmin <= tmax && tmax > 0) {
+        const t = tmin >= 0 ? tmin : tmax;
+        outPoint.copy(ray.origin).addScaledVector(ray.direction, t);
+        outFace.x = normalX;
+        outFace.y = normalY;
+        outFace.z = normalZ;
+        return true;
+      }
+      return false;
+    }
+    
+    // ============ ФИЗИКА ============
+    
+    function updatePhysics(dt) {
+      const speed = 5;
       
-      let collidedY = false;
+      // Движение с джойстика
+      if (joystickActive) {
+        const angle = player.rotY;
+        const forwardX = -Math.sin(angle);
+        const forwardZ = -Math.cos(angle);
+        const rightX = Math.cos(angle);
+        const rightZ = -Math.sin(angle);
+        
+        player.vx = (forwardX * joyDY + rightX * joyDX) * speed;
+        player.vz = (forwardZ * joyDY + rightZ * joyDX) * speed;
+      } else {
+        player.vx *= 0.8;
+        player.vz *= 0.8;
+      }
       
-      for (let x = Math.floor(pMin.x) - 1; x <= Math.ceil(pMax.x) + 1; x++) {
-        for (let y = Math.floor(pMin.y) - 1; y <= Math.ceil(pMax.y) + 1; y++) {
-          for (let z = Math.floor(pMin.z) - 1; z <= Math.ceil(pMax.z) + 1; z++) {
-            const block = getBlock(x, y, z);
-            if (block !== 'air' && blockTypes[block]?.solid) {
-              const bMin = new THREE.Vector3(x - 0.5, y - 0.5, z - 0.5);
-              const bMax = new THREE.Vector3(x + 0.5, y + 0.5, z + 0.5);
-              
-              if (pMax.x > bMin.x && pMin.x < bMax.x &&
-                  pMax.y > bMin.y && pMin.y < bMax.y &&
-                  pMax.z > bMin.z && pMin.z < bMax.z) {
-                
-                const ox = Math.min(pMax.x - bMin.x, bMax.x - pMin.x);
-                const oy = Math.min(pMax.y - bMin.y, bMax.y - pMin.y);
-                const oz = Math.min(pMax.z - bMin.z, bMax.z - pMin.z);
-                
-                if (oy < ox && oy < oz) {
-                  if (player.velocity.y < 0) {
-                    newPos.y = y + 0.5 + 0.9;
-                    player.velocity.y = 0;
-                    player.onGround = true;
-                    collidedY = true;
-                  } else {
-                    newPos.y = y - 0.5 - 0.1;
-                    player.velocity.y = 0;
-                  }
-                }
-              }
+      // Гравитация
+      player.vy -= 18 * dt;
+      
+      // Двигаем по осям
+      const newX = player.x + player.vx * dt;
+      const newY = player.y + player.vy * dt;
+      const newZ = player.z + player.vz * dt;
+      
+      // Коллизия
+      let groundCheck = false;
+      
+      // Проверка Y
+      const feetY = newY - 0.8;
+      const headY = newY + 0.1;
+      
+      for (let dy = -2; dy <= 2; dy++) {
+        const checkY = Math.round(newY + dy * 0.5);
+        if (getBlock(Math.round(player.x), checkY, Math.round(player.z)) !== 'air') {
+          const blockTop = checkY + 0.5;
+          const blockBottom = checkY - 0.5;
+          
+          if (feetY < blockTop && newY + 0.1 > blockBottom) {
+            if (player.vy < 0 && Math.abs(feetY - blockTop) < 0.3) {
+              player.y = blockTop + 0.8;
+              player.vy = 0;
+              groundCheck = true;
+            } else if (player.vy > 0 && Math.abs(headY - blockBottom) < 0.3) {
+              player.y = blockBottom - 0.1;
+              player.vy = 0;
             }
           }
         }
       }
       
-      if (!collidedY) player.onGround = false;
-      player.position.copy(newPos);
+      if (!groundCheck) {
+        player.y = newY;
+      }
+      player.onGround = groundCheck;
       
-      if (player.position.y < -15) {
-        player.position.set(0, 22, 0);
-        player.velocity.set(0, 0, 0);
+      // X и Z проще
+      let blockedX = false, blockedZ = false;
+      
+      for (const mesh of meshes) {
+        const bx = mesh.userData.x, by = mesh.userData.y, bz = mesh.userData.z;
+        const px = Math.round(newX), pz = Math.round(newZ);
+        
+        if (bx === px && Math.abs(by - Math.round(player.y)) <= 1 && bz === Math.round(player.z)) {
+          blockedX = true;
+        }
+        if (bx === Math.round(player.x) && Math.abs(by - Math.round(player.y)) <= 1 && bz === pz) {
+          blockedZ = true;
+        }
+      }
+      
+      if (!blockedX) player.x = newX;
+      if (!blockedZ) player.z = newZ;
+      
+      // Ограничение мира
+      player.x = Math.max(-14, Math.min(14, player.x));
+      player.z = Math.max(-14, Math.min(14, player.z));
+      
+      if (player.y < -5) {
+        player.x = 0; player.y = 15; player.z = 0;
+        player.vy = 0;
         player.health--;
         updateHealthUI();
       }
     }
     
     function updateHealthUI() {
-      document.querySelectorAll('.heart').forEach((h, i) => {
+      const hearts = document.querySelectorAll('.heart-icon');
+      hearts.forEach((h, i) => {
         h.textContent = i < player.health ? '❤️' : '🖤';
       });
     }
     
-    function updateBlockInfo() {
-      const raycaster = new THREE.Raycaster();
-      raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
-      const intersects = raycaster.intersectObjects(Array.from(blockMeshes.values()));
-      if (intersects.length > 0 && intersects[0].distance < 8) {
-        document.getElementById('block-info').textContent = 
-          blockTypes[intersects[0].object.userData.type]?.name || '???';
-      }
-    }
+    // ============ FPS СЧЕТЧИК ============
     
-    // FPS счетчик
-    let frameCount = 0;
-    let fpsTime = performance.now();
+    let frames = 0, fpsTime = performance.now();
     
-    function updateFPS() {
-      frameCount++;
-      const now = performance.now();
-      if (now - fpsTime >= 1000) {
-        document.getElementById('fps-counter').textContent = `FPS: ${frameCount}`;
-        frameCount = 0;
-        fpsTime = now;
-      }
-    }
+    // ============ ГЛАВНЫЙ ЦИКЛ ============
     
-    // Игровой цикл
     let lastTime = performance.now();
     
-    function gameLoop() {
-      const now = performance.now();
-      const dt = Math.min((now - lastTime) / 1000, 0.1);
-      lastTime = now;
+    function gameLoop(time) {
+      requestAnimationFrame(gameLoop);
+      
+      const dt = Math.min((time - lastTime) / 1000, 0.05);
+      lastTime = time;
       
       updatePhysics(dt);
-      updateBreaking(dt);
-      updateBlockInfo();
-      updateFPS();
       
-      camera.position.copy(player.position);
-      camera.position.y += 0.9;
-      camera.rotation.copy(player.rotation);
+      // Камера
+      camera.position.set(player.x, player.y + 0.8, player.z);
+      camera.rotation.set(player.rotX, player.rotY, 0, 'YXZ');
       
-      // Анимируем солнце
-      sunLight.position.x = 50 * Math.cos(now * 0.0001);
-      sunLight.position.z = 50 * Math.sin(now * 0.0001);
+      // FPS
+      frames++;
+      if (time - fpsTime >= 1000) {
+        document.getElementById('fps-display').textContent = `FPS: ${frames}`;
+        frames = 0;
+        fpsTime = time;
+      }
+      
+      // Блок под прицелом
+      const ray = getLookRay();
+      const hit = raycast(ray);
+      if (hit) {
+        const names = {
+          grass: '🟩 Трава', dirt: '🟫 Земля', stone: '🪨 Камень',
+          wood: '🟤 Дерево', leaves: '🌿 Листья', sand: '🟨 Песок',
+          plank: '🟫 Доски', brick: '🧱 Кирпич', glass: '🪟 Стекло',
+          gold: '🟡 Золото', diamond: '💎 Алмаз', bedrock: '⬛ Бедрок'
+        };
+        document.getElementById('block-label').textContent = names[hit.mesh.userData.type] || '???';
+      } else {
+        document.getElementById('block-label').textContent = '';
+      }
       
       renderer.render(scene, camera);
-      requestAnimationFrame(gameLoop);
     }
     
+    // ============ ЗАПУСК ============
+    
+    buildWorld();
+    updateHotbarUI();
+    updateHealthUI();
+    requestAnimationFrame(gameLoop);
+    
+    // Ресайз
     window.addEventListener('resize', () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
     });
     
-    // Запуск
-    generateWorld();
-    updateHotbarUI();
-    updateHealthUI();
-    gameLoop();
-    
-    console.log('⛏️ MINECRAFT RTX MOBILE ЗАПУЩЕН!');
-    console.log('📱 Оптимизирован под сенсорное управление');
-    console.log('🎮 Джойстик слева | Обзор справа | Кнопки действий');
+    console.log('✅ MINECRAFT ОПТИМИЗИРОВАН!');
+    console.log('📱 Ландшафтный режим | Кнопка полного экрана | 60 FPS');
   </script>
 </body>
 </html>
