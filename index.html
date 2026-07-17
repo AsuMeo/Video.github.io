@@ -3,256 +3,468 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>БЛОКРАН SURVIVAL — Мультиплеерная Песочница в реальном времени</title>
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>БЛОКРАН SURVIVAL: МУЛЬТИПЛЕЕР</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Rubik:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
-  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-  html,body { width:100%; height:100%; overflow:hidden; background:#0a0c14; font-family:'Rubik',sans-serif; user-select:none; }
-  #game { position:fixed; inset:0; width:100%; height:100%; display:block; image-rendering:pixelated; }
+  * { 
+    margin: 0; 
+    padding: 0; 
+    box-sizing: border-box; 
+    -webkit-tap-highlight-color: transparent; 
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  html, body { 
+    width: 100%; 
+    height: 100%; 
+    overflow: hidden; 
+    background: #080a10; 
+    font-family: 'Rubik', sans-serif;
+    position: fixed;
+  }
+  #game { 
+    position: absolute; 
+    inset: 0; 
+    width: 100%; 
+    height: 100%; 
+    display: block; 
+    image-rendering: pixelated; 
+  }
 
-  /* ---------- AUTH ---------- */
+  /* ---------- AUTH STYLE ---------- */
   #auth {
-    position:fixed; inset:0; z-index:50; display:flex; align-items:center; justify-content:center;
-    background:radial-gradient(1200px 700px at 50% -10%, #1b2b5e 0%, #0a1030 45%, #05070f 100%);
-    transition:opacity .5s;
+    position: fixed; 
+    inset: 0; 
+    z-index: 50; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    background: radial-gradient(1200px 700px at 50% -10%, #1b2b5e 0%, #0a1030 45%, #05070f 100%);
+    transition: opacity .5s;
   }
-  #auth.hidden { opacity:0; pointer-events:none; }
+  #auth.hidden { opacity: 0; pointer-events: none; }
   .auth-card {
-    width:min(420px, 92vw); padding:30px 24px 24px; border-radius:22px;
-    background:rgba(13,20,46,.82); backdrop-filter:blur(14px);
-    border:1px solid rgba(120,160,255,.22);
-    box-shadow:0 0 60px rgba(60,110,255,.18), inset 0 1px 0 rgba(255,255,255,.08);
-    text-align:center; color:#dfe8ff;
+    width: min(440px, 94vw); 
+    padding: 24px; 
+    border-radius: 20px;
+    background: rgba(13, 20, 46, 0.85); 
+    backdrop-filter: blur(14px);
+    border: 1px solid rgba(120, 160, 255, 0.25);
+    box-shadow: 0 0 50px rgba(60, 110, 255, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    text-align: center; 
+    color: #dfe8ff;
   }
-  .logo { display:flex; align-items:center; justify-content:center; gap:12px; margin-bottom:6px; }
-  .logo h1 { font-family:'Press Start 2P',monospace; font-size:18px; letter-spacing:1px;
-    background:linear-gradient(180deg,#8ecbff,#4f7cff 60%,#b96bff); -webkit-background-clip:text; background-clip:text; color:transparent;
-    filter:drop-shadow(0 0 12px rgba(90,140,255,.55)); }
-  .tagline { font-size:12px; color:#8fa3d9; margin-bottom:18px; }
-  .field { margin-bottom:10px; text-align:left; }
-  .field label { display:block; font-size:10px; letter-spacing:1px; text-transform:uppercase; color:#7f93c9; margin-bottom:4px; }
+  .logo { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 8px; }
+  .logo h1 { 
+    font-family: 'Press Start 2P', monospace; 
+    font-size: 16px; 
+    letter-spacing: 1px;
+    background: linear-gradient(180deg, #8ecbff, #4f7cff 60%, #b96bff); 
+    -webkit-background-clip: text; 
+    background-clip: text; 
+    color: transparent;
+    filter: drop-shadow(0 0 10px rgba(90, 140, 255, 0.4)); 
+  }
+  .tagline { font-size: 11px; color: #8fa3d9; margin-bottom: 16px; }
+  .field { margin-bottom: 10px; text-align: left; }
+  .field label { display: block; font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: #7f93c9; margin-bottom: 4px; }
   .field input {
-    width:100%; padding:10px 12px; border-radius:10px; border:1px solid rgba(120,160,255,.25);
-    background:rgba(6,10,28,.75); color:#eaf1ff; font-size:14px; font-family:'Rubik'; outline:none; transition:.2s;
+    width: 100%; 
+    padding: 10px 12px; 
+    border-radius: 10px; 
+    border: 1px solid rgba(120, 160, 255, 0.25);
+    background: rgba(6, 10, 28, 0.8); 
+    color: #eaf1ff; 
+    font-size: 13px; 
+    font-family: 'Rubik'; 
+    outline: none; 
+    transition: .2s;
   }
-  .field input:focus { border-color:#5f8dff; box-shadow:0 0 0 3px rgba(95,141,255,.18); }
+  .field input:focus { border-color: #5f8dff; box-shadow: 0 0 0 3px rgba(95, 141, 255, 0.2); }
   .btn {
-    width:100%; padding:11px; border:none; border-radius:10px; cursor:pointer; font-family:'Rubik'; font-weight:800;
-    font-size:14px; letter-spacing:.5px; color:#fff; transition:.15s; margin-top:4px;
+    width: 100%; 
+    padding: 12px; 
+    border: none; 
+    border-radius: 10px; 
+    cursor: pointer; 
+    font-family: 'Rubik'; 
+    font-weight: 800;
+    font-size: 13px; 
+    color: #fff; 
+    transition: .15s; 
+    margin-top: 4px;
   }
-  .btn:active { transform:scale(.97); }
-  .btn-primary { background:linear-gradient(135deg,#3f7bff,#7b4dff); box-shadow:0 4px 14px rgba(80,110,255,.4); }
-  .btn-primary:hover { filter:brightness(1.12); }
-  .btn-ghost { background:transparent; border:1px solid rgba(120,160,255,.35); color:#a9bcff; margin-top:8px; }
-  .btn-ghost:hover { background:rgba(95,141,255,.1); }
-  #authErr { min-height:16px; color:#ff7d92; font-size:12px; margin-top:8px; }
-  .hint { margin-top:12px; font-size:11px; color:#6f83b8; line-height:1.4; }
-  .spin { display:inline-block; width:12px; height:12px; border:2px solid #fff3; border-top-color:#fff; border-radius:50%; animation:sp 1s linear infinite; vertical-align:-2px; }
-  @keyframes sp { to { transform:rotate(360deg); } }
+  .btn:active { transform: scale(.97); }
+  .btn-primary { background: linear-gradient(135deg, #3f7bff, #7b4dff); box-shadow: 0 4px 14px rgba(80, 110, 255, 0.35); }
+  .btn-ghost { background: transparent; border: 1px solid rgba(120, 160, 255, 0.3); color: #a9bcff; margin-top: 6px; }
+  #authErr { min-height: 14px; color: #ff7d92; font-size: 11px; margin-top: 6px; }
+  .hint { margin-top: 10px; font-size: 10px; color: #6f83b8; line-height: 1.4; }
+  .spin { display: inline-block; width: 12px; height: 12px; border: 2px solid #fff3; border-top-color: #fff; border-radius: 50%; animation: sp 1s linear infinite; vertical-align: -2px; }
+  @keyframes sp { to { transform: rotate(360deg); } }
 
-  /* ---------- HUD ---------- */
-  #hud { position:fixed; inset:0; z-index:20; pointer-events:none; display:none; }
-  #hud.on { display:block; }
+  /* ---------- HUD STYLE ---------- */
+  #hud { position: absolute; inset: 0; z-index: 20; pointer-events: none; display: none; }
+  #hud.on { display: block; }
   
   #topbar {
-    position:absolute; top:10px; left:12px; display:flex; flex-direction:column; gap:5px;
-    color:#eaf1ff; text-shadow:0 2px 4px #000;
+    position: absolute; 
+    top: 10px; 
+    left: 12px; 
+    display: flex; 
+    flex-direction: column; 
+    gap: 4px;
+    color: #eaf1ff; 
+    text-shadow: 0 2px 4px #000;
   }
-  #playerStats { display:flex; align-items:center; gap:12px; }
-  #hpBarWrap { width:150px; height:16px; background:rgba(0,0,0,0.5); border:1.5px solid #fff3; border-radius:4px; overflow:hidden; position:relative; }
-  #hpBarFill { height:100%; width:100%; background:linear-gradient(90deg, #ef4444, #f87171); transition:width 0.25s; }
-  #hpTxt { position:absolute; inset:0; text-align:center; font-size:10px; font-weight:800; line-height:14px; color:#fff; }
-
-  #xpBarWrap { width:150px; height:8px; background:rgba(0,0,0,0.5); border:1px solid #fff2; border-radius:3px; overflow:hidden; position:relative; margin-top:2px;}
-  #xpBarFill { height:100%; width:0%; background:#22c55e; transition:width 0.3s; }
+  #playerStats { display: flex; align-items: center; gap: 8px; }
+  #hpBarWrap { width: 140px; height: 14px; background: rgba(0,0,0,0.6); border: 1px solid #fff2; border-radius: 4px; overflow: hidden; position: relative; }
+  #hpBarFill { height: 100%; width: 100%; background: linear-gradient(90deg, #ef4444, #f87171); transition: width 0.2s; }
+  #hpTxt { position: absolute; inset: 0; text-align: center; font-size: 9px; font-weight: 800; line-height: 12px; color: #fff; }
   
-  #levelBadge { background:#eab308; color:#000; font-weight:800; font-size:11px; padding:2px 6px; border-radius:4px; text-shadow:none; }
+  #xpBarWrap { width: 140px; height: 6px; background: rgba(0,0,0,0.6); border: 1px solid #fff1; border-radius: 3px; overflow: hidden; }
+  #xpBarFill { height: 100%; width: 0%; background: #22c55e; transition: width 0.3s; }
+  #levelBadge { background: #eab308; color: #000; font-weight: 800; font-size: 10px; padding: 2px 6px; border-radius: 4px; text-shadow: none; }
 
-  #stats { font-size:12px; color:#c9d7ff; display:flex; gap:12px; margin-top:2px; }
-  #stats b { color:#fff; }
+  #stats { font-size: 11px; color: #c9d7ff; display: flex; gap: 10px; margin-top: 2px; }
+  #stats b { color: #fff; }
 
-  /* Hotbar UI */
+  /* Inventory Hotbar */
   #hotbarWrap {
-    position:absolute; bottom:14px; left:50%; transform:translateX(-50%);
-    display:flex; gap:6px; background:rgba(10,14,30,0.85); border:2px solid rgba(130,165,255,0.3);
-    padding:6px; border-radius:14px; pointer-events:auto; z-index:30;
+    position: absolute; 
+    bottom: 12px; 
+    left: 50%; 
+    transform: translateX(-50%);
+    display: flex; 
+    gap: 4px; 
+    background: rgba(8, 12, 28, 0.9); 
+    border: 2px solid rgba(130, 165, 255, 0.25);
+    padding: 5px; 
+    border-radius: 12px; 
+    pointer-events: auto; 
+    z-index: 30;
   }
   .hot-slot {
-    width:46px; height:46px; background:rgba(20,28,55,0.7); border:2px solid #556c9c;
-    border-radius:10px; display:flex; flex-direction:column; align-items:center; justify-content:center;
-    position:relative; cursor:pointer; transition:transform 0.1s, border-color 0.15s;
+    width: 42px; 
+    height: 42px; 
+    background: rgba(20, 28, 55, 0.8); 
+    border: 2px solid #4a5d85;
+    border-radius: 8px; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    justify-content: center;
+    position: relative; 
+    cursor: pointer; 
+    transition: transform 0.1s, border-color 0.15s;
   }
-  .hot-slot.active { border-color:#eab308; background:rgba(234,179,8,0.15); transform:scale(1.06); }
-  .hot-slot img, .hot-slot .icon-mock { width:24px; height:24px; display:flex; align-items:center; justify-content:center; font-size:18px; }
-  .hot-slot .count { position:absolute; bottom:2px; right:4px; font-size:10px; font-weight:800; color:#fff; text-shadow:1px 1px 2px #000; }
-  .hot-slot .key-num { position:absolute; top:1px; left:3px; font-size:8px; color:#7f93c9; }
+  .hot-slot.active { border-color: #f59e0b; background: rgba(245, 158, 11, 0.15); transform: scale(1.05); }
+  .hot-slot .icon-mock { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+  .hot-slot .count { position: absolute; bottom: 1px; right: 3px; font-size: 9px; font-weight: 800; color: #fff; text-shadow: 1px 1px 2px #000; }
+  .hot-slot .key-num { position: absolute; top: 1px; left: 2px; font-size: 8px; color: #7f93c9; }
 
-  /* Dynamic Active Skill button (Level 10) */
+  /* Mobile HUD Interaction Mode Buttons */
+  #mobileInteractionMode {
+    position: absolute; 
+    bottom: 64px; 
+    left: 50%; 
+    transform: translateX(-50%);
+    display: flex; 
+    gap: 10px; 
+    pointer-events: auto; 
+    z-index: 30;
+  }
+  .mode-btn {
+    padding: 8px 14px; 
+    border-radius: 10px; 
+    border: 1.5px solid rgba(130, 165, 255, 0.4);
+    background: rgba(10, 16, 40, 0.85); 
+    color: #fff; 
+    font-size: 11px; 
+    font-weight: 800;
+    display: flex; 
+    align-items: center; 
+    gap: 6px; 
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  }
+  .mode-btn.active {
+    background: #f59e0b; 
+    border-color: #fff; 
+    color: #000;
+  }
+
+  /* Level 10 Active Spell Button */
   #activeSkillBtn {
-    position:absolute; bottom:14px; right:120px; width:52px; height:52px; border-radius:50%;
-    background:radial-gradient(#b96bff, #7b4dff); border:2.5px solid #fff; color:#fff;
-    font-size:24px; display:none; align-items:center; justify-content:center; cursor:pointer;
-    box-shadow:0 0 16px rgba(185,107,255,0.6); pointer-events:auto; transition:transform 0.1s;
+    position: absolute; 
+    bottom: 12px; 
+    right: 130px; 
+    width: 50px; 
+    height: 50px; 
+    border-radius: 50%;
+    background: radial-gradient(#b96bff, #7b4dff); 
+    border: 2px solid #fff; 
+    color: #fff;
+    font-size: 20px; 
+    display: none; 
+    align-items: center; 
+    justify-content: center; 
+    cursor: pointer;
+    box-shadow: 0 0 14px rgba(185, 107, 255, 0.7); 
+    pointer-events: auto; 
+    transition: transform 0.1s;
+    z-index: 35;
   }
-  #activeSkillBtn:active { transform:scale(0.9); }
+  #activeSkillBtn:active { transform: scale(0.9); }
 
-  /* Controls panel top */
+  /* Camera Controls */
   #camControls {
-    position:absolute; top:10px; left:50%; transform:translateX(-50%);
-    display:flex; gap:6px; pointer-events:auto; z-index:30;
+    position: absolute; 
+    top: 10px; 
+    left: 50%; 
+    transform: translateX(-50%);
+    display: flex; 
+    gap: 4px; 
+    pointer-events: auto; 
+    z-index: 30;
   }
   .hud-btn {
-    width:38px; height:38px; border-radius:10px; border:1px solid rgba(130,165,255,.35);
-    background:rgba(10,16,40,.82); color:#fff; font-size:14px; font-weight:800; cursor:pointer;
-    display:flex; align-items:center; justify-content:center; backdrop-filter:blur(6px);
-    transition:transform 0.1s, background-color 0.15s; user-select:none; touch-action:manipulation;
+    width: 36px; 
+    height: 36px; 
+    border-radius: 8px; 
+    border: 1px solid rgba(130,165,255,.3);
+    background: rgba(10,16,40,.8); 
+    color: #fff; 
+    font-size: 13px; 
+    font-weight: 800; 
+    cursor: pointer;
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    backdrop-filter: blur(6px);
+    transition: transform 0.1s;
   }
-  .hud-btn:active { transform:scale(0.92); background-color:rgba(95,141,255,.45); }
-
-  /* Crafting Panel Toggle Button */
-  #craftToggleBtn { background:linear-gradient(135deg, #10b981, #047857); border-color:#34d399; }
+  .hud-btn:active { transform: scale(0.92); }
+  #craftToggleBtn { background: linear-gradient(135deg, #10b981, #047857); border-color: #34d399; }
 
   /* Leaderboard */
   #board {
-    position:absolute; top:10px; right:12px; min-width:180px; max-width:220px;
-    background:rgba(8,12,30,.7); backdrop-filter:blur(6px);
-    border:1px solid rgba(130,165,255,.22); border-radius:14px; padding:10px 12px; color:#dfe8ff;
+    position: absolute; 
+    top: 10px; 
+    right: 12px; 
+    min-width: 170px; 
+    max-width: 210px;
+    background: rgba(8, 12, 30, 0.75); 
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(130, 165, 255, 0.2); 
+    border-radius: 12px; 
+    padding: 8px 10px; 
+    color: #dfe8ff;
   }
-  #board h3 { font-size:10px; letter-spacing:1px; text-transform:uppercase; color:#8fa3d9; margin-bottom:6px; display:flex; justify-content:space-between; }
-  #board h3 span { color:#5f7ac9; font-size:9px; }
-  .brow { display:flex; justify-content:space-between; gap:10px; font-size:12px; padding:3px 2px; border-radius:6px; }
-  .brow.me { background:rgba(95,141,255,.18); }
-  .brow .nm { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:120px; }
-  .brow .bl { font-weight:800; color:#8ef0b2; font-variant-numeric:tabular-nums; }
-  .brow i { font-style:normal; color:#7f93c9; margin-right:4px; font-size:10px; }
+  #board h3 { font-size: 9px; letter-spacing: 0.5px; text-transform: uppercase; color: #8fa3d9; margin-bottom: 4px; display: flex; justify-content: space-between; }
+  .brow { display: flex; justify-content: space-between; gap: 8px; font-size: 11px; padding: 2px 1px; }
+  .brow.me { background: rgba(95, 141, 255, 0.15); border-radius: 4px; }
+  .brow .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 110px; }
+  .brow .bl { font-weight: 800; color: #8ef0b2; }
 
   #toast {
-    position:absolute; top:18%; left:50%; transform:translateX(-50%); padding:12px 24px; border-radius:14px;
-    background:rgba(10,16,40,.85); border:1px solid rgba(130,165,255,.35); color:#fff; font-weight:600; font-size:14px;
-    opacity:0; transition:opacity .3s; text-align:center; max-width:80vw; pointer-events:none; text-shadow:0 1px 3px #000;
+    position: absolute; 
+    top: 15%; 
+    left: 50%; 
+    transform: translateX(-50%); 
+    padding: 10px 20px; 
+    border-radius: 10px;
+    background: rgba(10, 16, 40, 0.9); 
+    border: 1px solid rgba(130, 165, 255, 0.3); 
+    color: #fff; 
+    font-weight: 600; 
+    font-size: 13px;
+    opacity: 0; 
+    transition: opacity .3s; 
+    text-align: center; 
+    max-width: 80vw; 
+    pointer-events: none;
   }
-  #toast.show { opacity:1; }
-
+  #toast.show { opacity: 1; }
   #trackName {
-    position:absolute; top:145px; right:12px; font-size:10px; font-weight:bold;
-    color:#ffe98a; background:rgba(10,16,40,0.65); padding:4px 10px; border-radius:8px;
-    border:1px solid rgba(130,165,255,0.25); pointer-events:none; text-shadow:0 1px 3px #000;
+    position: absolute; 
+    top: 150px; 
+    right: 12px; 
+    font-size: 9px; 
+    font-weight: bold;
+    color: #ffe98a; 
+    background: rgba(10, 16, 40, 0.65); 
+    padding: 3px 8px; 
+    border-radius: 6px;
+    pointer-events: none;
   }
 
   /* Chat window */
   #chat {
-    position:absolute; bottom:15px; left:16px; width:280px; height:150px;
-    background:rgba(10,16,40,.55); border:1px solid rgba(130,165,255,.22);
-    border-radius:14px; backdrop-filter:blur(6px); display:flex; flex-direction:column;
-    pointer-events:auto; z-index:25; transition: opacity 0.3s, transform 0.3s;
+    position: absolute; 
+    bottom: 15px; 
+    left: 12px; 
+    width: 250px; 
+    height: 130px;
+    background: rgba(10, 16, 40, 0.6); 
+    border: 1px solid rgba(130, 165, 255, 0.2);
+    border-radius: 12px; 
+    backdrop-filter: blur(6px); 
+    display: flex; 
+    flex-direction: column;
+    pointer-events: auto; 
+    z-index: 25; 
+    transition: opacity 0.3s;
   }
-  #chat.hidden { opacity:0; pointer-events:none; transform:translateY(15px); }
-  #chatMsgs { flex:1; overflow-y:auto; padding:8px; font-size:11px; display:flex; flex-direction:column; gap:4px; text-shadow:0 1px 2px #000; }
+  #chat.hidden { opacity: 0; pointer-events: none; }
+  #chatMsgs { flex: 1; overflow-y: auto; padding: 6px; font-size: 10px; display: flex; flex-direction: column; gap: 3px; }
   #chatInput {
-    background:rgba(6,10,28,.8); border:none; border-top:1px solid rgba(130,165,255,.2);
-    padding:8px 10px; color:#fff; font-size:12px; border-radius:0 0 14px 14px; outline:none;
+    background: rgba(6, 10, 28, 0.85); 
+    border: none; 
+    border-top: 1px solid rgba(130, 165, 255, 0.2);
+    padding: 6px 10px; 
+    color: #fff; 
+    font-size: 11px; 
+    border-radius: 0 0 12px 12px; 
+    outline: none;
   }
 
-  /* Dynamic Craft Panel */
+  /* Craft Panel */
   #craftPanel {
-    position:absolute; top:70px; left:12px; width:260px; max-height:calc(100vh - 250px);
-    background:rgba(12, 18, 38, 0.92); border:2px solid rgba(16, 185, 129, 0.4);
-    border-radius:16px; backdrop-filter:blur(10px); display:none; flex-direction:column;
-    pointer-events:auto; z-index:28; box-shadow:0 10px 30px rgba(0,0,0,0.5); overflow:hidden;
+    position: absolute; 
+    top: 60px; 
+    left: 12px; 
+    width: 240px; 
+    max-height: calc(100vh - 220px);
+    background: rgba(12, 18, 38, 0.94); 
+    border: 2px solid rgba(16, 185, 129, 0.4);
+    border-radius: 14px; 
+    backdrop-filter: blur(8px); 
+    display: none; 
+    flex-direction: column;
+    pointer-events: auto; 
+    z-index: 28; 
+    box-shadow: 0 8px 25px rgba(0,0,0,0.5); 
+    overflow: hidden;
   }
-  #craftPanel.open { display:flex; }
-  .craft-header { background:rgba(16, 185, 129, 0.15); padding:10px 14px; font-size:11px; font-family:'Press Start 2P'; color:#34d399; border-bottom:1px solid rgba(16, 185, 129, 0.25); }
-  .recipe-list { overflow-y:auto; padding:8px; display:flex; flex-direction:column; gap:6px; }
+  #craftPanel.open { display: flex; }
+  .craft-header { background: rgba(16, 185, 129, 0.15); padding: 8px 12px; font-size: 9px; font-family: 'Press Start 2P'; color: #34d399; }
+  .recipe-list { overflow-y: auto; padding: 6px; display: flex; flex-direction: column; gap: 4px; }
   .recipe-item {
-    background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:8px;
-    padding:8px; display:flex; justify-content:space-between; align-items:center; transition:background 0.2s;
+    background: rgba(255,255,255,0.02); 
+    border: 1px solid rgba(255,255,255,0.06); 
+    border-radius: 6px;
+    padding: 6px; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center;
   }
-  .recipe-item:hover { background:rgba(255,255,255,0.07); }
-  .recipe-info { display:flex; align-items:center; gap:8px; }
-  .recipe-icon { font-size:20px; }
-  .recipe-name { font-size:12px; font-weight:800; color:#fff; }
-  .recipe-cost { font-size:10px; color:#94a3b8; margin-top:2px; }
+  .recipe-info { display: flex; align-items: center; gap: 6px; }
+  .recipe-icon { font-size: 16px; }
+  .recipe-name { font-size: 11px; font-weight: 800; color: #fff; }
+  .recipe-cost { font-size: 9px; color: #94a3b8; }
   .recipe-btn {
-    padding:4px 10px; border-radius:6px; font-size:10px; font-weight:800; cursor:pointer;
-    background:#10b981; border:none; color:#fff; transition:transform 0.1s;
+    padding: 4px 8px; 
+    border-radius: 4px; 
+    font-size: 9px; 
+    font-weight: 800; 
+    cursor: pointer;
+    background: #10b981; 
+    border: none; 
+    color: #fff;
   }
-  .recipe-btn:active { transform:scale(0.92); }
-  .recipe-btn:disabled { background:#334155; color:#64748b; cursor:default; }
+  .recipe-btn:disabled { background: #334155; color: #64748b; cursor: default; }
 
   /* BOOK / GUIDE OVERLAY */
   #bookOverlay {
-    position:fixed; inset:0; z-index:100; display:none; align-items:center; justify-content:center;
-    background:rgba(3,5,15,0.85); backdrop-filter:blur(8px); transition:opacity 0.3s;
+    position: fixed; 
+    inset: 0; 
+    z-index: 100; 
+    display: none; 
+    align-items: center; 
+    justify-content: center;
+    background: rgba(3, 5, 15, 0.85); 
+    backdrop-filter: blur(6px);
   }
-  #bookOverlay.open { display:flex; }
+  #bookOverlay.open { display: flex; }
   .book-container {
-    width:min(720px, 95vw); height:min(480px, 85vh);
-    background:#3e2723; border:6px solid #2d1a12; border-radius:16px;
-    box-shadow:0 20px 50px rgba(0,0,0,0.6), inset 0 2px 10px rgba(255,255,255,0.25);
-    display:flex; flex-direction:column; overflow:hidden; position:relative;
+    width: min(680px, 96vw); 
+    height: min(420px, 80vh);
+    background: #3e2723; 
+    border: 4px solid #2d1a12; 
+    border-radius: 12px;
+    display: flex; 
+    flex-direction: column; 
+    overflow: hidden;
   }
   .book-header {
-    background:#2d1a12; padding:10px 16px; display:flex; justify-content:space-between; align-items:center; color:#ffe98a;
-    font-family:'Press Start 2P', monospace; font-size:10px; border-bottom:3px solid #1a0f0a;
+    background: #2d1a12; 
+    padding: 8px 12px; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    color: #ffe98a;
+    font-family: 'Press Start 2P', monospace; 
+    font-size: 8px;
   }
-  .book-body {
-    flex:1; display:flex; background:#f4eccf; color:#3e2723; padding:18px; gap:20px; overflow:hidden;
-  }
-  .book-page {
-    flex:1; display:flex; flex-direction:column; overflow-y:auto; padding-right:6px;
-  }
-  .book-page.divider {
-    border-right:2px dashed rgba(62, 39, 35, 0.25);
-  }
-  .book-page h3 {
-    font-size:15px; font-weight:800; border-bottom:2px solid #3e2723; padding-bottom:4px; margin-bottom:10px; color:#5d4037;
-    display:flex; align-items:center; gap:6px;
-  }
-  .book-page p { font-size:12px; line-height:1.5; margin-bottom:10px; font-weight:600; }
-  .book-page ul { margin-left:14px; margin-bottom:12px; font-size:11px; font-weight:600; line-height:1.4; }
+  .book-body { flex: 1; display: flex; background: #f4eccf; color: #3e2723; padding: 12px; gap: 12px; overflow: hidden; }
+  .book-page { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
+  .book-page.divider { border-right: 2px dashed rgba(62, 39, 35, 0.2); padding-right: 8px; }
+  .book-page h3 { font-size: 13px; font-weight: 800; border-bottom: 2px solid #3e2723; padding-bottom: 2px; margin-bottom: 8px; color: #5d4037; }
+  .book-page p { font-size: 11px; line-height: 1.4; margin-bottom: 8px; }
   
-  /* Skins */
   .skin-card {
-    background:rgba(62, 39, 35, 0.08); border:2px solid #5d4037; border-radius:10px;
-    padding:8px; display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;
-    transition: transform 0.2s, background-color 0.2s;
+    background: rgba(62, 39, 35, 0.06); 
+    border: 1px solid #5d4037; 
+    border-radius: 8px;
+    padding: 6px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between; 
+    margin-bottom: 6px;
   }
-  .skin-card.equipped { background:rgba(46, 125, 50, 0.15); border-color:#2e7d32; }
-  .skin-info { display:flex; align-items:center; gap:8px; }
-  .skin-preview-box { width:24px; height:24px; border-radius:4px; border:2px solid #3e2723; }
-  .skin-name { font-size:11px; font-weight:800; color:#3e2723; }
-  .skin-price { font-size:10px; font-weight:800; color:#e65100; display:flex; align-items:center; gap:2px; }
-  .skin-btn { padding:4px 8px; border-radius:6px; font-weight:800; font-size:10px; cursor:pointer; border:none; }
-  .skin-btn.buy { background:#e65100; color:#fff; }
-  .skin-btn.equip { background:#3e2723; color:#f4eccf; }
-  .skin-btn.active { background:#2e7d32; color:#fff; cursor:default; }
+  .skin-card.equipped { background: rgba(46, 125, 50, 0.12); border-color: #2e7d32; }
+  .skin-info { display: flex; align-items: center; gap: 6px; }
+  .skin-preview-box { width: 18px; height: 18px; border-radius: 3px; border: 1.5px solid #3e2723; }
+  .skin-name { font-size: 10px; font-weight: 800; }
+  .skin-btn { padding: 3px 6px; border-radius: 4px; font-weight: 800; font-size: 9px; cursor: pointer; border: none; }
+  .skin-btn.buy { background: #e65100; color: #fff; }
+  .skin-btn.equip { background: #3e2723; color: #f4eccf; }
+  .skin-btn.active { background: #2e7d32; color: #fff; }
 
-  .book-footer {
-    background:#2d1a12; padding:8px 16px; display:flex; justify-content:space-between; align-items:center;
-    border-top:3px solid #1a0f0a;
-  }
-  .book-close-btn { background:#c62828; color:#fff; border:none; padding:6px 12px; border-radius:8px; font-weight:800; font-size:11px; cursor:pointer; }
-  .book-nav-btn { background:#5d4037; color:#ffe98a; border:none; padding:6px 12px; border-radius:8px; font-weight:800; font-size:11px; cursor:pointer; }
-  .book-nav-btn:disabled { opacity:0.3; cursor:default; }
+  .book-footer { background: #2d1a12; padding: 6px 12px; display: flex; justify-content: space-between; }
+  .book-close-btn { background: #c62828; color: #fff; border: none; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 10px; }
+  .book-nav-btn { background: #5d4037; color: #ffe98a; border: none; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 10px; }
 
-  /* Touch controls override */
-  #touch { position:absolute; inset:0; display:none; }
-  body.touch #touch { display:block; }
+  /* Mobile Touch Controls */
+  #touch { position: absolute; inset: 0; display: none; }
+  body.touch #touch { display: block; }
   .tbtn {
-    position:absolute; bottom:18px; width:68px; height:68px; border-radius:18px; pointer-events:auto;
-    background:rgba(20,30,70,.4); border:2px solid rgba(140,175,255,.35); color:#fff; font-size:26px;
-    display:flex; align-items:center; justify-content:center; backdrop-filter:blur(4px); user-select:none; touch-action:none;
+    position: absolute; 
+    bottom: 12px; 
+    width: 60px; 
+    height: 60px; 
+    border-radius: 14px; 
+    pointer-events: auto;
+    background: rgba(20,30,70,0.5); 
+    border: 1.5px solid rgba(140,175,255,0.4); 
+    color: #fff; 
+    font-size: 22px;
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    backdrop-filter: blur(4px);
   }
-  .tbtn.act { background:rgba(95,141,255,.45); }
-  #tLeft { left:16px; } #tRight { left:96px; }
-  #tJump { right:16px; width:80px; height:80px; border-radius:50%; font-size:32px; background:rgba(60,180,120,.3); border-color:rgba(120,255,170,.4); }
+  .tbtn.act { background: rgba(95,141,255,0.5); }
+  #tLeft { left: 12px; } 
+  #tRight { left: 82px; }
+  #tJump { right: 12px; width: 72px; height: 72px; border-radius: 50%; font-size: 26px; background: rgba(60,180,120,0.35); border-color: rgba(120,255,170,0.45); }
   
-  #vignette { position:fixed; inset:0; z-index:10; pointer-events:none;
-    background:radial-gradient(ellipse at center, transparent 55%, rgba(0,0,10,.5) 100%); }
-  #loading { position:fixed; inset:0; z-index:80; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:14px;
-    background:#0a0c14; color:#8fa3d9; font-size:14px; letter-spacing:1px; transition:opacity .4s; }
-  #loading.hidden { opacity:0; pointer-events:none; }
+  #vignette { position: fixed; inset: 0; z-index: 10; pointer-events: none; background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,10,0.55) 100%); }
+  #loading { position: fixed; inset: 0; z-index: 80; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 10px; background: #080c14; color: #8fa3d9; font-size: 13px; }
 </style>
 </head>
 <body>
@@ -263,7 +475,7 @@
   <div id="topbar">
     <div id="playerStats">
       <span id="levelBadge">LVL 1</span>
-      <div style="display:flex; flex-direction:column;">
+      <div style="display: flex; flex-direction: column;">
         <div id="hpBarWrap">
           <div id="hpBarFill"></div>
           <div id="hpTxt">100 / 100 HP</div>
@@ -275,7 +487,7 @@
     </div>
     <div id="stats">
       <span>🪙 <b id="coinsCount">0</b></span>
-      <span style="color:#ffe98a;">🍂 <b id="seasonLabel">ЛЕТО</b></span>
+      <span style="color: #ffe98a;">🍂 <b id="seasonLabel">ЛЕТО</b></span>
       <span>👥 <b id="online">1</b></span>
     </div>
   </div>
@@ -283,33 +495,38 @@
   <div id="camControls">
     <button class="hud-btn" id="zoomOutBtn" title="Отдалить">🔍−</button>
     <button class="hud-btn" id="zoomInBtn" title="Приблизить">🔍+</button>
+    <button class="hud-btn" id="fullScrBtn" title="Полный экран">📺</button>
     <button class="hud-btn" id="craftToggleBtn" title="Крафт">🛠️</button>
-    <button class="hud-btn" id="guideBookBtn" title="Гайды и скины">📖</button>
-    <button class="hud-btn" id="musBtn" title="Радио">📻</button>
-    <button class="hud-btn" id="musMuteBtn" title="Музыка">🎵</button>
+    <button class="hud-btn" id="guideBookBtn" title="Гардероб">📖</button>
+    <button class="hud-btn" id="musBtn" title="Музыка">📻</button>
     <button class="hud-btn" id="muteBtn" title="Звуки">🔊</button>
     <button class="hud-btn" id="chatToggleBtn" title="Чат">💬</button>
   </div>
 
-  <!-- Crafting Window Panel -->
+  <!-- Mobile Interaction mode: Mine vs Build -->
+  <div id="mobileInteractionMode">
+    <button class="mode-btn active" id="modeMineBtn">⛏️ ДОБЫЧА</button>
+    <button class="mode-btn" id="modeBuildBtn">🧱 СТРОЙКА</button>
+  </div>
+
   <div id="craftPanel">
-    <div class="craft-header">🛠️ ВЕРСТАК КРАФТА</div>
+    <div class="craft-header">🛠️ КРАФТ ВЕРСТАКА</div>
     <div class="recipe-list" id="recipeListContainer"></div>
   </div>
 
-  <!-- Inventory Hotbar (9 slots) -->
+  <!-- Inventory Hotbar -->
   <div id="hotbarWrap"></div>
 
-  <!-- Level 10 Active Super Skill (Meteor drill) -->
+  <!-- Super Spell Level 10 Button -->
   <button id="activeSkillBtn" title="Супер Огненный Удар!">🔥</button>
 
   <div id="chat">
     <div id="chatMsgs"></div>
-    <input id="chatInput" maxlength="64" placeholder="Нажмите Enter для чата..." autocomplete="off">
+    <input id="chatInput" maxlength="64" placeholder="Чат..." autocomplete="off">
   </div>
 
   <div id="board">
-    <h3>🏆 Игроки мира <span id="boardUpd"></span></h3>
+    <h3>🏆 Лидеры Мира</h3>
     <div id="boardRows"></div>
   </div>
   <div id="toast"></div>
@@ -326,22 +543,20 @@
 <div id="bookOverlay">
   <div class="book-container">
     <div class="book-header">
-      <span>📖 ВЫЖИВАНИЕ И ГАРДЕРОБ</span>
-      <span id="bookProgress">Уровень 1</span>
+      <span>📖 РУКОВОДСТВО И ГАРДЕРОБ</span>
+      <span id="bookProgress">LVL 1</span>
     </div>
     <div class="book-body">
-      <!-- Left Page: Guide text -->
       <div class="book-page divider" id="bookLeftPage"></div>
-      <!-- Right Page: Skins Shop -->
       <div class="book-page" id="bookRightPage">
         <h3>👗 ГАРДЕРОБ СКИНОВ</h3>
-        <p style="font-size:11px; margin-bottom:10px;">Собирай 🪙 монетки в мире (выпадают из золотых жил и мобов) и покупай скины!</p>
+        <p style="font-size: 11px; margin-bottom: 8px;">Собирай 🪙 монеты с монстров и жил, покупай скины для мультиплеера!</p>
         <div id="skinsShopContainer"></div>
       </div>
     </div>
     <div class="book-footer">
       <button class="book-nav-btn" id="bookPrevBtn">◀ Назад</button>
-      <button class="book-close-btn" id="bookCloseBtn">Закрыть книгу</button>
+      <button class="book-close-btn" id="bookCloseBtn">Закрыть</button>
       <button class="book-nav-btn" id="bookNextBtn">Вперед ▶</button>
     </div>
   </div>
@@ -350,24 +565,23 @@
 <div id="auth">
   <div class="auth-card">
     <div class="logo">
-      <svg width="36" height="36" viewBox="0 0 48 48">
+      <svg width="32" height="32" viewBox="0 0 48 48">
         <defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0" stop-color="#6ee7ff"/><stop offset=".55" stop-color="#4f7cff"/><stop offset="1" stop-color="#b96bff"/>
         </linearGradient></defs>
         <rect x="4" y="26" width="18" height="18" rx="3" fill="url(#lg)"/>
         <rect x="26" y="26" width="18" height="18" rx="3" fill="#39d98a"/>
         <rect x="15" y="4" width="18" height="18" rx="3" fill="#ffd94f"/>
-        <circle cx="21" cy="11" r="2.4" fill="#20263f"/><circle cx="27" cy="11" r="2.4" fill="#20263f"/>
       </svg>
       <h1>БЛОКРАН SURVIVAL</h1>
     </div>
-    <div class="tagline">Шахты, Строительство, Крафт, Монстры и Совместное выживание! 🌲</div>
-    <div class="field" id="nickField">
-      <label>Ник персонажа</label>
-      <input id="nick" maxlength="14" placeholder="Имя игрока" autocomplete="off">
+    <div class="tagline">Мультиплеерная Sandbox-выживалка. СТРОЙТЕ И КОПАЙТЕ С ДРУЗЬЯМИ! 🌍</div>
+    <div class="field">
+      <label>Никнейм</label>
+      <input id="nick" maxlength="14" placeholder="Имя персонажа" autocomplete="off">
     </div>
     <div class="field">
-      <label>Почта</label>
+      <label>Электронная почта</label>
       <input id="email" type="email" placeholder="you@example.com" autocomplete="email">
     </div>
     <div class="field">
@@ -377,15 +591,15 @@
     <button class="btn btn-primary" id="loginBtn">ВОЙТИ В ИГРУ</button>
     <button class="btn btn-ghost" id="regBtn">СОЗДАТЬ АККАУНТ</button>
     <div id="authErr"></div>
-    <div class="hint">🏃 A/D или ←/→ — бег · ПРОБЕЛ — прыжок · ЛКМ/Касание экрана — рубить / ставить блоки<br>
-    🛠️ Добывайте дерево и камни, чтобы скрафтить инструменты, факелы и прочные блоки!<br>
-    ⚡ Накапливайте XP! Уровень 10 разблокирует огненный разрушительный спелл! 🔥</div>
+    <div class="hint">🎯 Нажмите 📺 для полноэкранного режима на Android!<br>
+    ⛏️ В режиме «Добыча» зажмите палец на блоке для разрушения. <br>
+    🧱 В режиме «Стройка» коснитесь экрана, чтобы разместить блок из Хотбара!</div>
   </div>
 </div>
 
 <div id="loading">
-  <div class="spin" style="width:26px;height:26px;border-width:3px"></div>
-  <div id="loadTxt">ГЕНЕРАЦИЯ БЕЗГРАНИЧНОГО МИРА…</div>
+  <div class="spin" style="width: 24px; height: 24px; border-width: 3px"></div>
+  <div id="loadTxt">ГЕНЕРАЦИЯ БЕЗГРАНИЧНОЙ ВСЕЛЕННОЙ…</div>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -422,24 +636,31 @@ function hexToRGBA(hex, alpha) {
 function toggleFullscreen() {
   const doc = window.document;
   const docEl = doc.documentElement;
-  const requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
-  const cancelFullScreen = doc.exitFullscreen || doc.mozCancelFullScreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
-  if(!doc.fullscreenElement && !doc.mozFullScreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement) {
-    requestFullScreen.call(docEl).catch(() => {});
+  const req = docEl.requestFullscreen || docEl.webkitRequestFullscreen || docEl.mozRequestFullScreen || docEl.msRequestFullscreen;
+  const exit = doc.exitFullscreen || doc.webkitExitFullscreen || doc.mozCancelFullScreen || doc.msExitFullscreen;
+
+  if(!doc.fullscreenElement && !doc.webkitFullscreenElement && !doc.mozFullScreenElement && !doc.msFullscreenElement) {
+    if (req) {
+      req.call(docEl).then(() => {
+        if (screen.orientation && screen.orientation.lock) {
+          screen.orientation.lock('landscape').catch(() => {});
+        }
+      }).catch(() => {});
+    }
   } else {
-    cancelFullScreen.call(doc);
+    if (exit) exit.call(doc);
   }
 }
 
 const AUTH_ERR = {
-  'auth/invalid-email':'Некорректная почта',
+  'auth/invalid-email':'Неверная почта',
   'auth/user-not-found':'Пользователь не найден',
   'auth/wrong-password':'Неверный пароль',
   'auth/invalid-credential':'Неверный логин или пароль',
   'auth/email-already-in-use':'Почта уже зарегистрирована',
   'auth/weak-password':'Пароль слишком слабый (мин. 6 символов)',
-  'auth/too-many-requests':'Слишком много попыток. Подождите',
-  'auth/network-request-failed':'Проблемы с сетью'
+  'auth/too-many-requests':'Слишком много попыток.',
+  'auth/network-request-failed':'Нет соединения с сетью'
 };
 function authError(e){ $('authErr').textContent = AUTH_ERR[e.code] || ('Ошибка: ' + (e.code||e.message)); }
 function validNick(n){ return /^[A-Za-zА-Яа-яЁё0-9_\-]{2,14}$/.test(n); }
@@ -453,6 +674,7 @@ async function doRegister(){
   if (!email || !pass) { $('authErr').textContent = 'Заполните все поля'; return; }
   busyAuth = true; $('regBtn').innerHTML = '<span class="spin"></span> СОЗДАЮ…';
   try {
+    toggleFullscreen();
     const cr = await auth.createUserWithEmailAndPassword(email, pass);
     await db.ref('users/' + cr.user.uid).set({ name: nick, created: firebase.database.ServerValue.TIMESTAMP });
     MY_NAME = nick;
@@ -466,6 +688,7 @@ async function doLogin(){
   if (!email || !pass) { $('authErr').textContent = 'Введите почту и пароль'; return; }
   busyAuth = true; $('loginBtn').innerHTML = '<span class="spin"></span> ВХОЖУ…';
   try {
+    toggleFullscreen();
     await auth.signInWithEmailAndPassword(email, pass);
   } catch(e){ authError(e); }
   busyAuth = false; $('loginBtn').textContent = 'ВОЙТИ В ИГРУ';
@@ -478,7 +701,7 @@ $('pass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); }
 <script>
 'use strict';
 /* ============================================================
-   АУДИО: Саундтрек в стиле Майнкрафт/Террария + Процедурные звуки
+   АУДИО: Процедурный синтезатор в стиле Майнкрафт/Террария
    ============================================================ */
 const Audio8 = {
   ctx:null, master:null, musG:null, sfxG:null, noiseBuf:null, rainG:null, rainSrc:null,
@@ -490,9 +713,9 @@ const Audio8 = {
     const AC = window.AudioContext || window.webkitAudioContext;
     if (!AC) return;
     this.ctx = new AC();
-    this.master = this.ctx.createGain(); this.master.gain.value = 0.5; this.master.connect(this.ctx.destination);
+    this.master = this.ctx.createGain(); this.master.gain.value = 0.55; this.master.connect(this.ctx.destination);
     
-    this.musG = this.ctx.createGain(); this.musG.gain.value = this.musicMuted ? 0 : 0.28; this.musG.connect(this.master);
+    this.musG = this.ctx.createGain(); this.musG.gain.value = this.musicMuted ? 0 : 0.25; this.musG.connect(this.master);
     this.sfxG = this.ctx.createGain(); this.sfxG.gain.value = this.sfxMuted ? 0 : 0.45; this.sfxG.connect(this.master);
     this.rainG = this.ctx.createGain(); this.rainG.gain.value = 0.0; this.rainG.connect(this.master);
 
@@ -500,7 +723,7 @@ const Audio8 = {
     for (let i=0;i<len;i++) d[i] = Math.random()*2-1;
     this.noiseBuf = buf;
 
-    // Звук дождя
+    // Шум атмосферного дождя
     const rainBufLen = this.ctx.sampleRate * 2;
     const rainBuf = this.ctx.createBuffer(1, rainBufLen, this.ctx.sampleRate);
     const rd = rainBuf.getChannelData(0);
@@ -511,39 +734,39 @@ const Audio8 = {
     this.rainSrc.loop = true;
     const rainFilter = this.ctx.createBiquadFilter();
     rainFilter.type = 'lowpass';
-    rainFilter.frequency.value = 700;
+    rainFilter.frequency.value = 650;
     this.rainSrc.connect(rainFilter);
     rainFilter.connect(this.rainG);
     this.rainSrc.start(0);
 
     this.ready = true;
     this.nextT = this.ctx.currentTime + 0.1;
-    this.timer = setInterval(()=>this.schedule(), 50);
+    this.timer = setInterval(()=>this.schedule(), 40);
   },
   resume(){ if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume(); },
   toggleMusic() {
     this.musicMuted = !this.musicMuted;
-    if (this.musG) this.musG.gain.value = this.musicMuted ? 0 : 0.28;
+    if (this.musG) this.musG.gain.value = this.musicMuted ? 0 : 0.25;
     return this.musicMuted;
   },
   toggleSfx() {
     this.sfxMuted = !this.sfxMuted;
     if (this.sfxG) this.sfxG.gain.value = this.sfxMuted ? 0 : 0.45;
-    if (this.rainG) this.rainG.gain.value = this.sfxMuted ? 0 : (weather.rainIntensity * 0.2);
+    if (this.rainG) this.rainG.gain.value = this.sfxMuted ? 0 : (weather.rainIntensity * 0.18);
     return this.sfxMuted;
   },
   updateRainSound(intensity) {
     if (!this.ready || this.sfxMuted) return;
-    if (this.rainG) this.rainG.gain.setTargetAtTime(intensity * 0.2, this.ctx.currentTime, 0.3);
+    if (this.rainG) this.rainG.gain.setTargetAtTime(intensity * 0.18, this.ctx.currentTime, 0.4);
   },
   tracks: [
-    { name:'🌲 Зелёный Шёпот (Утро)', bpm:80, wave:'sine', vol:.35,
+    { name:'🌲 Зелёная Обитель', bpm:72, wave:'sine', vol:.35,
       mel:[60,64,67,71,67,64,60,0, 62,65,69,72,69,65,62,0, 60,64,67,71,72,71,67,0, 59,62,65,67,65,62,59,0],
       bass:[36,0,40,0,43,0,36,0, 38,0,41,0,45,0,38,0] },
-    { name:'✨ Атмосфера Пещеры', bpm:65, wave:'sine', vol:.4,
+    { name:'💎 Мистические Копи', bpm:60, wave:'sine', vol:.4,
       mel:[67,74,79,0,74,67,0,0, 66,73,78,0,73,66,0,0, 64,71,76,0,71,64,0,0, 62,69,74,0,69,62,0,0],
       bass:[31,0,31,0,30,0,30,0, 28,0,28,0,26,0,26,0] },
-    { name:'🔥 Опасная Ночь (Фонк)', bpm:120, wave:'sawtooth', vol:.08,
+    { name:'🔥 Опасная Ночь (Борьба)', bpm:115, wave:'sawtooth', vol:.07,
       mel:[60,60,63,60,65,60,67,0, 60,60,63,60,67,65,63,0, 58,58,61,58,63,58,65,0, 58,58,61,58,65,63,61,0],
       bass:[36,36,36,36,36,36,36,36, 34,34,34,34,34,34,34,34] }
   ],
@@ -551,14 +774,14 @@ const Audio8 = {
     if (i === this.trackIdx) return;
     this.trackIdx = i; this.step = 0;
     if (this.ctx) this.nextT = this.ctx.currentTime + 0.1;
-    const curName = this.tracks[i] ? this.tracks[i].name : 'Звуки Природы';
+    const curName = this.tracks[i] ? this.tracks[i].name : 'Звуки Ветров';
     $('trackName').textContent = '📻 ' + curName;
   },
   nextTrack(){
     this.manualRadio = true;
     let next = (this.trackIdx + 1) % this.tracks.length;
     this.playTrack(next);
-    toast('📻 Плейлист: ' + this.tracks[next].name, 1500);
+    toast('📻 Воспроизведение: ' + this.tracks[next].name, 1500);
   },
   f(m){ return m === 0 ? 0 : 440*Math.pow(2,(m-69)/12); },
   note(midi, t, dur, wave, vol, dest){
@@ -566,7 +789,7 @@ const Audio8 = {
     const o = this.ctx.createOscillator(), g = this.ctx.createGain();
     o.type = wave; o.frequency.value = this.f(midi);
     g.gain.setValueAtTime(0, t);
-    g.gain.linearRampToValueAtTime(vol, t+0.01);
+    g.gain.linearRampToValueAtTime(vol, t+0.012);
     g.gain.setValueAtTime(vol, t+dur*0.6);
     g.gain.exponentialRampToValueAtTime(0.001, t+dur);
     o.connect(g); g.connect(dest||this.musG);
@@ -574,8 +797,8 @@ const Audio8 = {
   },
   kick(t){
     const o = this.ctx.createOscillator(), g = this.ctx.createGain();
-    o.type='sine'; o.frequency.setValueAtTime(120,t); o.frequency.exponentialRampToValueAtTime(35,t+0.15);
-    g.gain.setValueAtTime(.4,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.15);
+    o.type='sine'; o.frequency.setValueAtTime(120,t); o.frequency.exponentialRampToValueAtTime(35,t+0.16);
+    g.gain.setValueAtTime(.35,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.16);
     o.connect(g); g.connect(this.musG); o.start(t); o.stop(t+0.18);
   },
   schedule(){
@@ -586,12 +809,10 @@ const Audio8 = {
     while (this.nextT < this.ctx.currentTime + 0.15){
       const s = this.step, t = this.nextT;
       const m = tr.mel[s % tr.mel.length];
-      if (m) this.note(m, t, stepDur*1.8, tr.wave, tr.vol);
+      if (m) this.note(m, t, stepDur*1.7, tr.wave, tr.vol);
       const b = tr.bass[s % tr.bass.length];
-      if (b) this.note(b, t, stepDur*1.5, 'triangle', .18);
-      if (tr.bpm > 100) {
-        if (s % 4 === 0) this.kick(t);
-      }
+      if (b) this.note(b, t, stepDur*1.4, 'triangle', .16);
+      if (tr.bpm > 100 && s % 4 === 0) this.kick(t);
       this.step++;
       this.nextT += stepDur;
     }
@@ -612,18 +833,18 @@ const Audio8 = {
     g.gain.setValueAtTime(vol,t); g.gain.exponentialRampToValueAtTime(0.001,t+dur);
     s.connect(f); f.connect(g); g.connect(this.sfxG); s.start(t); s.stop(t+dur+0.02);
   },
-  jump(){ this.blip(250,550,.08,'sine',.15); },
+  jump(){ this.blip(240,500,.08,'sine',.14); },
   land(){ this.noise(.05,.08,400); },
-  hit(){ this.blip(180,50,.12,'triangle',.25); this.noise(.1,.15,800); },
-  breakBlock(){ this.noise(.12, .22, 350); },
-  placeBlock(){ this.blip(180,120,.05,'triangle',.15); },
+  hit(){ this.blip(170,40,.12,'triangle',.22); this.noise(.1,.12,850); },
+  breakBlock(){ this.noise(.12, .2, 380); },
+  placeBlock(){ this.blip(160,110,.05,'triangle',.14); },
   lvlUp(){
-    [400, 500, 600, 800].forEach((f, i) => {
-      setTimeout(() => this.blip(f, f + 100, 0.15, 'square', 0.2), i * 100);
+    [380, 480, 580, 780].forEach((f, i) => {
+      setTimeout(() => this.blip(f, f + 120, 0.16, 'square', 0.18), i * 90);
     });
   },
-  coin(){ this.blip(880,1500,0.12,'sine',0.18); },
-  skill(){ this.blip(150, 900, 0.35, 'sawtooth', 0.25); this.noise(0.4, 0.3, 1500); }
+  coin(){ this.blip(900,1600,0.12,'sine',0.15); },
+  skill(){ this.blip(130, 850, 0.4, 'sawtooth', 0.22); this.noise(0.45, 0.28, 1400); }
 };
 ['pointerdown','keydown','touchstart'].forEach(ev =>
   window.addEventListener(ev, ()=>{ Audio8.init(); Audio8.resume(); }, { passive:true }));
@@ -632,52 +853,36 @@ const Audio8 = {
 <script>
 'use strict';
 /* ============================================================
-   МИР СУРВАЙВАЛА: Сетка блоков, Руда, Генерация Пещер, Деревья
+   МИР СУРВАЙВАЛА: Бесшовный бесконечный мир Террарии
    ============================================================ */
 const TILE = 32, WW = 400, WH = 100, WORLD_PX = WW * TILE;
 const world = new Uint16Array(WW * WH);
 const backWorld = new Uint16Array(WW * WH);
 
-// ИДЕНТИФИКАТОРЫ БЛОКОВ
 const B = {
-  AIR: 0,
-  GRASS: 1,
-  DIRT: 2,
-  STONE: 3,
-  COAL: 4,
-  IRON: 5,
-  GOLD: 6,
-  DIAMOND: 7,
-  WOOD: 8,
-  LEAVES: 9,
-  STONE_BRICK: 10,
-  WOOD_PLANK: 11,
-  TORCH: 12,
-  LAVA: 13,
-  WATER: 14,
-  SAND: 15,
-  GRASS_TALL: 16
+  AIR: 0, GRASS: 1, DIRT: 2, STONE: 3, COAL: 4, IRON: 5, GOLD: 6, DIAMOND: 7,
+  WOOD: 8, LEAVES: 9, STONE_BRICK: 10, WOOD_PLANK: 11, TORCH: 12, LAVA: 13,
+  WATER: 14, SAND: 15, GRASS_TALL: 16
 };
 
-// ХАРАКТЕРИСТИКИ ТАЙЛОВ
 const TILES_INFO = {
   [B.AIR]: { solid: false, mineTime: 0, color: 'transparent' },
-  [B.GRASS]: { solid: true, mineTime: 300, color: '#4ade80', bg: '#2b1e15' },
-  [B.DIRT]: { solid: true, mineTime: 250, color: '#7c2d12' },
-  [B.STONE]: { solid: true, mineTime: 600, color: '#64748b' },
-  [B.COAL]: { solid: true, mineTime: 650, color: '#1e293b' },
-  [B.IRON]: { solid: true, mineTime: 800, color: '#b45309' },
-  [B.GOLD]: { solid: true, mineTime: 1200, color: '#fbbf24' },
-  [B.DIAMOND]: { solid: true, mineTime: 1800, color: '#22d3ee' },
-  [B.WOOD]: { solid: false, mineTime: 400, color: '#451a03' },
-  [B.LEAVES]: { solid: false, mineTime: 100, color: '#15803d' },
-  [B.STONE_BRICK]: { solid: true, mineTime: 700, color: '#475569' },
-  [B.WOOD_PLANK]: { solid: true, mineTime: 300, color: '#a16207' },
-  [B.TORCH]: { solid: false, mineTime: 20, color: '#fbbf24', light: [255,160,40, 1.0] },
-  [B.LAVA]: { solid: false, mineTime: 9999, color: '#ef4444', hazard: true, light: [255,50,0, 0.95] },
-  [B.WATER]: { solid: false, mineTime: 9999, color: '#3b82f6' },
-  [B.SAND]: { solid: true, mineTime: 200, color: '#fef08a' },
-  [B.GRASS_TALL]: { solid: false, mineTime: 10, color: '#22c55e' }
+  [B.GRASS]: { solid: true, mineTime: 250, color: '#34d399', bg: '#2b1e15' },
+  [B.DIRT]: { solid: true, mineTime: 200, color: '#78350f' },
+  [B.STONE]: { solid: true, mineTime: 550, color: '#4b5563' },
+  [B.COAL]: { solid: true, mineTime: 600, color: '#111827' },
+  [B.IRON]: { solid: true, mineTime: 750, color: '#d97706' },
+  [B.GOLD]: { solid: true, mineTime: 1100, color: '#eab308' },
+  [B.DIAMOND]: { solid: true, mineTime: 1600, color: '#06b6d4' },
+  [B.WOOD]: { solid: false, mineTime: 350, color: '#451a03' },
+  [B.LEAVES]: { solid: false, mineTime: 90, color: '#047857' },
+  [B.STONE_BRICK]: { solid: true, mineTime: 650, color: '#374151' },
+  [B.WOOD_PLANK]: { solid: true, mineTime: 250, color: '#b45309' },
+  [B.TORCH]: { solid: false, mineTime: 15, color: '#f59e0b', light: [255,150,40, 1.0] },
+  [B.LAVA]: { solid: false, mineTime: 9999, color: '#ef4444', hazard: true, light: [255,40,0, 0.9] },
+  [B.WATER]: { solid: false, mineTime: 9999, color: '#2563eb' },
+  [B.SAND]: { solid: true, mineTime: 180, color: '#fef08a' },
+  [B.GRASS_TALL]: { solid: false, mineTime: 10, color: '#10b981' }
 };
 
 function blockAt(tx, ty) {
@@ -694,12 +899,10 @@ function solidAt(tx, ty) {
   return TILES_INFO[b] ? TILES_INFO[b].solid : false;
 }
 
-// Генерация мира (2D Террария вайб)
 function generateSurvivalWorld() {
   const R = mulberry32(2026);
-  const noise = (x) => Math.sin(x * 0.05) * 6 + Math.cos(x * 0.12) * 2;
+  const noise = (x) => Math.sin(x * 0.055) * 6 + Math.cos(x * 0.11) * 2;
 
-  // 1. Неровный рельеф
   const skyLimit = 35;
   for (let x = 0; x < WW; x++) {
     const h = Math.round(skyLimit + noise(x));
@@ -714,8 +917,6 @@ function generateSurvivalWorld() {
       } else {
         world[idx] = B.STONE;
       }
-      
-      // Задние стены (background tiles)
       if (y >= h) {
         backWorld[idx] = (y < h + 10) ? B.DIRT : B.STONE;
       } else {
@@ -724,37 +925,33 @@ function generateSurvivalWorld() {
     }
   }
 
-  // 2. Генерация пещер (Червеобразные ходы)
-  const caveCount = 35;
+  // Генерация пещерных пустот
+  const caveCount = 38;
   for (let i = 0; i < caveCount; i++) {
     let cx = R() * WW | 0;
-    let cy = R() * (WH - skyLimit - 15) + skyLimit + 10 | 0;
-    let len = 40 + R() * 80 | 0;
+    let cy = R() * (WH - skyLimit - 15) + skyLimit + 12 | 0;
+    let len = 40 + R() * 70 | 0;
     for (let s = 0; s < len; s++) {
       cx += Math.round((R() - 0.5) * 3);
       cy += Math.round((R() - 0.5) * 2);
       cx = clamp(cx, 2, WW - 3);
-      cy = clamp(cy, skyLimit + 4, WH - 6);
-      
-      // Вырезаем круг радиусом ~2-3 блока
+      cy = clamp(cy, skyLimit + 3, WH - 6);
       for (let dx = -2; dx <= 2; dx++) {
         for (let dy = -2; dy <= 2; dy++) {
-          if (dx*dx + dy*dy <= 5) {
-            setBlock(cx + dx, cy + dy, B.AIR);
-          }
+          if (dx*dx + dy*dy <= 5) setBlock(cx + dx, cy + dy, B.AIR);
         }
       }
     }
   }
 
-  // 3. Рудные жилы (Уголь, Железо, Золото, Алмазы)
+  // Спавн рудных жил
   function seedVein(blockId, depthMin, depthMax, spawnChance, rSize) {
-    for (let x = 3; x < WW - 3; x += 5) {
+    for (let x = 3; x < WW - 3; x += 6) {
       if (R() < spawnChance) {
         const y = Math.round(depthMin + R() * (depthMax - depthMin));
         for (let dx = -rSize; dx <= rSize; dx++) {
           for (let dy = -rSize; dy <= rSize; dy++) {
-            if (R() < 0.7 && blockAt(x + dx, y + dy) === B.STONE) {
+            if (R() < 0.75 && blockAt(x + dx, y + dy) === B.STONE) {
               setBlock(x + dx, y + dy, blockId);
             }
           }
@@ -762,38 +959,31 @@ function generateSurvivalWorld() {
       }
     }
   }
-
   seedVein(B.COAL, skyLimit + 10, WH - 10, 0.65, 2);
   seedVein(B.IRON, skyLimit + 15, WH - 15, 0.45, 1);
-  seedVein(B.GOLD, skyLimit + 30, WH - 10, 0.35, 1);
-  seedVein(B.DIAMOND, WH - 30, WH - 4, 0.18, 1);
+  seedVein(B.GOLD, skyLimit + 30, WH - 10, 0.3, 1);
+  seedVein(B.DIAMOND, WH - 25, WH - 4, 0.16, 1);
 
-  // 4. Лавовые озёра на самом дне
+  // Озера кипящей лавы снизу
   for (let x = 0; x < WW; x++) {
-    for (let y = WH - 10; y < WH; y++) {
-      if (blockAt(x, y) === B.AIR || (R() < 0.4 && y > WH - 8)) {
+    for (let y = WH - 9; y < WH; y++) {
+      if (blockAt(x, y) === B.AIR || (R() < 0.4 && y > WH - 7)) {
         setBlock(x, y, B.LAVA);
       }
     }
   }
 
-  // 5. Деревья на поверхности
-  for (let x = 4; x < WW - 4; x += 8 + Math.round(R() * 6)) {
-    // Находим блок поверхности
+  // Спавн деревьев
+  for (let x = 5; x < WW - 5; x += 10 + Math.round(R() * 8)) {
     let surfaceY = -1;
     for (let y = 0; y < WH; y++) {
-      if (blockAt(x, y) === B.GRASS) {
-        surfaceY = y;
-        break;
-      }
+      if (blockAt(x, y) === B.GRASS) { surfaceY = y; break; }
     }
     if (surfaceY !== -1) {
-      // Спавним ствол дерева
-      const treeHeight = 5 + Math.round(R() * 4);
+      const treeHeight = 5 + Math.round(R() * 3);
       for (let ty = 1; ty <= treeHeight; ty++) {
         setBlock(x, surfaceY - ty, B.WOOD);
       }
-      // Спавним листву
       const ly = surfaceY - treeHeight;
       for (let ldx = -2; ldx <= 2; ldx++) {
         for (let ldy = -2; ldy <= 2; ldy++) {
@@ -805,11 +995,11 @@ function generateSurvivalWorld() {
     }
   }
 
-  // 6. Высокая трава на свободной поверхности
+  // Дикая растительность
   for (let x = 0; x < WW; x++) {
     for (let y = 0; y < WH - 1; y++) {
       if (blockAt(x, y) === B.GRASS && blockAt(x, y - 1) === B.AIR) {
-        if (R() < 0.4) setBlock(x, y - 1, B.GRASS_TALL);
+        if (R() < 0.35) setBlock(x, y - 1, B.GRASS_TALL);
       }
     }
   }
@@ -820,20 +1010,19 @@ generateSurvivalWorld();
 <script>
 'use strict';
 /* ============================================================
-   ПЕРСОНАЖ: Уровни, XP, Инвентарь, Локальная Выносливость
+   ПЕРСОНАЖ: Инвентарь, Уровни, XP, Способности
    ============================================================ */
 const P = {
   x: WW * TILE / 2, y: 15 * TILE, w: 22, h: 26, vx: 0, vy: 0, dir: 1,
   ground: false, hp: 100, maxHp: 100, xp: 0, level: 1, maxXp: 100,
-  coins: 0, activeSkin: 'default', deadT: 0, runT:0, squash: 0,
+  coins: 0, activeSkin: 'default', deadT: 0, runT: 0, squash: 0,
   activeHotbarSlot: 0,
-  // 9 слотов инвентаря: { type, count }
   inventory: [
     { type: 'pickaxe_wood', count: 1 },
     { type: 'sword_wood', count: 1 },
-    { type: B.TORCH, count: 15 },
-    { type: B.DIRT, count: 64 },
-    { type: B.STONE_BRICK, count: 20 },
+    { type: B.TORCH, count: 10 },
+    { type: B.DIRT, count: 32 },
+    { type: B.STONE_BRICK, count: 15 },
     { type: null, count: 0 },
     { type: null, count: 0 },
     { type: null, count: 0 },
@@ -842,41 +1031,41 @@ const P = {
 };
 
 const SKINS = [
-  { id: 'default', name: 'Выживший', color: '#5cb8ff', price: 0, desc: 'Обычный пиксельный путник.' },
-  { id: 'woodcutter', name: 'Лесоруб', color: '#fb923c', price: 10, desc: 'Любитель свежего дуба.' },
-  { id: 'miner', name: 'Шахтёр', color: '#64748b', price: 25, desc: 'Обладает каменным телом.' },
-  { id: 'golden', name: 'Король', color: '#facc15', price: 50, desc: 'Настоящая корона и царский блеск.' },
-  { id: 'void', name: 'Демон бездны', color: '#c084fc', price: 100, desc: 'Фиолетовый неоновый дух.' }
+  { id: 'default', name: 'Житель', color: '#5cb8ff', price: 0, desc: 'Пиксельный исследователь кубического мира.' },
+  { id: 'woodcutter', name: 'Дровосек', color: '#f97316', price: 15, desc: 'Обладает оранжевым прочным костюмом.' },
+  { id: 'miner', name: 'Шахтер', color: '#6b7280', price: 30, desc: 'Всегда носит тяжелую экипировку.' },
+  { id: 'golden', name: 'Лорд Лидер', color: '#fbbf24', price: 65, desc: 'Особая золотая корона на голове!' },
+  { id: 'void', name: 'Слуга Пустоты', color: '#c084fc', price: 120, desc: 'Фиолетовая неоновая дымка.' }
 ];
 let ownedSkins = ['default'];
 
 const cam = { x: 0, y: 0 };
 const keys = { left: false, right: false, jump: false };
 const particles = [];
-const damageTexts = []; // Всплывающие цифры урона / XP
+const damageTexts = [];
 let screenShake = 0;
 
 function spawnP(x, y, vx, vy, life, color, size, grav){
-  if (particles.length > 200) particles.shift();
-  particles.push({ x, y, vx, vy, life, maxLife: life, color, size, grav: grav ?? 0.25 });
+  if (particles.length > 150) particles.shift();
+  particles.push({ x, y, vx, vy, life, maxLife: life, color, size, grav: grav ?? 0.22 });
 }
 function textPop(x, y, text, color) {
-  damageTexts.push({ x, y, text, color, life: 40 });
+  damageTexts.push({ x, y, text, color, life: 35 });
 }
 
 function gainXP(amt) {
   P.xp += amt;
-  textPop(P.x + P.w/2, P.y - 10, `+${amt} XP`, '#22c55e');
+  textPop(P.x + P.w/2, P.y - 8, `+${amt} XP`, '#22c55e');
   if (P.xp >= P.maxXp) {
     P.xp -= P.maxXp;
     P.level++;
-    P.maxXp = P.level * 100 + 50;
-    P.maxHp = 100 + (P.level - 1) * 10;
+    P.maxXp = P.level * 90 + 40;
+    P.maxHp = 100 + (P.level - 1) * 8;
     P.hp = P.maxHp;
     Audio8.lvlUp();
-    textPop(P.x + P.w/2, P.y - 30, `LEVEL UP! (LVL ${P.level})`, '#eab308');
-    for (let i = 0; i < 30; i++) {
-      spawnP(P.x + P.w/2, P.y + P.h/2, (Math.random()-0.5)*6, (Math.random()-0.5)*6 - 2, 40, '#facc15', 3, 0.1);
+    textPop(P.x + P.w/2, P.y - 28, `LEVEL UP! (${P.level})`, '#fbbf24');
+    for (let i = 0; i < 20; i++) {
+      spawnP(P.x + P.w/2, P.y + P.h/2, (Math.random()-0.5)*5, (Math.random()-0.5)*5 - 2, 35, '#eab308', 3, 0.1);
     }
     checkSkillsUnlock();
     saveProgressExact();
@@ -891,9 +1080,7 @@ function checkSkillsUnlock() {
   }
 }
 
-// Поиск и добавление предметов в инвентарь
 function addToInventory(type, amt = 1) {
-  // Ищем существующий стак (если это блок/ресурс)
   if (typeof type === 'number') {
     for (const slot of P.inventory) {
       if (slot.type === type && slot.count < 99) {
@@ -903,7 +1090,6 @@ function addToInventory(type, amt = 1) {
       }
     }
   }
-  // Ищем пустое место
   for (const slot of P.inventory) {
     if (slot.type === null) {
       slot.type = type;
@@ -918,158 +1104,98 @@ function addToInventory(type, amt = 1) {
 
 function getActiveTool() {
   const slot = P.inventory[P.activeHotbarSlot];
-  if (slot && slot.type) return slot.type;
-  return null;
-}
-
-function useHotbarItem(tx, ty) {
-  const slot = P.inventory[P.activeHotbarSlot];
-  if (!slot || !slot.type) return;
-
-  // 1. Использование строительного блока
-  if (typeof slot.type === 'number') {
-    if (blockAt(tx, ty) === B.AIR || blockAt(tx, ty) === B.GRASS_TALL) {
-      // Строим блок!
-      setBlock(tx, ty, slot.type);
-      Audio8.placeBlock();
-      slot.count--;
-      if (slot.count <= 0) {
-        slot.type = null;
-        slot.count = 0;
-      }
-      renderHotbar();
-      saveProgressExact();
-    }
-  }
+  return (slot && slot.type) ? slot.type : null;
 }
 </script>
 
 <script>
 'use strict';
 /* ============================================================
-   ОКРУЖЕНИЕ И ВРАГИ (MOBS): Слизни, Зомби, Глаза
+   ВРАГИ (MOBS) И НАНОСИМЫЙ УРОН
    ============================================================ */
 const enemies = [];
-const bloodParticles = [];
 
 function spawnEnemy(type, x, y) {
   enemies.push({
     id: Math.random(),
-    type,
-    x, y,
-    w: type === 'slime' ? 24 : 20,
-    h: type === 'slime' ? 18 : 28,
+    type, x, y,
+    w: type === 'slime' ? 22 : 18,
+    h: type === 'slime' ? 16 : 26,
     vx: 0, vy: 0,
-    hp: type === 'zombie' ? 80 : (type === 'eye' ? 40 : 30),
-    maxHp: type === 'zombie' ? 80 : (type === 'eye' ? 40 : 30),
+    hp: type === 'zombie' ? 70 : (type === 'eye' ? 35 : 25),
+    maxHp: type === 'zombie' ? 70 : (type === 'eye' ? 35 : 25),
     dir: 1,
     color: type === 'slime' ? '#10b981' : (type === 'zombie' ? '#047857' : '#ef4444'),
-    lastHit: 0,
-    jumpCooldown: 0
+    lastHit: 0, jumpCooldown: 0
   });
 }
 
 function updateMobs() {
   for (let i = enemies.length - 1; i >= 0; i--) {
     const e = enemies[i];
-    
-    // Гравитация
-    if (e.type !== 'eye') {
-      e.vy += 0.45;
-    }
+    if (e.type !== 'eye') e.vy += 0.4;
 
-    const distToPlayer = Math.hypot((P.x - e.x), (P.y - e.y));
-    
-    // Простой ИИ погони
-    if (distToPlayer < 300) {
+    const dist = Math.hypot((P.x - e.x), (P.y - e.y));
+    if (dist < 260) {
       e.dir = Math.sign(P.x - e.x) || 1;
-      
       if (e.type === 'eye') {
-        // Летающий монстр
-        e.vx = e.dir * 1.5;
-        e.vy = Math.sign(P.y - e.y) * 1.2;
+        e.vx = e.dir * 1.4;
+        e.vy = Math.sign(P.y - e.y) * 1.1;
       } else {
-        e.vx = e.dir * 1.2;
-        // Прыжок через препятствия
-        const txInFront = Math.floor((e.x + e.dir * 15) / TILE);
+        e.vx = e.dir * 1.1;
+        const txFront = Math.floor((e.x + e.dir * 14) / TILE);
         const tyFeet = Math.floor((e.y + e.h - 4) / TILE);
-        if (solidAt(txInFront, tyFeet) && e.jumpCooldown <= 0) {
-          e.vy = -7.5;
-          e.jumpCooldown = 40;
+        if (solidAt(txFront, tyFeet) && e.jumpCooldown <= 0) {
+          e.vy = -7.0;
+          e.jumpCooldown = 45;
         }
       }
     } else {
-      // Блуждание
       if (Math.random() < 0.01) e.dir = -e.dir;
-      e.vx = e.dir * 0.6;
+      e.vx = e.dir * 0.5;
     }
 
     if (e.jumpCooldown > 0) e.jumpCooldown--;
 
-    // Применение скоростей
     e.x += e.vx;
-    // Коллизия по X с блоками
-    const txLeft = Math.floor(e.x / TILE);
-    const txRight = Math.floor((e.x + e.w) / TILE);
-    const tyTop = Math.floor(e.y / TILE);
-    const tyBot = Math.floor((e.y + e.h) / TILE);
+    const txL = Math.floor(e.x / TILE), txR = Math.floor((e.x + e.w) / TILE);
+    const tyT = Math.floor(e.y / TILE), tyB = Math.floor((e.y + e.h) / TILE);
     
-    if (solidAt(txLeft, tyTop) || solidAt(txLeft, tyBot)) {
-      e.x = (txLeft + 1) * TILE;
-      e.dir = -e.dir;
-    }
-    if (solidAt(txRight, tyTop) || solidAt(txRight, tyBot)) {
-      e.x = txRight * TILE - e.w;
-      e.dir = -e.dir;
-    }
+    if (solidAt(txL, tyT) || solidAt(txL, tyB)) { e.x = (txL + 1) * TILE; e.dir = -e.dir; }
+    if (solidAt(txR, tyT) || solidAt(txR, tyB)) { e.x = txR * TILE - e.w; e.dir = -e.dir; }
 
     e.y += e.vy;
-    // Коллизия по Y
-    const newTxLeft = Math.floor(e.x / TILE);
-    const newTxRight = Math.floor((e.x + e.w) / TILE);
-    const newTyTop = Math.floor(e.y / TILE);
-    const newTyBot = Math.floor((e.y + e.h) / TILE);
+    const nTxL = Math.floor(e.x / TILE), nTxR = Math.floor((e.x + e.w) / TILE);
+    const nTyTop = Math.floor(e.y / TILE), nTyBot = Math.floor((e.y + e.h) / TILE);
 
-    if (solidAt(newTxLeft, newTyBot) || solidAt(newTxRight, newTyBot)) {
-      e.y = newTyBot * TILE - e.h;
-      e.vy = 0;
-    }
-    if (solidAt(newTxLeft, newTyTop) || solidAt(newTxRight, newTyTop)) {
-      e.y = (newTyTop + 1) * TILE;
-      e.vy = 0.5;
-    }
+    if (solidAt(nTxL, nTyBot) || solidAt(nTxR, nTyBot)) { e.y = nTyBot * TILE - e.h; e.vy = 0; }
+    if (solidAt(nTxL, nTyTop) || solidAt(nTxR, nTyTop)) { e.y = (nTyTop + 1) * TILE; e.vy = 0.5; }
 
-    // Столкновение с игроком
     if (e.x + e.w > P.x && e.x < P.x + P.w && e.y + e.h > P.y && e.y < P.y + P.h) {
-      if (P.deadT <= 0) {
-        playerDamage(15);
-      }
+      if (P.deadT <= 0) playerDamage(12);
     }
 
-    // Смерть моба
     if (e.hp <= 0) {
-      // Взрыв крови
-      for (let p = 0; p < 15; p++) {
-        spawnP(e.x + e.w/2, e.y + e.h/2, (Math.random()-0.5)*5, -Math.random()*4, 25, e.color, 3, 0.2);
+      for (let p = 0; p < 12; p++) {
+        spawnP(e.x + e.w/2, e.y + e.h/2, (Math.random()-0.5)*4, -Math.random()*3, 20, e.color, 2.5, 0.2);
       }
-      gainXP(30);
-      P.coins += 2 + Math.floor(Math.random() * 4);
+      gainXP(25);
+      P.coins += 2 + Math.floor(Math.random() * 3);
       $('coinsCount').textContent = P.coins;
       Audio8.coin();
       enemies.splice(i, 1);
     }
   }
 
-  // Спавн мобов ночью на поверхности
-  if (weather.timeOfDay > 0.4 && weather.timeOfDay < 0.8 && enemies.length < 8 && Math.random() < 0.015) {
-    const rx = P.x + (Math.random() - 0.5) * 500;
-    const ry = P.y - 100;
+  // Спавн мобов
+  if (weather.timeOfDay > 0.4 && weather.timeOfDay < 0.8 && enemies.length < 6 && Math.random() < 0.012) {
+    const rx = P.x + (Math.random() - 0.5) * 450;
+    const ry = P.y - 120;
     if (rx > 0 && rx < WORLD_PX) {
-      const type = Math.random() < 0.5 ? 'zombie' : 'eye';
-      spawnEnemy(type, rx, ry);
+      spawnEnemy(Math.random() < 0.55 ? 'zombie' : 'eye', rx, ry);
     }
-  } else if (enemies.length < 3 && Math.random() < 0.005) {
-    const rx = P.x + (Math.random() - 0.5) * 400;
+  } else if (enemies.length < 3 && Math.random() < 0.006) {
+    const rx = P.x + (Math.random() - 0.5) * 350;
     const ry = P.y - 80;
     spawnEnemy('slime', rx, ry);
   }
@@ -1077,21 +1203,19 @@ function updateMobs() {
 
 function playerDamage(amt) {
   P.hp = Math.max(0, P.hp - amt);
-  screenShake = 10;
+  screenShake = 8;
   Audio8.hit();
   textPop(P.x + P.w/2, P.y, `-${amt} HP`, '#ef4444');
-  if (P.hp <= 0) {
-    die();
-  }
+  if (P.hp <= 0) die();
 }
 
 function die() {
   P.hp = P.maxHp;
   P.x = WW * TILE / 2;
-  P.y = 10 * TILE;
+  P.y = 15 * TILE;
   P.vx = 0; P.vy = 0;
-  P.deadT = 40;
-  toast('💀 Вы погибли! Возрождение на спавне.', 2500);
+  P.deadT = 35;
+  toast('💀 Возрождение на начальной точке спавна!', 2200);
   saveProgressExact();
 }
 </script>
@@ -1099,30 +1223,26 @@ function die() {
 <script>
 'use strict';
 /* ============================================================
-   ДИНАМИЧЕСКИЙ КРАФТ И СМЕНА СЕЗОНОВ
+   КРАФТ, СЕЗОНЫ И ПОГОДНАЯ СИСТЕМА
    ============================================================ */
 const CRAFT_RECIPES = [
-  { id: 'torch', name: 'Факел', icon: '🕯️', cost: '1 Каменный Уголь + 1 Дерево', req: { [B.COAL]: 1, [B.WOOD]: 1 }, result: B.TORCH, amt: 4 },
-  { id: 'wood_plank', name: 'Деревянная Доска', icon: '🪵', cost: '1 Блок Дерева', req: { [B.WOOD]: 1 }, result: B.WOOD_PLANK, amt: 4 },
+  { id: 'torch', name: 'Факел', icon: '🕯️', cost: '1 Уголь + 1 Дерево', req: { [B.COAL]: 1, [B.WOOD]: 1 }, result: B.TORCH, amt: 4 },
+  { id: 'wood_plank', name: 'Деревянная Доска', icon: '🪵', cost: '1 Дерево', req: { [B.WOOD]: 1 }, result: B.WOOD_PLANK, amt: 4 },
   { id: 'stone_brick', name: 'Каменный Кирпич', icon: '🧱', cost: '2 Камня', req: { [B.STONE]: 2 }, result: B.STONE_BRICK, amt: 1 },
   { id: 'sword_iron', name: 'Железный Меч', icon: '⚔️', cost: '5 Железа + 2 Дерева', req: { [B.IRON]: 5, [B.WOOD]: 2 }, result: 'sword_iron', amt: 1 },
   { id: 'pickaxe_iron', name: 'Железная Кирка', icon: '⛏️', cost: '6 Железа + 3 Дерева', req: { [B.IRON]: 6, [B.WOOD]: 3 }, result: 'pickaxe_iron', amt: 1 },
-  { id: 'heal_potion', name: 'Зелье лечения', icon: '🧪', cost: '10 Травы + 3 Золота', req: { [B.GRASS_TALL]: 10, [B.GOLD]: 3 }, result: 'heal_potion', amt: 1 }
+  { id: 'heal_potion', name: 'Лечебное Зелье', icon: '🧪', cost: '8 Травы + 2 Золота', req: { [B.GRASS_TALL]: 8, [B.GOLD]: 2 }, result: 'heal_potion', amt: 1 }
 ];
 
 function renderCraftingPanel() {
   const container = $('recipeListContainer');
   container.innerHTML = CRAFT_RECIPES.map(rec => {
-    // Проверка доступности
     let hasIngredients = true;
     for (const key in rec.req) {
       const need = rec.req[key];
       let have = 0;
-      // Считаем сколько у нас в инвентаре
       for (const slot of P.inventory) {
-        if (slot.type === parseInt(key)) {
-          have += slot.count;
-        }
+        if (slot.type === parseInt(key)) have += slot.count;
       }
       if (have < need) hasIngredients = false;
     }
@@ -1146,7 +1266,6 @@ window.craftItem = function(recipeId) {
   const rec = CRAFT_RECIPES.find(r => r.id === recipeId);
   if (!rec) return;
 
-  // Проверим ещё раз и вычтем ингредиенты
   for (const key in rec.req) {
     let need = rec.req[key];
     for (const slot of P.inventory) {
@@ -1162,34 +1281,25 @@ window.craftItem = function(recipeId) {
 
   addToInventory(rec.result, rec.amt);
   Audio8.lvlUp();
-  toast(`🛠️ Скрафчено: ${rec.name}!`, 1200);
+  toast(`🛠️ Изготовлено: ${rec.name}!`, 1200);
   renderCraftingPanel();
   saveProgressExact();
 };
 
 const SEASONS = ['ЛЕТО', 'ОСЕНЬ', 'ЗИМА', 'ВЕСНА'];
-const SEASON_LIGHTING = {
-  'ЛЕТО': { r: 85, g: 195, b: 77 },
-  'ОСЕНЬ': { r: 217, g: 119, b: 6 },
-  'ЗИМА': { r: 226, g: 232, b: 240 },
-  'ВЕСНА': { r: 244, g: 114, b: 182 }
-};
-
 let weather = {
   rainIntensity: 0.0,
   isRaining: false,
-  timeOfDay: 0.2, // 0 - полдень, 0.5 - полночь
+  timeOfDay: 0.2, 
   season: 'ЛЕТО',
   lastSeasonSwitch: 0
 };
 
 function updateDynamicWeatherAndSeasons(now) {
-  // Движение солнца
-  weather.timeOfDay = (Date.now() % 360000) / 360000; // Цикл 6 минут
+  weather.timeOfDay = (Date.now() % 300000) / 300000; // 5 минут цикл суток
 
-  // Вероятность дождя каждые 2 минуты
-  const weatherCycle = Date.now() % 120000;
-  weather.isRaining = weatherCycle < 30000; // Идет 30 секунд
+  const weatherCycle = Date.now() % 90000;
+  weather.isRaining = weatherCycle < 25000; 
 
   if (weather.isRaining) {
     weather.rainIntensity = lerp(weather.rainIntensity, 1.0, 0.005);
@@ -1198,13 +1308,12 @@ function updateDynamicWeatherAndSeasons(now) {
   }
   Audio8.updateRainSound(weather.rainIntensity);
 
-  // Смена времен года
-  if (now - weather.lastSeasonSwitch > 90000) {
+  if (now - weather.lastSeasonSwitch > 75000) {
     weather.lastSeasonSwitch = now;
     const curIdx = SEASONS.indexOf(weather.season);
     weather.season = SEASONS[(curIdx + 1) % SEASONS.length];
     $('seasonLabel').textContent = weather.season;
-    toast(`🍁 Новое время года: ${weather.season}!`, 2500);
+    toast(`🍁 Смена времени года: ${weather.season}!`, 2000);
   }
 }
 </script>
@@ -1212,23 +1321,22 @@ function updateDynamicWeatherAndSeasons(now) {
 <script>
 'use strict';
 /* ============================================================
-   ФИЗИКА И ДВИЖЕНИЕ: Коллизии с блоками сетки мира
+   ДВИЖЕНИЕ И ФИЗИКА СЕТКИ БЛОКОВ
    ============================================================ */
 function stepPlayer() {
-  P.vy += 0.5; // Гравитация
+  P.vy += 0.45; // Гравитация
 
-  if (keys.left) { P.vx -= 0.6; P.dir = -1; }
-  else if (keys.right) { P.vx += 0.6; P.dir = 1; }
+  if (keys.left) { P.vx -= 0.55; P.dir = -1; }
+  else if (keys.right) { P.vx += 0.55; P.dir = 1; }
   else {
     P.vx *= P.ground ? 0.72 : 0.94;
     if (Math.abs(P.vx) < 0.05) P.vx = 0;
   }
 
-  // Ограничение скорости
-  const maxSpeed = 4.5 + (P.level * 0.1);
+  const maxSpeed = 4.2 + (P.level * 0.08);
   P.vx = clamp(P.vx, -maxSpeed, maxSpeed);
 
-  // Коллизия по оси X
+  // Ось X коллизия
   P.x += P.vx;
   const tx0_x = Math.floor(P.x / TILE);
   const tx1_x = Math.floor((P.x + P.w) / TILE);
@@ -1253,7 +1361,7 @@ function stepPlayer() {
     }
   }
 
-  // Коллизия по оси Y
+  // Ось Y коллизия
   P.y += P.vy;
   P.ground = false;
   const tx0_y = Math.floor(P.x / TILE);
@@ -1280,36 +1388,31 @@ function stepPlayer() {
     }
   }
 
-  if (P.vy > 12) P.vy = 12;
+  if (P.vy > 11) P.vy = 11;
 
-  // Прыжок
   if (keys.jump && P.ground) {
-    P.vy = -10.5;
+    P.vy = -10.0;
     P.ground = false;
     Audio8.jump();
   }
 
-  // Смертельное падение / Лава коллизия
   const ctx = Math.floor((P.x + P.w/2)/TILE);
   const cty = Math.floor((P.y + P.h/2)/TILE);
-  if (blockAt(ctx, cty) === B.LAVA) {
-    playerDamage(4);
-  }
+  if (blockAt(ctx, cty) === B.LAVA) playerDamage(3);
 
   P.runT += Math.abs(P.vx);
 
-  // Камера плавно следует за персонажем
+  // Камера слежения
   cam.x = lerp(cam.x, P.x - vw / 2 + P.w / 2, 0.12);
   cam.y = lerp(cam.y, P.y - vh / 2 + P.h / 2, 0.08);
 
-  // Не выпускаем камеру за границы мира
   cam.x = clamp(cam.x, 0, WORLD_PX - vw);
   cam.y = clamp(cam.y, 0, WH * TILE - vh);
 
   if (screenShake > 0) {
     cam.x += (Math.random() - 0.5) * screenShake;
     cam.y += (Math.random() - 0.5) * screenShake;
-    screenShake *= 0.9;
+    screenShake *= 0.88;
   }
 }
 </script>
@@ -1317,7 +1420,7 @@ function stepPlayer() {
 <script>
 'use strict';
 /* ============================================================
-   СЕТЬ: Синхронизация общего мира, игроков, инвентаря и чата
+   СЕТЬ: Синхронизация блоков (Persisted Realtime World) и Игроков
    ============================================================ */
 let MY_UID = null, MY_NAME = '', joined = false;
 const remotes = {};
@@ -1338,15 +1441,23 @@ function joinNet(){
       seen.add(ch.key);
       let r = remotes[ch.key];
       if (!r) r = remotes[ch.key] = { rx: v.x, ry: v.y, tx: v.x, ty: v.y };
-      r.n = v.n; r.tx = v.x; r.ty = v.y; r.d = v.d || 1; r.s = v.s || 0;
-      r.skin = v.skin || 'default'; r.lvl = v.lvl || 1; r.tool = v.tool || null;
+      r.n = v.n; r.tx = v.x; r.ty = v.y; r.d = v.d || 1;
+      r.skin = v.skin || 'default'; r.lvl = v.lvl || 1;
     });
     for (const k in remotes) if (!seen.has(k)) delete remotes[k];
     $('online').textContent = seen.size + 1;
   });
 
-  // ЧАТ
-  db.ref('chat').limitToLast(18).on('child_added', snap => {
+  // ПОЛНОЦЕННАЯ РЕАЛТАЙМ СИНХРОНИЗАЦИЯ БЛОКОВ МЕЖДУ ВСЕМИ ИГРОКАМИ
+  db.ref('world_tiles').on('child_added', syncTileFromNet);
+  db.ref('world_tiles').on('child_changed', syncTileFromNet);
+  db.ref('world_tiles').on('child_removed', snap => {
+    const [tx, ty] = snap.key.split('_').map(Number);
+    setBlock(tx, ty, B.AIR);
+  });
+
+  // ЧАТ СЕТИ
+  db.ref('chat').limitToLast(15).on('child_added', snap => {
     const data = snap.val();
     if (!data) return;
     const msgEl = document.createElement('div');
@@ -1357,8 +1468,15 @@ function joinNet(){
     box.scrollTop = box.scrollHeight;
   });
 
-  // Быстрый тикер положения
   setInterval(() => { if (Date.now() - lastSend > 100) sendNow(); }, 100);
+}
+
+function syncTileFromNet(snap) {
+  const [tx, ty] = snap.key.split('_').map(Number);
+  const blockId = snap.val();
+  if (tx >= 0 && tx < WW && ty >= 0 && ty < WH) {
+    setBlock(tx, ty, blockId);
+  }
 }
 
 function sendChatMessage() {
@@ -1379,7 +1497,7 @@ function sendNow(){
   meRef.update({
     n: MY_NAME, skin: P.activeSkin,
     x: Math.round(P.x), y: Math.round(P.y), d: P.dir,
-    lvl: P.level, tool: getActiveTool(),
+    lvl: P.level,
     t: firebase.database.ServerValue.TIMESTAMP
   });
 }
@@ -1397,7 +1515,7 @@ function saveProgressExact() {
     x: Math.round(P.x),
     y: Math.round(P.y)
   };
-  localStorage.setItem('blockran_survival_save_v1', JSON.stringify(saveState));
+  localStorage.setItem('blockran_survival_save_v2', JSON.stringify(saveState));
   db.ref('saves/' + MY_UID).set(saveState).catch(() => {});
 }
 
@@ -1433,8 +1551,21 @@ auth.onAuthStateChanged(async user => {
 <script>
 'use strict';
 /* ============================================================
-   ИНТЕРФЕЙС, ИНВЕНТАРЬ И ГОРЯЧАЯ ПАНЕЛЬ СЛОТОВ
+   ИНТЕРФЕЙС И РЕЖИМЫ ТАПА ДЛЯ АНДРОИД
    ============================================================ */
+let activeInteractionMode = 'mine'; // 'mine' или 'build'
+
+$('modeMineBtn').onclick = () => {
+  activeInteractionMode = 'mine';
+  $('modeMineBtn').classList.add('active');
+  $('modeBuildBtn').classList.remove('active');
+};
+$('modeBuildBtn').onclick = () => {
+  activeInteractionMode = 'build';
+  $('modeBuildBtn').classList.add('active');
+  $('modeMineBtn').classList.remove('active');
+};
+
 function renderHotbar() {
   const wrap = $('hotbarWrap');
   wrap.innerHTML = P.inventory.map((slot, idx) => {
@@ -1444,7 +1575,7 @@ function renderHotbar() {
       if (typeof slot.type === 'string') {
         const icons = {
           'pickaxe_wood': '⛏️', 'sword_wood': '⚔️',
-          'pickaxe_iron': '🔩⛏️', 'sword_iron': '🔩⚔️',
+          'pickaxe_iron': '🔘⛏️', 'sword_iron': '🔘⚔️',
           'heal_potion': '🧪'
         };
         inner = `<span class="icon-mock">${icons[slot.type] || '🛠️'}</span>`;
@@ -1487,7 +1618,6 @@ function renderBoard() {
       <span class="bl">LVL ${r.lvl}</span>
     </div>
   `).join('');
-  $('boardUpd').textContent = new Date().toLocaleTimeString('ru-RU');
 }
 
 let toastT = null;
@@ -1496,9 +1626,9 @@ function toast(msg, ms = 2200){
   clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('show'), ms);
 }
 
-// Поведение UI кнопок
-$('zoomOutBtn').onclick = () => { ZOOM = clamp(ZOOM - 0.2, 0.8, 2.2); resize(); };
-$('zoomInBtn').onclick = () => { ZOOM = clamp(ZOOM + 0.2, 0.8, 2.2); resize(); };
+$('zoomOutBtn').onclick = () => { ZOOM = clamp(ZOOM - 0.15, 0.8, 2.2); resize(); };
+$('zoomInBtn').onclick = () => { ZOOM = clamp(ZOOM + 0.15, 0.8, 2.2); resize(); };
+$('fullScrBtn').onclick = () => { toggleFullscreen(); };
 $('craftToggleBtn').onclick = () => {
   const p = $('craftPanel');
   p.classList.toggle('open');
@@ -1507,154 +1637,176 @@ $('craftToggleBtn').onclick = () => {
 $('muteBtn').onclick = () => {
   const m = Audio8.toggleSfx();
   $('muteBtn').textContent = m ? '🔇' : '🔊';
-  toast(m ? 'Звуковые эффекты выключены' : 'Звуки включены');
-};
-$('musMuteBtn').onclick = () => {
-  const m = Audio8.toggleMusic();
-  $('musMuteBtn').textContent = m ? '🔇' : '🎵';
-  toast(m ? 'Музыка выключена' : 'Музыка включена');
 };
 $('musBtn').onclick = () => { Audio8.init(); Audio8.nextTrack(); };
-$('chatToggleBtn').onclick = () => {
-  $('chat').classList.toggle('hidden');
-};
+$('chatToggleBtn').onclick = () => { $('chat').classList.toggle('hidden'); };
 
-/* СТРОИТЕЛЬСТВО И ДОБЫЧА МЫШКОЙ (ЛКМ / ПКМ) */
-const mouse = { x: 0, y: 0, isDown: false, targetBlock: { tx: 0, ty: 0 }, mineProgress: 0 };
+/* ============================================================
+   ОБРАБОТКА ТАПОВ И КЛИКОВ ПО БЛОКАМ С ДВУХ РЕЖИМОВ
+   ============================================================ */
+const interactionInput = { x: 0, y: 0, isDown: false, targetBlock: { tx: 0, ty: 0 }, mineProgress: 0 };
 
-window.addEventListener('mousemove', e => {
+function getCanvasInputCoords(e) {
   const rect = cv.getBoundingClientRect();
-  mouse.x = (e.clientX - rect.left) / ZOOM + cam.x;
-  mouse.y = (e.clientY - rect.top) / ZOOM + cam.y;
-});
-
-window.addEventListener('mousedown', e => {
-  if (e.target.tagName === 'BUTTON' || e.target.closest('#hud')) return;
-  const tx = Math.floor(mouse.x / TILE);
-  const ty = Math.floor(mouse.y / TILE);
+  let clientX = e.clientX, clientY = e.clientY;
   
-  // Дистанция воздействия
+  if (e.touches && e.touches.length > 0) {
+    clientX = e.touches[0].clientX;
+    clientY = e.touches[0].clientY;
+  }
+  
+  const canvasX = (clientX - rect.left) * (cv.width / rect.width);
+  const canvasY = (clientY - rect.top) * (cv.height / rect.height);
+  const gameX = (canvasX / (dpr * ZOOM)) + cam.x;
+  const gameY = (canvasY / (dpr * ZOOM)) + cam.y;
+  return { x: gameX, y: gameY };
+}
+
+function handleInputStart(e) {
+  if (e.target.tagName === 'BUTTON' || e.target.closest('#hud')) return;
+  const coords = getCanvasInputCoords(e);
+  const tx = Math.floor(coords.x / TILE);
+  const ty = Math.floor(coords.y / TILE);
+
   const dist = Math.hypot((P.x + P.w/2) - (tx * TILE + 16), (P.y + P.h/2) - (ty * TILE + 16));
   if (dist > 180) return; // Слишком далеко
 
-  if (e.button === 0) { // ЛКМ: Добыча или атака
-    const activeTool = getActiveTool();
-    
-    // Проверим, нет ли моба под кликом
-    let hitMob = false;
-    for (const mob of enemies) {
-      if (mouse.x > mob.x && mouse.x < mob.x + mob.w && mouse.y > mob.y && mouse.y < mob.y + mob.h) {
-        // Наносим удар мечом!
-        const isSword = typeof activeTool === 'string' && activeTool.includes('sword');
-        const dmg = isSword ? (activeTool.includes('iron') ? 35 : 20) : 6;
-        mob.hp -= dmg;
-        mob.vx = P.dir * 4; // Отбрасывание
-        mob.vy = -3;
-        Audio8.hit();
-        textPop(mob.x + mob.w/2, mob.y, `-${dmg} HP`, '#f87171');
-        hitMob = true;
-        break;
-      }
-    }
+  const activeTool = getActiveTool();
 
-    if (!hitMob) {
-      // Пьем зелье
-      if (activeTool === 'heal_potion') {
-        P.hp = Math.min(P.maxHp, P.hp + 50);
-        Audio8.lvlUp();
-        textPop(P.x + P.w/2, P.y, `+50 HP`, '#4ade80');
-        // Тратим зелье
-        P.inventory[P.activeHotbarSlot].count--;
-        if (P.inventory[P.activeHotbarSlot].count <= 0) {
-          P.inventory[P.activeHotbarSlot].type = null;
-        }
-        renderHotbar();
-        return;
-      }
-
-      // Добыча блоков
-      mouse.targetBlock = { tx, ty };
-      mouse.isDown = true;
-    }
-  } else if (e.button === 2) { // ПКМ: Поставить блок
-    e.preventDefault();
-    useHotbarItem(tx, ty);
+  // Пьем лечебное зелье
+  if (activeTool === 'heal_potion') {
+    P.hp = Math.min(P.maxHp, P.hp + 50);
+    Audio8.lvlUp();
+    textPop(P.x + P.w/2, P.y, `+50 HP`, '#4ade80');
+    P.inventory[P.activeHotbarSlot].count--;
+    if (P.inventory[P.activeHotbarSlot].count <= 0) P.inventory[P.activeHotbarSlot].type = null;
+    renderHotbar();
+    return;
   }
-});
 
-window.addEventListener('mouseup', () => {
-  mouse.isDown = false;
-  mouse.mineProgress = 0;
-});
-window.addEventListener('contextmenu', e => e.preventDefault());
+  // Проверка удара по мобам
+  let hitMob = false;
+  for (const mob of enemies) {
+    if (coords.x > mob.x && coords.x < mob.x + mob.w && coords.y > mob.y && coords.y < mob.y + mob.h) {
+      const isSword = typeof activeTool === 'string' && activeTool.includes('sword');
+      const dmg = isSword ? (activeTool.includes('iron') ? 35 : 20) : 6;
+      mob.hp -= dmg;
+      mob.vx = P.dir * 3.8;
+      mob.vy = -3;
+      Audio8.hit();
+      textPop(mob.x + mob.w/2, mob.y, `-${dmg} HP`, '#f87171');
+      hitMob = true;
+      break;
+    }
+  }
+
+  if (!hitMob) {
+    if (activeInteractionMode === 'mine') {
+      interactionInput.targetBlock = { tx, ty };
+      interactionInput.isDown = true;
+    } else {
+      // Режим СТРОЙКИ
+      if (blockAt(tx, ty) === B.AIR || blockAt(tx, ty) === B.GRASS_TALL) {
+        const slot = P.inventory[P.activeHotbarSlot];
+        if (slot && typeof slot.type === 'number') {
+          // Локальная замена + отправка изменений в Firebase Realtime
+          setBlock(tx, ty, slot.type);
+          db.ref(`world_tiles/${tx}_${ty}`).set(slot.type);
+          Audio8.placeBlock();
+
+          slot.count--;
+          if (slot.count <= 0) { slot.type = null; slot.count = 0; }
+          renderHotbar();
+          saveProgressExact();
+        }
+      }
+    }
+  }
+}
+
+function handleInputMove(e) {
+  if (!interactionInput.isDown) return;
+  const coords = getCanvasInputCoords(e);
+  interactionInput.x = coords.x;
+  interactionInput.y = coords.y;
+}
+
+function handleInputEnd() {
+  interactionInput.isDown = false;
+  interactionInput.mineProgress = 0;
+}
+
+// Применяем как для ПК, так и для Андроид устройств
+cv.addEventListener('mousedown', handleInputStart);
+cv.addEventListener('mousemove', handleInputMove);
+window.addEventListener('mouseup', handleInputEnd);
+
+cv.addEventListener('touchstart', handleInputStart, { passive: true });
+cv.addEventListener('touchmove', handleInputMove, { passive: true });
+window.addEventListener('touchend', handleInputEnd, { passive: true });
 
 function updateMining() {
-  if (mouse.isDown) {
-    const { tx, ty } = mouse.targetBlock;
+  if (interactionInput.isDown) {
+    const { tx, ty } = interactionInput.targetBlock;
     const b = blockAt(tx, ty);
     if (b !== B.AIR) {
       const info = TILES_INFO[b];
       const activeTool = getActiveTool();
       
-      // Вычисляем скорость копания
       let mult = 1.0;
       if (typeof activeTool === 'string' && activeTool.includes('pickaxe')) {
-        mult = activeTool.includes('iron') ? 4.0 : 2.0;
+        mult = activeTool.includes('iron') ? 4.2 : 2.2;
       }
 
-      mouse.mineProgress += 16.66 * mult;
+      interactionInput.mineProgress += 16.66 * mult;
       
-      // Спавн пыли
-      if (Math.random() < 0.4) {
-        spawnP(tx * TILE + 16, ty * TILE + 16, (Math.random()-0.5)*3, -Math.random()*2, 12, info.color, 3, 0.15);
+      if (Math.random() < 0.35) {
+        spawnP(tx * TILE + 16, ty * TILE + 16, (Math.random()-0.5)*3, -Math.random()*2, 10, info.color, 2.5, 0.15);
       }
 
-      if (mouse.mineProgress >= info.mineTime) {
-        // Разрушаем!
-        Audio8.breakBlock();
+      if (interactionInput.mineProgress >= info.mineTime) {
+        // Разрушение локально + синхронизация с Firebase в реалтайме
         setBlock(tx, ty, B.AIR);
-        
-        // Даём XP и кладем в инвентарь
-        const xpMap = { [B.STONE]: 3, [B.COAL]: 5, [B.IRON]: 8, [B.GOLD]: 15, [B.DIAMOND]: 35 };
+        db.ref(`world_tiles/${tx}_${ty}`).set(B.AIR);
+        Audio8.breakBlock();
+
+        const xpMap = { [B.STONE]: 2, [B.COAL]: 4, [B.IRON]: 6, [B.GOLD]: 12, [B.DIAMOND]: 30 };
         gainXP(xpMap[b] || 1);
-        
-        // Попытка уложить в инвентарь
         addToInventory(b, 1);
 
-        mouse.isDown = false;
-        mouse.mineProgress = 0;
+        interactionInput.isDown = false;
+        interactionInput.mineProgress = 0;
         saveProgressExact();
       }
     }
   }
 }
 
-// Кнопка Активного супер-удара (Уровень 10)
+// Спелл уничтожения пласта 10 уровня
 $('activeSkillBtn').onclick = () => {
   if (P.level < 10) return;
   Audio8.skill();
-  toast('🔥 ОГНЕННЫЙ ВЗРЫВ ПРЕИСПОДНЕЙ!', 2000);
+  toast('🔥 ВЗРЫВ МЕТЕОРИТА ПРЕИСПОДНЕЙ!', 2000);
   
-  // Разрушает всё в радиусе 4 блоков вокруг персонажа
   const pTx = Math.floor((P.x + P.w/2)/TILE);
   const pTy = Math.floor((P.y + P.h/2)/TILE);
   
   for (let dx = -3; dx <= 3; dx++) {
     for (let dy = -3; dy <= 3; dy++) {
-      if (dx*dx + dy*dy <= 10) {
+      if (dx*dx + dy*dy <= 9) {
         const b = blockAt(pTx + dx, pTy + dy);
         if (b !== B.AIR && b !== B.LAVA) {
           setBlock(pTx + dx, pTy + dy, B.AIR);
-          if (Math.random() < 0.5) addToInventory(b, 1);
+          db.ref(`world_tiles/${pTx + dx}_${pTy + dy}`).set(B.AIR);
+          if (Math.random() < 0.45) addToInventory(b, 1);
         }
       }
     }
   }
-  // Наносим массовый урон всем мобам рядом
   for (const mob of enemies) {
-    if (Math.hypot(mob.x - P.x, mob.y - P.y) < 150) {
-      mob.hp -= 80;
-      textPop(mob.x + mob.w/2, mob.y, `-80 FIRE`, '#f59e0b');
+    if (Math.hypot(mob.x - P.x, mob.y - P.y) < 140) {
+      mob.hp -= 70;
+      textPop(mob.x + mob.w/2, mob.y, `-70 FIRE`, '#f59e0b');
     }
   }
   saveProgressExact();
@@ -1664,32 +1816,31 @@ $('activeSkillBtn').onclick = () => {
 <script>
 'use strict';
 /* ============================================================
-   📖 ИНТЕРАКТИВНЫЕ ГАЙДЫ И СКИНОДЕЛЬНЯ
+   РУКОВОДСТВО И СМЕНА СТРАНИЦ КНИГИ
    ============================================================ */
 let currentGuidePage = 0;
 const GUIDE_PAGES = [
   {
-    title: '🌿 Глава 1: Начало Выживания',
-    content: `Добро пожаловать в живой мир БЛОКРАН!<br><br>
-    Здесь вы предоставлены сами себе. Копайте шахты, стройте дома и защищайтесь от угроз.<br>
-    • У вас есть <b>Деревянная Кирка</b> и <b>Меч</b> в хотбаре.<br>
-    • Нажимайте клавиши <b>1–9</b> или колесико мыши для выбора слотов.<br>
-    • <b>ЛКМ</b> — добыча / атака. <b>ПКМ</b> — установить выбранный блок.`
+    title: '🌿 Выживание на сервере',
+    content: `Приветствуем в мире БЛОКРАН SURVIVAL!<br><br>
+    Кооперируйтесь со своими друзьями, стройте базы и замки в режиме реального времени.<br>
+    • Используйте <b>джойстик внизу</b> для бега.<br>
+    • В режиме <b>«Добыча»</b> зажимайте пальцем блок, чтобы разрушить.<br>
+    • В режиме <b>«Стройка»</b> просто жмите пальцем в пустоту, чтобы установить блок!`
   },
   {
-    title: '🛠️ Глава 2: Система Крафта',
-    content: `Используйте кнопку <b>[🛠️ Крафт]</b> в верхней панели меню!<br><br>
-    Для крафта качественных инструментов нужны ресурсы:<br>
-    • Рубите Деревья на поверхности, чтобы получить дерево.<br>
-    • Добывайте Камень глубоко под землей.<br>
-    • Крафтите доски, прочные кирпичи и факелы для освещения темных пещер.`
+    title: '🛠️ Крафт и Верстаки',
+    content: `Откройте меню верстака кнопкой <b>[🛠️]</b> сверху!<br><br>
+    • Срубайте Дерево на поверхности.<br>
+    • Раскалывайте Камни и Кирпичи в шахтах.<br>
+    • Собирайте уголь для факелов, чтобы вы не затерялись в вечной темноте подземелий!`
   },
   {
-    title: '🧟 Глава 3: Монстры и Уровни',
-    content: `Каждое действие повышает ваш опыт (XP)!<br><br>
-    С каждым новым уровнем увеличивается ваше максимальное здоровье.<br>
-    • Опасайтесь Ночи! В темноте спавнятся сильные Зомби и Демонические глаза.<br>
-    • На <b>10 Уровне</b> вы овладеете магией огня — Огненный Спелл, мгновенно разрушающий пласты земли!`
+    title: '🧟 Прогресс и Опасности',
+    content: `Ночью на поверхности спавнятся Зомби и Глаза.<br><br>
+    • Убивайте монстров для получения ценного опыта и монет.<br>
+    • <b>Уровень 10</b> дает колоссальную силу Огненного Спелла (кнопка 🔥).<br>
+    • Здоровье повышается с каждым полученным уровнем.`
   }
 ];
 
@@ -1712,7 +1863,7 @@ function renderSkinsShop() {
     if (isEquipped) {
       btnHtml = `<button class="skin-btn active">Надето</button>`;
     } else if (isOwned) {
-      btnHtml = `<button class="skin-btn equip" onclick="equipSkin('${s.id}')">Надеть</button>`;
+      btnHtml = `<button class="skin-btn equip" onclick="equipSkin('${s.id}')">Выбрать</button>`;
     } else {
       btnHtml = `<button class="skin-btn buy" onclick="buySkin('${s.id}', ${s.price})">Купить</button>`;
     }
@@ -1723,7 +1874,7 @@ function renderSkinsShop() {
           <div class="skin-preview-box" style="background:${s.color};"></div>
           <div>
             <div class="skin-name">${esc(s.name)}</div>
-            <div style="font-size:10px; color:#5d4037;">${esc(s.desc)}</div>
+            <div style="font-size:9px; color:#5d4037;">${esc(s.desc)}</div>
           </div>
         </div>
         <div>
@@ -1741,7 +1892,7 @@ window.buySkin = function(skinId, price) {
     ownedSkins.push(skinId);
     P.activeSkin = skinId;
     $('coinsCount').textContent = P.coins;
-    toast('👗 Скин успешно куплен и экипирован!', 1800);
+    toast('👗 Новый скин успешно куплен!', 1800);
     Audio8.lvlUp();
     renderSkinsShop();
     saveProgressExact();
@@ -1753,7 +1904,7 @@ window.buySkin = function(skinId, price) {
 window.equipSkin = function(skinId) {
   if (ownedSkins.includes(skinId)) {
     P.activeSkin = skinId;
-    toast('👗 Скин изменен!', 1500);
+    toast('👗 Образ персонажа изменен!', 1500);
     Audio8.coin();
     renderSkinsShop();
     saveProgressExact();
@@ -1773,7 +1924,7 @@ $('bookNextBtn').onclick = () => { if (currentGuidePage < GUIDE_PAGES.length - 1
 <script>
 'use strict';
 /* ============================================================
-   ОТРИСОВКА И ВИЗУАЛ: Параллакс, Динамический день/ночь свет, RTX
+   РЕНДЕРИНГ: Динамический цвет неба, туман, шейк камеры
    ============================================================ */
 const cv = $('game'), ctx = cv.getContext('2d');
 const lcv = document.createElement('canvas'), lctx = lcv.getContext('2d');
@@ -1793,25 +1944,20 @@ function resize(){
 window.addEventListener('resize', resize); resize();
 
 function drawSkyBackground() {
-  // Цветовая гамма неба в зависимости от времени суток
   const tod = weather.timeOfDay;
   let skyColor1, skyColor2;
 
   if (tod < 0.25 || tod > 0.75) {
-    // ДЕНЬ
-    skyColor1 = '#7dd3fc'; skyColor2 = '#e0f2fe';
+    skyColor1 = '#7dd3fc'; skyColor2 = '#e0f2fe'; // День
   } else if (tod >= 0.25 && tod < 0.35) {
-    // ЗАКАТ
     const t = (tod - 0.25) / 0.1;
-    skyColor1 = mixCol('#7dd3fc', '#f97316', t);
+    skyColor1 = mixCol('#7dd3fc', '#f97316', t); // Закат
     skyColor2 = mixCol('#e0f2fe', '#fef08a', t);
   } else if (tod >= 0.35 && tod < 0.65) {
-    // НОЧЬ
-    skyColor1 = '#090d16'; skyColor2 = '#05050a';
+    skyColor1 = '#090d16'; skyColor2 = '#05050a'; // Ночь
   } else {
-    // РАССВЕТ
     const t = (tod - 0.65) / 0.1;
-    skyColor1 = mixCol('#090d16', '#a78bfa', t);
+    skyColor1 = mixCol('#090d16', '#a78bfa', t); // Рассвет
     skyColor2 = mixCol('#05050a', '#fed7aa', t);
   }
 
@@ -1821,13 +1967,12 @@ function drawSkyBackground() {
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, vw, vh);
 
-  // Звезды ночью
   if (tod > 0.35 && tod < 0.65) {
     ctx.fillStyle = '#fff';
     const seedR = mulberry32(101);
     for (let i = 0; i < 40; i++) {
       const sx = (seedR() * 2000 - cam.x * 0.1) % vw;
-      const sy = seedR() * vh * 0.7;
+      const sy = seedR() * vh * 0.75;
       ctx.fillRect(sx, sy, 1.5, 1.5);
     }
   }
@@ -1843,7 +1988,6 @@ function mixCol(c1, c2, t) {
   return `rgb(${r},${g},${b})`;
 }
 
-// Отрисовка блоков в пределах видимости
 function drawBlocks() {
   const tx0 = Math.max(0, Math.floor(cam.x / TILE));
   const tx1 = Math.min(WW - 1, Math.ceil((cam.x + vw) / TILE));
@@ -1856,7 +2000,6 @@ function drawBlocks() {
       const bx = tx * TILE - cam.x;
       const by = ty * TILE - cam.y;
 
-      // Отрисовка задних фоновых стенок
       const bgB = backWorld[ty * WW + tx];
       if (b === B.AIR && bgB !== B.AIR) {
         ctx.fillStyle = bgB === B.DIRT ? '#451a03' : '#334155';
@@ -1869,36 +2012,32 @@ function drawBlocks() {
       ctx.fillStyle = info.color;
       
       if (b === B.TORCH) {
-        // Простая отрисовка красивого факела
         ctx.fillStyle = '#78350f';
         ctx.fillRect(bx + 14, by + 10, 4, 22);
         ctx.fillStyle = '#f97316';
         ctx.beginPath();
-        ctx.arc(bx + 16, by + 8 + Math.sin(performance.now()/80)*2, 6, 0, 7);
+        ctx.arc(bx + 16, by + 8 + Math.sin(performance.now()/80)*2, 5, 0, 7);
         ctx.fill();
       } else if (b === B.GRASS_TALL) {
-        ctx.fillStyle = '#22c55e';
-        ctx.fillRect(bx + 6, by + 12, 4, 20);
-        ctx.fillRect(bx + 16, by + 6, 3, 26);
-        ctx.fillRect(bx + 24, by + 14, 4, 18);
+        ctx.fillStyle = '#10b981';
+        ctx.fillRect(bx + 6, by + 14, 4, 18);
+        ctx.fillRect(bx + 16, by + 8, 3, 24);
       } else {
         ctx.fillRect(bx, by, TILE, TILE);
-        
-        // Красивая окантовка для блоков земли и травы
         if (b === B.GRASS) {
-          ctx.fillStyle = '#22c55e';
-          ctx.fillRect(bx, by, TILE, 6);
+          ctx.fillStyle = '#10b981';
+          ctx.fillRect(bx, by, TILE, 5);
         } else if (b === B.STONE) {
-          ctx.fillStyle = '#475569';
+          ctx.fillStyle = '#374151';
           ctx.fillRect(bx, by, TILE, 3);
         }
       }
     }
   }
 
-  // Сетка-выделитель блока под мышкой
-  const mouseTx = Math.floor(mouse.x / TILE);
-  const mouseTy = Math.floor(mouse.y / TILE);
+  // Обводка блока под пальцем/мышкой
+  const mouseTx = Math.floor(interactionInput.x / TILE);
+  const mouseTy = Math.floor(interactionInput.y / TILE);
   const dist = Math.hypot((P.x + P.w/2) - (mouseTx * TILE + 16), (P.y + P.h/2) - (mouseTy * TILE + 16));
   
   if (dist <= 180 && mouseTx >= 0 && mouseTx < WW && mouseTy >= 0 && mouseTy < WH) {
@@ -1906,22 +2045,19 @@ function drawBlocks() {
     ctx.lineWidth = 1.5;
     ctx.strokeRect(mouseTx * TILE - cam.x, mouseTy * TILE - cam.y, TILE, TILE);
     
-    // Прогресс разрушения блока
-    if (mouse.isDown && blockAt(mouseTx, mouseTy) !== B.AIR) {
+    if (interactionInput.isDown && blockAt(mouseTx, mouseTy) !== B.AIR) {
       ctx.fillStyle = 'rgba(255,0,0,0.3)';
-      const h = TILE * (mouse.mineProgress / TILES_INFO[blockAt(mouseTx, mouseTy)].mineTime);
+      const h = TILE * (interactionInput.mineProgress / TILES_INFO[blockAt(mouseTx, mouseTy)].mineTime);
       ctx.fillRect(mouseTx * TILE - cam.x, mouseTy * TILE - cam.y + TILE - h, TILE, h);
     }
   }
 }
 
-// Рендеринг игрока
 function drawPlayer(x, y, dir, name, skinId, isMe) {
   ctx.save();
   ctx.translate(x + 11, y + 26);
   const skinColor = getSkinColor(skinId);
 
-  // Световая аура вокруг персонажа
   ctx.save();
   const aura = ctx.createRadialGradient(0, -13, 2, 0, -13, 40);
   aura.addColorStop(0, hexToRGBA(skinColor, 0.35));
@@ -1930,17 +2066,14 @@ function drawPlayer(x, y, dir, name, skinId, isMe) {
   ctx.beginPath(); ctx.arc(0, -13, 40, 0, 7); ctx.fill();
   ctx.restore();
 
-  // Ноги бегущего
   const run = isMe && Math.abs(P.vx) > 0.5 ? Math.sin(performance.now() * 0.015) * 4 : 0;
   ctx.fillStyle = 'rgba(0,0,0,0.4)';
   ctx.fillRect(-8 + run, -4, 5, 4);
   ctx.fillRect(3 - run, -4, 5, 4);
 
-  // Тело
   ctx.fillStyle = skinColor;
   ctx.fillRect(-11, -24, 22, 20);
 
-  // Глаза
   const eyeOffset = dir * 2.5;
   ctx.fillStyle = '#fff';
   ctx.fillRect(-5 + eyeOffset, -18, 3.5, 3.5);
@@ -1949,33 +2082,29 @@ function drawPlayer(x, y, dir, name, skinId, isMe) {
   ctx.fillRect(-4 + eyeOffset + dir, -17, 2, 2);
   ctx.fillRect(3 + eyeOffset + dir, -17, 2, 2);
 
-  // Имя и Уровень
-  ctx.font = '700 11px Rubik'; ctx.textAlign = 'center';
-  ctx.fillStyle = isMe ? '#eab308' : '#ffffff';
+  ctx.font = '700 10px Rubik'; ctx.textAlign = 'center';
+  ctx.fillStyle = isMe ? '#fbbf24' : '#ffffff';
   ctx.fillText(name, 0, -30);
 
   ctx.restore();
 }
 
-// Отрисовка Мягкого Освещения Пещер (RTX Свет)
 function drawLighting() {
   const tod = weather.timeOfDay;
   let ambientDark = 0.0;
-  if (tod > 0.3 && tod < 0.7) {
-    ambientDark = 0.82; // Глубокая ночь
-  } else if (tod >= 0.25 && tod <= 0.3) {
-    ambientDark = lerp(0.0, 0.82, (tod - 0.25)/0.05);
-  } else if (tod >= 0.7 && tod <= 0.75) {
-    ambientDark = lerp(0.82, 0.0, (tod - 0.7)/0.05);
+  if (tod > 0.35 && tod < 0.65) {
+    ambientDark = 0.84; // Ночь
+  } else if (tod >= 0.25 && tod <= 0.35) {
+    ambientDark = lerp(0.0, 0.84, (tod - 0.25)/0.1);
+  } else if (tod >= 0.65 && tod <= 0.75) {
+    ambientDark = lerp(0.84, 0.0, (tod - 0.65)/0.1);
   }
 
   lctx.clearRect(0, 0, vw, vh);
   lctx.globalCompositeOperation = 'source-over';
-  // В пещерах темно ВСЕГДА
   lctx.fillStyle = `rgba(5, 7, 16, ${ambientDark})`;
   lctx.fillRect(0, 0, vw, vh);
 
-  // Вырезаем пещеры из общего дневного света
   const tx0 = Math.max(0, Math.floor(cam.x / TILE));
   const tx1 = Math.min(WW - 1, Math.ceil((cam.x + vw) / TILE));
   const ty0 = Math.max(0, Math.floor(cam.y / TILE));
@@ -1983,9 +2112,8 @@ function drawLighting() {
 
   for (let ty = ty0; ty <= ty1; ty++) {
     for (let tx = tx0; tx <= tx1; tx++) {
-      if (ty > 45) {
-        // Подземный мрак
-        const depthFactor = clamp((ty - 45)/10, 0.0, 0.94);
+      if (ty > 48) {
+        const depthFactor = clamp((ty - 48)/12, 0.0, 0.95);
         lctx.fillStyle = `rgba(5, 7, 16, ${depthFactor})`;
         lctx.fillRect((tx * TILE - cam.x)/LIGHT_SCALE, (ty * TILE - cam.y)/LIGHT_SCALE, TILE/LIGHT_SCALE, TILE/LIGHT_SCALE);
       }
@@ -2003,7 +2131,6 @@ function drawLighting() {
     lctx.beginPath(); lctx.arc(lx, ly, lr, 0, 7); lctx.fill();
   };
 
-  // Факелы, Лава и Свет игрока
   drawLightHole(P.x + P.w/2 - cam.x, P.y + P.h/2 - cam.y, 140, 1.0);
   for (const k in remotes) {
     drawLightHole(remotes[k].rx + 11 - cam.x, remotes[k].ry + 13 - cam.y, 100, 0.8);
@@ -2013,7 +2140,7 @@ function drawLighting() {
     for (let tx = tx0; tx <= tx1; tx++) {
       const b = blockAt(tx, ty);
       if (b === B.TORCH) {
-        drawLightHole(tx * TILE + 16 - cam.x, ty * TILE + 16 - cam.y, 160, 1.0);
+        drawLightHole(tx * TILE + 16 - cam.x, ty * TILE + 16 - cam.y, 150, 1.0);
       } else if (b === B.LAVA) {
         drawLightHole(tx * TILE + 16 - cam.x, ty * TILE + 16 - cam.y, 110, 0.9);
       }
@@ -2037,13 +2164,13 @@ function drawParticles() {
 
 function drawDamageTexts() {
   ctx.save();
-  ctx.font = '800 11px Rubik';
+  ctx.font = '800 10px Rubik';
   ctx.textAlign = 'center';
   for (let i = damageTexts.length - 1; i >= 0; i--) {
     const t = damageTexts[i];
     ctx.fillStyle = t.color;
     ctx.fillText(t.text, t.x - cam.x, t.y - cam.y);
-    t.y -= 0.6;
+    t.y -= 0.55;
     t.life--;
     if (t.life <= 0) damageTexts.splice(i, 1);
   }
@@ -2054,7 +2181,7 @@ function drawAmbientWeather() {
   if (weather.rainIntensity > 0.02) {
     ctx.strokeStyle = 'rgba(174, 219, 255, ' + (weather.rainIntensity * 0.45) + ')';
     ctx.lineWidth = 1.2;
-    const count = Math.floor(weather.rainIntensity * 50);
+    const count = Math.floor(weather.rainIntensity * 45);
     for (let i = 0; i < count; i++) {
       const rx = (i * 47 + performance.now() * 0.8) % vw;
       const ry = (i * 23 + performance.now() * 1.5) % vh;
@@ -2070,7 +2197,7 @@ function drawAmbientWeather() {
 <script>
 'use strict';
 /* ============================================================
-   ОСНОВНОЙ ИГРОВОЙ ЦИКЛ И СТАРТ
+   ОСНОВНОЙ ТАКТ ИНИЦИАЛИЗАЦИИ И ЗАПУСКА ИГРЫ
    ============================================================ */
 let lastTs = 0, acc = 0;
 
@@ -2082,20 +2209,18 @@ function stepGame() {
   updateMining();
   smoothRemotes();
 
-  // Удаление старых частиц
   for (let i = particles.length - 1; i >= 0; i--) {
     const p = particles[i];
     p.x += p.vx; p.y += p.vy; p.vy += p.grav; p.life--;
     if (p.life <= 0) particles.splice(i, 1);
   }
 
-  // Обновление HUD
   $('hpBarFill').style.width = (P.hp / P.maxHp * 100) + '%';
   $('hpTxt').textContent = `${Math.round(P.hp)} / ${P.maxHp} HP`;
   $('xpBarFill').style.width = (P.xp / P.maxXp * 100) + '%';
   $('levelBadge').textContent = `LVL ${P.level}`;
   
-  if (Math.random() < 0.05) renderBoard();
+  if (Math.random() < 0.04) renderBoard();
 }
 
 function loop(ts) {
@@ -2111,22 +2236,18 @@ function loop(ts) {
   drawBlocks();
   drawAmbientWeather();
 
-  // Отрисовка мобов
   for (const e of enemies) {
     ctx.fillStyle = e.color;
     ctx.fillRect(e.x - cam.x, e.y - cam.y, e.w, e.h);
-    // Глазки мобам
     ctx.fillStyle = '#fff';
-    ctx.fillRect(e.x - cam.x + (e.dir > 0 ? e.w - 6 : 2), e.y - cam.y + 4, 4, 4);
+    ctx.fillRect(e.x - cam.x + (e.dir > 0 ? e.w - 5 : 1), e.y - cam.y + 3, 3, 3);
   }
 
-  // Другие игроки
   for (const k in remotes) {
     const r = remotes[k];
     drawPlayer(r.rx - cam.x, r.ry - cam.y, r.d, r.n, r.skin, false);
   }
 
-  // Текущий игрок
   drawPlayer(P.x - cam.x, P.y - cam.y, P.dir, MY_NAME, P.activeSkin, true);
 
   drawParticles();
@@ -2139,8 +2260,7 @@ async function startGame() {
   $('loading').classList.add('hidden');
   $('hud').classList.add('on');
 
-  // Восстановление сохранений
-  const local = localStorage.getItem('blockran_survival_save_v1');
+  const local = localStorage.getItem('blockran_survival_save_v2');
   if (local) {
     try {
       const d = JSON.parse(local);
@@ -2174,31 +2294,22 @@ async function startGame() {
   renderHotbar();
   joinNet();
   
-  toast(`🌲 Добро пожаловать, ${MY_NAME}! Копайте, стройте и выживайте сообща! 🛠️`, 4000);
+  toast(`🌲 Мир загружен! Добро пожаловать, ${MY_NAME}!`, 3000);
   Audio8.init();
   Audio8.playTrack(0);
 
   requestAnimationFrame(loop);
 }
 
-/* КЛАВИАТУРА И КОНТРОЛЛЕРЫ */
 const keyMap = {
-  'KeyA': () => keys.left = true,
-  'KeyD': () => keys.right = true,
-  'ArrowLeft': () => keys.left = true,
-  'ArrowRight': () => keys.right = true,
-  'Space': () => keys.jump = true,
-  'ArrowUp': () => keys.jump = true,
-  'KeyW': () => keys.jump = true
+  'KeyA': () => keys.left = true, 'KeyD': () => keys.right = true,
+  'ArrowLeft': () => keys.left = true, 'ArrowRight': () => keys.right = true,
+  'Space': () => keys.jump = true, 'ArrowUp': () => keys.jump = true, 'KeyW': () => keys.jump = true
 };
 const keyUpMap = {
-  'KeyA': () => keys.left = false,
-  'KeyD': () => keys.right = false,
-  'ArrowLeft': () => keys.left = false,
-  'ArrowRight': () => keys.right = false,
-  'Space': () => keys.jump = false,
-  'ArrowUp': () => keys.jump = false,
-  'KeyW': () => keys.jump = false
+  'KeyA': () => keys.left = false, 'KeyD': () => keys.right = false,
+  'ArrowLeft': () => keys.left = false, 'ArrowRight': () => keys.right = false,
+  'Space': () => keys.jump = false, 'ArrowUp': () => keys.jump = false, 'KeyW': () => keys.jump = false
 };
 
 window.addEventListener('keydown', e => {
@@ -2208,25 +2319,20 @@ window.addEventListener('keydown', e => {
   }
   if (keyMap[e.code]) keyMap[e.code]();
   if (e.code === 'Enter') { e.preventDefault(); $('chatInput').focus(); }
-  
-  // Цифры хотбара 1-9
-  if (e.keyCode >= 49 && e.keyCode <= 57) {
-    selectHotbarSlot(e.keyCode - 49);
-  }
+  if (e.keyCode >= 49 && e.keyCode <= 57) selectHotbarSlot(e.keyCode - 49);
 });
 window.addEventListener('keyup', e => {
   if (e.target.tagName === 'INPUT') return;
   if (keyUpMap[e.code]) keyUpMap[e.code]();
 });
 
-// Мобильное управление
 function bindTouch(id, on, off){
   const el = $(id);
   const start = e => { e.preventDefault(); el.classList.add('act'); on(); };
   const end = e => { e.preventDefault(); el.classList.remove('act'); off(); };
-  el.addEventListener('touchstart', start, { passive:false });
-  el.addEventListener('touchend', end, { passive:false });
-  el.addEventListener('touchcancel', end, { passive:false });
+  el.addEventListener('touchstart', start, { passive: false });
+  el.addEventListener('touchend', end, { passive: false });
+  el.addEventListener('touchcancel', end, { passive: false });
 }
 bindTouch('tLeft', () => keys.left = true, () => keys.left = false);
 bindTouch('tRight', () => keys.right = true, () => keys.right = false);
