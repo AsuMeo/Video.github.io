@@ -6,7 +6,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>БЛОКРАН SURVIVAL: ОБЩИЙ МИР</title>
+<title>БЛОКРАН SURVIVAL: РЕАЛТАЙМ МУЛЬТИПЛЕЕР</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Rubik:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
@@ -603,7 +603,7 @@
 
 <div id="loading">
   <div class="spin" style="width: 24px; height: 24px; border-width: 3px"></div>
-  <div id="loadTxt">СИНХРОНИЗАЦИЯ ОБЩЕГО МУЛЬТИПЛЕЕРНОГО МИРА…</div>
+  <div id="loadTxt">ПОДКЛЮЧЕНИЕ К ОБЩЕМУ REALTIME МИРУ БЛОКОВ…</div>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -611,6 +611,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script>
 'use strict';
+// ПОЛНОСТЬЮ РАБОЧИЙ FIREBASE CONFIG С КЛЮЧОМ REALTIME DATABASE
 const firebaseConfig = {
   apiKey: "AIzaSyBm0mIvHVznIeF2PoFk6dtdaiT5r877wyA",
   authDomain: "meow-874ce.firebaseapp.com",
@@ -906,7 +907,7 @@ function solidAt(tx, ty) {
 // Хранилище сгенерированных деревьев для падающих листьев сакуры
 const spawnedTrees = [];
 
-// ГЕНЕРАЦИЯ ОДНОГО БОЛЬШОГО МИРА НА ОСНОВЕ СИДА ИЗ FIREBASE
+// ГЕНЕРАЦИЯ ЕДИНОГО МИРА НА ОСНОВЕ СИДА ИЗ FIREBASE REALTIME DB
 function generateSharedWorld(sharedSeed) {
   const R = mulberry32(sharedSeed);
   const noise = (x) => Math.sin(x * 0.055) * 6 + Math.cos(x * 0.11) * 2;
@@ -1439,11 +1440,11 @@ function stepPlayer() {
 <script>
 'use strict';
 /* ============================================================
-   СЕТЬ: Синхронизация блоков (Persisted Realtime World) и Игроков
+   СЕТЬ: Синхронизация блоков (Realtime World) и Игроков
    ============================================================ */
 let MY_UID = null, MY_NAME = '', joined = false;
 const remotes = {};
-let meRef = null, lastSend = 0, lastSX = 0, lastSY = 0;
+let meRef = null, lastSend = 0;
 
 function joinNet(){
   meRef = db.ref('players/' + MY_UID);
@@ -1555,11 +1556,13 @@ auth.onAuthStateChanged(async user => {
   if (user && !joined){
     joined = true;
     MY_UID = user.uid;
-    try {
-      const s = await db.ref('users/' + user.uid + '/name').once('value');
-      MY_NAME = s.val() || user.email.split('@')[0].slice(0, 14);
-    } catch(e){ MY_NAME = user.email.split('@')[0].slice(0, 14); }
-    startGame();
+    db.ref('users/' + user.uid + '/name').once('value').then(s => {
+       MY_NAME = s.val() || user.email.split('@')[0].slice(0, 14);
+       loadWorldAndStart();
+    }).catch(() => {
+       MY_NAME = user.email.split('@')[0].slice(0, 14);
+       loadWorldAndStart();
+    });
   } else if (!user){
     $('loading').classList.add('hidden');
     $('auth').classList.remove('hidden');
@@ -2384,28 +2387,43 @@ function loop(ts) {
   drawLighting();
 }
 
-async function startGame() {
-  try {
-    // 1. ПОЛУЧЕНИЕ ИЛИ ГЕНЕРАЦИЯ ЕДИНОГО СИДА МУЛЬТИПЛЕЕРА
-    const seedRef = db.ref('world_seed');
-    let snapSeed = await seedRef.once('value');
-    let seed = snapSeed.val();
-    
-    if (!seed) {
-      // Если сида нет в базе — мы первый игрок на сервере. Создаем постоянный сид
-      seed = Math.floor(Math.random() * 1000000) + 12345;
-      await seedRef.set(seed);
+// НЕБЛОКИРУЮЩАЯ ЗАГРУЗКА И СВЯЗЬ С REALTIME DATABASE
+function loadWorldAndStart() {
+  let loaded = false;
+
+  // Жесткий таймаут: если база Realtime зависла — стартуем локальный мир через 1.2 секунды
+  const fallbackTimeout = setTimeout(() => {
+    if (!loaded) {
+      loaded = true;
+      console.warn("Таймаут подключения к базе. Запуск локального сида.");
+      generateSharedWorld(11011);
+      launchGame();
     }
-    
-    // Генерируем ландшафт на основе единого сида
+  }, 1200);
+
+  db.ref('world_seed').once('value').then(snap => {
+    if (loaded) return;
+    loaded = true;
+    clearTimeout(fallbackTimeout);
+    let seed = snap.val();
+    if (!seed) {
+      seed = Math.floor(Math.random() * 200000) + 12345;
+      db.ref('world_seed').set(seed);
+    }
     generateSharedWorld(seed);
-
-  } catch(e) {
-    // Резервная генерация в случае сбоя сети
+    launchGame();
+  }).catch(err => {
+    if (loaded) return;
+    loaded = true;
+    clearTimeout(fallbackTimeout);
+    console.error("Ошибка Firebase. Запуск с сидом по умолчанию.", err);
     generateSharedWorld(3030);
-  }
+    launchGame();
+  });
+}
 
-  // 2. ЗАГРУЗКА ПЕРСОНАЛЬНОГО ПРОГРЕССА ИГРОКА
+async function launchGame() {
+  // 1. ЗАГРУЗКА ПЕРСОНАЛЬНОГО ПРОГРЕССА ИГРОКА
   const local = localStorage.getItem('blockran_survival_save_v2');
   if (local) {
     try {
@@ -2423,7 +2441,7 @@ async function startGame() {
     try {
       const snap = await Promise.race([
         db.ref('saves/' + MY_UID).once('value'),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 2000))
+        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 1500))
       ]);
       const d = snap.val();
       if (d) {
@@ -2439,6 +2457,9 @@ async function startGame() {
     } catch(e){}
   }
 
+  // 2. СВЯЗЫВАЕМ СЕТЕВЫЕ СЛУШАТЕЛИ РЕАЛТАЙМ БАЗЫ
+  joinNet();
+
   // 3. СКРЫВАЕМ СТАРТОВЫЙ ЭКРАН И ВКЛЮЧАЕМ ИГРУ
   $('loading').classList.add('hidden');
   $('auth').classList.add('hidden');
@@ -2446,7 +2467,6 @@ async function startGame() {
 
   checkSkillsUnlock();
   renderHotbar();
-  joinNet();
   
   toast(`🌲 Общий мир загружен! Добро пожаловать, ${MY_NAME}!`, 3000);
   Audio8.init();
