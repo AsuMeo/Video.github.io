@@ -1,1171 +1,286 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" style="margin:0;padding:0;height:100%;overflow:hidden">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>TERRARIA MOBILE ONLINE</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Rubik:wght@400;600;800&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>2D Террария Мультиплеер</title>
 <style>
-  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-  html,body { width:100%; height:100%; overflow:hidden; background:#05070f; font-family:'Rubik',sans-serif; user-select:none; touch-action:none; }
-  #game { position:fixed; inset:0; width:100%; height:100%; display:block; image-rendering:pixelated; }
-
-  /* ---------- AUTH ---------- */
-  #auth {
-    position:fixed; inset:0; z-index:50; display:flex; align-items:center; justify-content:center;
-    background:radial-gradient(1200px 700px at 50% -10%, #1b2b5e 0%, #0a1030 45%, #05070f 100%);
-    transition:opacity .5s;
-  }
-  #auth.hidden { opacity:0; pointer-events:none; }
-  .auth-card {
-    width:min(440px, 95vw); padding:24px 20px; border-radius:22px;
-    background:rgba(13,20,46,.85); backdrop-filter:blur(14px);
-    border:1px solid rgba(120,160,255,.22);
-    box-shadow:0 0 60px rgba(60,110,255,.18);
-    text-align:center; color:#dfe8ff;
-  }
-  .logo { display:flex; align-items:center; justify-content:center; gap:12px; margin-bottom:6px; }
-  .logo h1 { font-family:'Press Start 2P',monospace; font-size:16px; letter-spacing:1px;
-    background:linear-gradient(180deg,#8ecbff,#4f7cff 60%,#b96bff); -webkit-background-clip:text; background-clip:text; color:transparent; }
-  .tagline { font-size:12px; color:#8fa3d9; margin-bottom:16px; }
-  .field { margin-bottom:10px; text-align:left; }
-  .field label { display:block; font-size:10px; letter-spacing:1px; text-transform:uppercase; color:#7f93c9; margin-bottom:4px; }
-  .field input {
-    width:100%; padding:10px 12px; border-radius:10px; border:1px solid rgba(120,160,255,.25);
-    background:rgba(6,10,28,.75); color:#eaf1ff; font-size:14px; outline:none;
-  }
-  .btn {
-    width:100%; padding:12px; border:none; border-radius:10px; cursor:pointer; font-family:'Rubik'; font-weight:800;
-    font-size:14px; color:#fff; transition:.15s; margin-top:4px;
-  }
-  .btn:active { transform:scale(.97); }
-  .btn-primary { background:linear-gradient(135deg,#3f7bff,#7b4dff); box-shadow:0 4px 15px rgba(80,110,255,.3); }
-  .btn-ghost { background:transparent; border:1px solid rgba(120,160,255,.35); color:#a9bcff; margin-top:8px; }
-  #authErr { min-height:16px; color:#ff7d92; font-size:12px; margin-top:6px; }
-  .hint { margin-top:10px; font-size:11px; color:#6f83b8; line-height:1.4; }
-  .spin { display:inline-block; width:12px; height:12px; border:2px solid #fff3; border-top-color:#fff; border-radius:50%; animation:sp 1s linear infinite; }
-  @keyframes sp { to { transform:rotate(360deg); } }
-
-  /* ---------- HUD ---------- */
-  #hud { position:fixed; inset:0; z-index:20; pointer-events:none; display:none; }
-  #hud.on { display:block; }
-  #topbar {
-    position:absolute; top:12px; left:12px; display:flex; flex-direction:column; gap:4px;
-    color:#eaf1ff; text-shadow:0 2px 4px #000;
-  }
-  #hpBar { display:flex; align-items:center; gap:6px; font-weight:800; font-size:12px; color:#ff5c7a; }
-  #hpWrap { width:120px; height:10px; border-radius:5px; background:rgba(8,12,30,.7); border:1px solid rgba(255,100,100,.3); overflow:hidden; }
-  #hpFill { height:100%; width:100%; background:linear-gradient(90deg,#ff4f67,#ff8597); }
-  #stats { font-size:11px; color:#c9d7ff; display:flex; gap:10px; }
-
-  /* Hotbar UI (крупный для тач-скрина) */
-  #hotbar {
-    position:absolute; bottom:12px; left:50%; transform:translateX(-50%);
-    display:flex; gap:8px; pointer-events:auto; background:rgba(10,16,40,0.9);
-    padding:6px; border-radius:14px; border:2px solid rgba(130,165,255,.3); z-index:30;
-  }
-  .slot {
-    width:46px; height:46px; border-radius:8px; border:2px solid rgba(255,255,255,0.15);
-    background:rgba(255,255,255,0.05); display:flex; align-items:center; justify-content:center;
-    position:relative; transition:0.1s;
-  }
-  .slot.active { border-color:#ffd94f; background:rgba(255,217,79,0.22); transform:scale(1.08); }
-  .slot .icon { width:24px; height:24px; border-radius:4px; }
-  .slot .num { position:absolute; bottom:2px; right:4px; font-size:9px; color:#8fa3d9; }
-
-  /* Настройки камеры/аудио сверху по центру */
-  #camControls {
-    position:absolute; top:12px; left:50%; transform:translateX(-50%);
-    display:flex; gap:4px; pointer-events:auto; z-index:30;
-  }
-  .hud-btn {
-    width:38px; height:38px; border-radius:10px; border:1px solid rgba(130,165,255,.3);
-    background:rgba(10,16,40,.85); color:#fff; font-size:13px; font-weight:800; cursor:pointer;
-    display:flex; align-items:center; justify-content:center; backdrop-filter:blur(4px);
-  }
-
-  /* Таблица лидеров */
-  #board {
-    position:absolute; top:12px; right:12px; min-width:160px; max-width:210px;
-    background:rgba(8,12,30,.6); border:1px solid rgba(130,165,255,.2); border-radius:10px; padding:6px 8px; color:#dfe8ff;
-  }
-  #board h3 { font-size:9px; letter-spacing:1px; text-transform:uppercase; color:#8fa3d9; margin-bottom:4px; }
-  .brow { display:flex; justify-content:space-between; gap:6px; font-size:11px; padding:2px; }
-  .brow.me { background:rgba(95,141,255,.2); border-radius:4px; }
-  .brow .nm { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:100px; }
-  .brow .bl { font-weight:800; color:#ffd94f; }
-
-  #toast {
-    position:absolute; top:20%; left:50%; transform:translateX(-50%); padding:10px 20px; border-radius:10px;
-    background:rgba(10,16,40,.9); border:1px solid rgba(130,165,255,.3); color:#fff; font-weight:600; font-size:13px;
-    opacity:0; transition:opacity .3s; text-align:center; max-width:85vw; pointer-events:none; z-index:40;
-  }
-  #toast.show { opacity:1; }
-
-  #trackName {
-    position:absolute; top:115px; right:12px; font-size:9px;
-    color:#ffe98a; background:rgba(10,16,40,0.7); padding:3px 8px; border-radius:6px;
-    pointer-events:none;
-  }
-
-  /* ---------- МОБИЛЬНЫЕ КНОПКИ (D-PAD) ---------- */
-  #touch { position:absolute; inset:0; display:none; pointer-events:none; }
-  body.touch #touch { display:block; }
-  .tbtn {
-    position:absolute; bottom:14px; width:70px; height:70px; border-radius:18px; pointer-events:auto;
-    background:rgba(20,30,70,.45); border:2px solid rgba(140,175,255,.35); color:#fff; font-size:26px;
-    display:flex; align-items:center; justify-content:center; backdrop-filter:blur(3px);
-    touch-action:none; -webkit-user-select:none;
-  }
-  .tbtn.act { background:rgba(95,141,255,.5); }
-  #tLeft { left:16px; } 
-  #tRight { left:100px; }
-  #tJump { right:16px; width:84px; height:84px; border-radius:50%; font-size:32px; background:rgba(60,180,120,.35); border-color:rgba(120,255,170,.4); }
-
-  /* Переключатель мобильных режимов: Копать / Строить */
-  #tModeToggle {
-    position:absolute; bottom:110px; right:20px; width:76px; height:50px; border-radius:12px;
-    background:#ba3c3c; border:2px solid #ff7d7d; color:#fff; font-size:11px; font-weight:800;
-    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
-    pointer-events:auto; touch-action:none;
-  }
-  #tModeToggle.build-active { background:#3cbaba; border-color:#7dffff; }
-
-  /* Чат */
-  #chat {
-    position:absolute; bottom:110px; left:16px; width:260px; height:120px;
-    background:rgba(10,16,40,.6); border:1px solid rgba(130,165,255,.2);
-    border-radius:12px; display:flex; flex-direction:column;
-    pointer-events:auto; z-index:25;
-  }
-  #chat.hidden { display:none; }
-  #chatMsgs { flex:1; overflow-y:auto; padding:6px; font-size:11px; display:flex; flex-direction:column; gap:2px; }
-  #chatInput {
-    background:rgba(6,10,28,.85); border:none; border-top:1px solid rgba(130,165,255,.2);
-    padding:6px 10px; color:#fff; font-size:12px; border-radius:0 0 12px 12px; outline:none;
-    pointer-events:auto;
-  }
-
-  /* Поворот экрана */
-  #rotate {
-    position:fixed; inset:0; z-index:90; display:none; align-items:center; justify-content:center; flex-direction:column; gap:12px;
-    background:rgba(4,6,16,.96); color:#dfe8ff; text-align:center; padding:20px;
-  }
-  body.touch.portrait #rotate { display:flex; }
-  #rotate .ph { font-size:50px; animation:rot 1.6s ease-in-out infinite; }
-  @keyframes rot { 0%,20%{transform:rotate(0)} 60%,100%{transform:rotate(90deg)} }
-  
-  #vignette { position:fixed; inset:0; z-index:10; pointer-events:none;
-    background:radial-gradient(ellipse at center, transparent 60%, rgba(0,0,10,.6) 100%); }
-  #loading { position:fixed; inset:0; z-index:80; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:10px;
-    background:#05070f; color:#8fa3d9; font-size:13px; letter-spacing:1px; }
+*{margin:0;padding:0;box-sizing:border-box;user-select:none;-webkit-touch-callout:none;-webkit-user-select:none}
+body{background:#1a1a2e;color:#fff;font-family:sans-serif;width:100vw;height:100vh;overflow:hidden;touch-action:none;position:fixed;top:0;left:0}
+#game-container{width:100%;height:100%;position:relative;background:#2d2d44;display:flex;flex-direction:column;overflow:hidden}
+#auth-screen{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100;padding:20px}
+#auth-screen h1{font-size:28px;margin-bottom:20px;color:#f0c27f}
+#auth-screen input{width:80%;max-width:300px;padding:14px;margin:8px 0;border-radius:12px;border:2px solid #4a4a6a;background:#2d2d44;color:#fff;font-size:18px;text-align:center}
+#auth-screen button{width:80%;max-width:300px;padding:14px;margin:8px 0;border-radius:12px;border:none;background:#f0c27f;color:#1a1a2e;font-size:20px;font-weight:bold;cursor:pointer}
+#auth-screen .error{color:#ff6b6b;margin:10px 0;font-size:14px}
+#game-ui{position:absolute;top:0;left:0;width:100%;height:100%;display:none;flex-direction:column}
+#world-canvas{width:100%;height:100%;display:block;background:#3a3a5a;touch-action:none}
+#hud{position:absolute;bottom:20px;left:0;width:100%;display:flex;justify-content:space-between;padding:0 15px;pointer-events:none}
+#hud .stats{background:rgba(0,0,0,.7);padding:10px 16px;border-radius:16px;font-size:14px;display:flex;gap:16px;pointer-events:auto}
+#hud .stats span{color:#f0c27f}
+#inventory{position:absolute;bottom:80px;right:15px;background:rgba(0,0,0,.7);padding:10px;border-radius:16px;display:flex;gap:8px;pointer-events:auto}
+#inventory .slot{width:50px;height:50px;background:#2d2d44;border:2px solid #4a4a6a;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#aaa;text-align:center;pointer-events:auto}
+#inventory .slot.active{border-color:#f0c27f;background:#3d3d5a}
+#controls{position:absolute;bottom:20px;right:15px;display:flex;gap:10px;pointer-events:none}
+#controls button{width:70px;height:70px;border-radius:50%;border:none;background:rgba(240,194,127,.5);color:#1a1a2e;font-size:30px;font-weight:bold;pointer-events:auto;box-shadow:0 4px 15px rgba(0,0,0,.5)}
+#controls .break{background:rgba(255,107,107,.6)}
+#controls .place{background:rgba(107,255,107,.6)}
+#controls .jump{position:absolute;bottom:20px;left:15px;width:70px;height:70px;border-radius:50%;border:none;background:rgba(255,255,255,.3);color:#1a1a2e;font-size:30px;font-weight:bold;pointer-events:auto;box-shadow:0 4px 15px rgba(0,0,0,.5)}
+#player-list{position:absolute;top:10px;right:10px;background:rgba(0,0,0,.6);padding:8px 12px;border-radius:12px;font-size:12px;pointer-events:none;max-height:120px;overflow-y:auto}
+#player-list div{color:#aaa;margin:2px 0}
+#player-list .me{color:#f0c27f;font-weight:bold}
+@media(orientation:portrait){#auth-screen h1{font-size:22px}#controls button{width:60px;height:60px;font-size:24px}}
 </style>
 </head>
 <body>
-<canvas id="game"></canvas>
-<div id="vignette"></div>
-
+<div id="game-container">
+<div id="auth-screen">
+<h1>⚡ Террария 2D</h1>
+<input type="text" id="nick-input" placeholder="Твой ник" maxlength="12">
+<button id="login-btn">Войти в мир</button>
+<div class="error" id="auth-error"></div>
+</div>
+<div id="game-ui">
+<canvas id="world-canvas"></canvas>
 <div id="hud">
-  <div id="topbar">
-    <div id="hpBar">
-      <span>❤️ HP</span>
-      <div id="hpWrap"><div id="hpFill"></div></div>
-      <span id="hpTxt">100/100</span>
-    </div>
-    <div id="stats">
-      <span>🪙 Монеты: <b id="coinsCount">0</b></span>
-      <span>👥 Онлайн: <b id="online">1</b></span>
-      <span>📍 X:<b id="coordX">0</b> Y:<b id="coordY">0</b></span>
-    </div>
-  </div>
-
-  <div id="camControls">
-    <button class="hud-btn" id="zoomOutBtn">🔍−</button>
-    <button class="hud-btn" id="zoomInBtn">🔍+</button>
-    <button class="hud-btn" id="fullScrBtn">📺</button>
-    <button class="hud-btn" id="musBtn">📻</button>
-    <button class="hud-btn" id="musMuteBtn">🎵</button>
-    <button class="hud-btn" id="muteBtn">🔊</button>
-    <button class="hud-btn" id="chatToggleBtn">💬</button>
-  </div>
-
-  <!-- Селектор блоков Hotbar -->
-  <div id="hotbar">
-    <div class="slot active" data-type="1"><div class="icon" style="background:#55c34d;"></div><div class="num">Трава</div></div>
-    <div class="slot" data-type="2"><div class="icon" style="background:#7fa8c9;"></div><div class="num">Камень</div></div>
-    <div class="slot" data-type="3"><div class="icon" style="background:#8a5a33;"></div><div class="num">Дерево</div></div>
-    <div class="slot" data-type="5"><div class="icon" style="background:#c9b8e8;"></div><div class="num">Доски</div></div>
-    <div class="slot" data-type="6"><div class="icon" style="background:#ba3c3c;"></div><div class="num">Кирпич</div></div>
-    <div class="slot" data-type="7"><div class="icon" style="background:#ffd94f;box-shadow:0 0 6px #ffd94f;"></div><div class="num">Факел</div></div>
-  </div>
-
-  <div id="chat" class="hidden">
-    <div id="chatMsgs"></div>
-    <input id="chatInput" maxlength="64" placeholder="Тапни сюда для чата..." autocomplete="off">
-  </div>
-
-  <div id="board">
-    <h3>🏆 Игроки онлайн</h3>
-    <div id="boardRows"></div>
-  </div>
-  <div id="toast"></div>
-  <div id="trackName"></div>
-  
-  <div id="touch">
-    <div class="tbtn" id="tLeft">◀</div>
-    <div class="tbtn" id="tRight">▶</div>
-    <div class="tbtn" id="tJump">⤒</div>
-
-    <!-- Мобильная Кнопка Переключения Режимов ЛОМАТЬ / СТРОИТЬ -->
-    <div id="tModeToggle">
-      <span id="tModeIcon" style="font-size:16px;">⛏️</span>
-      <span id="tModeText" style="font-size:9px;">КОПАТЬ</span>
-    </div>
-  </div>
+<div class="stats"><span id="hp-text">❤️ 100</span><span id="food-text">🍖 100</span></div>
+</div>
+<div id="inventory">
+<div class="slot active" data-block="0">🌱</div>
+<div class="slot" data-block="1">🪨</div>
+<div class="slot" data-block="2">🌳</div>
+<div class="slot" data-block="3">🧱</div>
+</div>
+<div id="controls">
+<button class="jump" id="jump-btn">⬆</button>
+<button class="break" id="break-btn">⛏️</button>
+<button class="place" id="place-btn">🧱</button>
+</div>
+<div id="player-list"></div>
+</div>
 </div>
 
-<div id="auth">
-  <div class="auth-card">
-    <div class="logo">
-      <svg width="36" height="36" viewBox="0 0 48 48">
-        <defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stop-color="#6ee7ff"/><stop offset=".55" stop-color="#4f7cff"/><stop offset="1" stop-color="#b96bff"/>
-        </linearGradient></defs>
-        <rect x="4" y="26" width="18" height="18" rx="3" fill="url(#lg)"/>
-        <rect x="26" y="26" width="18" height="18" rx="3" fill="#39d98a"/>
-        <rect x="15" y="4" width="18" height="18" rx="3" fill="#ffd94f"/>
-      </svg>
-      <h1>TERRARIA MOBILE</h1>
-    </div>
-    <div class="tagline">Онлайн выживание на Android и iOS!</div>
-    <div class="field">
-      <label>Никнейм</label>
-      <input id="nick" maxlength="14" placeholder="Твой ник" autocomplete="off">
-    </div>
-    <div class="field">
-      <label>Почта</label>
-      <input id="email" type="email" placeholder="you@example.com" autocomplete="email">
-    </div>
-    <div class="field">
-      <label>Пароль</label>
-      <input id="pass" type="password" placeholder="Мин. 6 символов" autocomplete="current-password">
-    </div>
-    <button class="btn btn-primary" id="loginBtn">ВОЙТИ</button>
-    <button class="btn btn-ghost" id="regBtn">СОЗДАТЬ АККАУНТ</button>
-    <div id="authErr"></div>
-    <div class="hint">📱 Игра разработана только для смартфонов и планшетов.<br>
-    Поверни телефон горизонтально для удобной игры!</div>
-  </div>
-</div>
-
-<div id="rotate"><div class="ph">📱</div><p>Пожалуйста, поверни телефон горизонтально!</p></div>
-<div id="loading"><div class="spin" style="width:24px;height:24px;border-width:3px"></div><div id="loadTxt">ЗАГРУЗКА МИРА…</div></div>
-
-<!-- FIREBASE SDK -->
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<!-- Firebase SDK (App + Auth + Database) -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
 <script>
-'use strict';
-
-/* ============================================================
-   ОБЪЯВЛЕНИЕ ГЛОБАЛЬНЫХ ПЕРЕМЕННЫХ И ИНИЦИАЛИЗАЦИЯ ХОЛСТА (ФИКС)
-   ============================================================ */
-const $ = id => document.getElementById(id);
-const cv = $('game');
-const ctx = cv.getContext('2d');
-
-let vw = 0, vh = 0, dpr = 1, ZOOM = 1.25;
-let activeTouchWorldX = -1;
-let activeTouchWorldY = -1;
-
-const TILE = 32;
-const WW = 1200; // Ширина мира в блоках
-const WH = 100;  // Высота мира в блоках
-const WORLD_PX_W = WW * TILE;
-const WORLD_PX_H = WH * TILE;
-
-const clamp = (v,a,b) => v<a?a:(v>b?b:v);
-const lerp = (a,b,t) => a+(b-a)*t;
-const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-
-function tryFullscreen() {
-  try {
-    const doc = window.document;
-    const docEl = doc.documentElement;
-    const req = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
-    if(!doc.fullscreenElement && !doc.mozFullScreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement) {
-      if(req) req.call(docEl);
-    }
-  } catch(e){}
-}
-
-/* FIREBASE CONFIG */
 const firebaseConfig = {
-  apiKey: "AIzaSyBm0mIvHVznIeF2PoFk6dtdaiT5r877wyA",
-  authDomain: "meow-874ce.firebaseapp.com",
-  databaseURL: "https://meow-874ce-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "meow-874ce",
-  storageBucket: "meow-874ce.firebasestorage.app",
-  messagingSenderId: "471541334599",
-  appId: "1:471541334599:web:567af3e7dbe70a37572762"
+apiKey: "AIzaSyBm0mIvHVznIeF2PoFk6dtdaiT5r877wyA",
+authDomain: "meow-874ce.firebaseapp.com",
+databaseURL: "https://meow-874ce-default-rtdb.europe-west1.firebasedatabase.app",
+projectId: "meow-874ce",
+storageBucket: "meow-874ce.firebasestorage.app",
+messagingSenderId: "471541334599",
+appId: "1:471541334599:web:567af3e7dbe70a37572762"
 };
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const auth = firebase.auth();
 
-let auth, db;
-try {
-  firebase.initializeApp(firebaseConfig);
-  auth = firebase.auth();
-  db = firebase.database();
-} catch(e) {
-  $('loadTxt').innerHTML = "<span style='color:#ff5c7a'>Ошибка Firebase! Проверьте интернет.</span>";
+const WORLD_SIZE = 30;
+const BLOCK_TYPES = {0:'grass',1:'stone',2:'wood',3:'brick'};
+const BLOCK_COLORS = {0:'#4caf50',1:'#8d8d8d',2:'#6d4c41',3:'#b71c1c'};
+
+let playerId = null;
+let playerNick = '';
+let myBlock = 0;
+let hp = 100, food = 100;
+let posX = 15, posY = 25;
+
+const canvas = document.getElementById('world-canvas');
+const ctx = canvas.getContext('2d');
+let worldData = {};
+let players = {};
+let cellSize = 1;
+
+function resizeCanvas() {
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+cellSize = Math.min(canvas.width / WORLD_SIZE, canvas.height / WORLD_SIZE);
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+// Авторизация (анонимная)
+document.getElementById('login-btn').addEventListener('click', login);
+document.getElementById('nick-input').addEventListener('keydown', e => { if(e.key==='Enter') login(); });
+
+function login() {
+const nick = document.getElementById('nick-input').value.trim();
+if(!nick || nick.length<2) {
+document.getElementById('auth-error').textContent = 'Введи ник (2-12 символов)';
+return;
+}
+playerNick = nick;
+document.getElementById('auth-error').textContent = '⏳ Вход...';
+auth.signInAnonymously()
+.then(() => {
+playerId = auth.currentUser.uid;
+document.getElementById('auth-screen').style.display = 'none';
+document.getElementById('game-ui').style.display = 'flex';
+initGame();
+})
+.catch(err => {
+document.getElementById('auth-error').textContent = 'Ошибка входа: ' + err.message;
+});
 }
 
-/* АВТОРИЗАЦИЯ */
-const AUTH_ERR = {
-  'auth/invalid-email':'Неверная почта',
-  'auth/user-not-found':'Пользователь не найден',
-  'auth/wrong-password':'Неверный пароль',
-  'auth/invalid-credential':'Неверный логин или пароль',
-  'auth/email-already-in-use':'Почта уже занята',
-  'auth/weak-password':'Слишком простой пароль'
-};
-function authError(e){ $('authErr').textContent = AUTH_ERR[e.code] || e.message; }
-function validNick(n){ return /^[A-Za-zА-Яа-яЁё0-9_\-]{2,14}$/.test(n); }
-let busyAuth = false;
-
-async function doRegister(){
-  if (busyAuth) return;
-  const nick = $('nick').value.trim(), email = $('email').value.trim(), pass = $('pass').value;
-  $('authErr').textContent = '';
-  if (!validNick(nick)) { $('authErr').textContent = 'Ник: от 2 до 14 букв или цифр'; return; }
-  if (!email || !pass) { $('authErr').textContent = 'Заполните все поля!'; return; }
-  busyAuth = true; $('regBtn').innerHTML = '<span class="spin"></span> Создание…';
-  try {
-    tryFullscreen();
-    const cr = await auth.createUserWithEmailAndPassword(email, pass);
-    await db.ref('users/' + cr.user.uid).set({ name: nick, created: firebase.database.ServerValue.TIMESTAMP });
-    MY_NAME = nick;
-  } catch(e){ authError(e); }
-  busyAuth = false; $('regBtn').textContent = 'СОЗДАТЬ АККАУНТ';
+function initGame() {
+// Загружаем мир
+const worldRef = db.ref('world');
+worldRef.on('value', snap => {
+if(snap.val()) worldData = snap.val();
+else {
+worldData = {};
+for(let y=0; y<WORLD_SIZE; y++) {
+for(let x=0; x<WORLD_SIZE; x++) {
+const key = x+'_'+y;
+worldData[key] = y > WORLD_SIZE-5 ? 0 : (y > WORLD_SIZE-8 ? 1 : null);
 }
-async function doLogin(){
-  if (busyAuth) return;
-  const email = $('email').value.trim(), pass = $('pass').value;
-  $('authErr').textContent = '';
-  if (!email || !pass) { $('authErr').textContent = 'Заполните поля входа'; return; }
-  busyAuth = true; $('loginBtn').innerHTML = '<span class="spin"></span> Вход…';
-  try {
-    tryFullscreen();
-    await auth.signInWithEmailAndPassword(email, pass);
-  } catch(e){ authError(e); }
-  busyAuth = false; $('loginBtn').textContent = 'ВОЙТИ';
 }
-$('regBtn').onclick = doRegister;
-$('loginBtn').onclick = doLogin;
-
-/* ============================================================
-   ПРОЦЕДУРНЫЙ ЗВУКОВОЙ СИНТЕЗАТОР
-   ============================================================ */
-const Audio8 = {
-  ctx:null, master:null, musG:null, sfxG:null, noiseBuf:null,
-  trackIdx:-1, step:0, nextT:0, timer:null, musicMuted:false, sfxMuted:false, ready:false,
-  
-  init(){
-    if (this.ready) return;
-    try {
-      const AC = window.AudioContext || window.webkitAudioContext;
-      if (!AC) return;
-      this.ctx = new AC();
-      this.master = this.ctx.createGain(); this.master.gain.value = 0.5; this.master.connect(this.ctx.destination);
-      this.musG = this.ctx.createGain(); this.musG.gain.value = 0.2; this.musG.connect(this.master);
-      this.sfxG = this.ctx.createGain(); this.sfxG.gain.value = 0.45; this.sfxG.connect(this.master);
-
-      const len = this.ctx.sampleRate * 0.5, buf = this.ctx.createBuffer(1, len, this.ctx.sampleRate), d = buf.getChannelData(0);
-      for (let i=0;i<len;i++) d[i] = Math.random()*2-1;
-      this.noiseBuf = buf;
-
-      this.ready = true;
-      this.nextT = this.ctx.currentTime + 0.1;
-      this.timer = setInterval(()=>this.schedule(), 40);
-    } catch(e){}
-  },
-  resume(){ if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume(); },
-  toggleMusic() { this.musicMuted = !this.musicMuted; if (this.musG) this.musG.gain.value = this.musicMuted ? 0 : 0.2; return this.musicMuted; },
-  toggleSfx() { this.sfxMuted = !this.sfxMuted; if (this.sfxG) this.sfxG.gain.value = this.sfxMuted ? 0 : 0.45; return this.sfxMuted; },
-
-  tracks: [
-    { name:'🌲 Террария Дзен (День)', bpm:90, wave:'sine', vol:.18,
-      mel:[60,64,67,72,0,67,64,0, 62,65,69,74,0,69,65,0],
-      bass:[36,0,43,0,38,0,45,0] },
-    { name:'🦇 Эхо Подземелий (Ночь)', bpm:72, wave:'triangle', vol:.22,
-      mel:[57,60,64,67,72,67,64,60, 53,57,60,65,69,65,60,57],
-      bass:[33,0,33,0,29,0,29,0] }
-  ],
-  playTrack(i){
-    if (i === this.trackIdx) return;
-    this.trackIdx = i; this.step = 0;
-    if (this.ctx) this.nextT = this.ctx.currentTime + 0.05;
-    const el = $('trackName'); if (el) el.textContent = this.tracks[i] ? '📻 ' + this.tracks[i].name : '';
-  },
-  f(m){ return m === 0 ? 0 : 440*Math.pow(2,(m-69)/12); },
-  note(midi, t, dur, wave, vol){
-    if (midi === 0 || vol <= 0 || !this.ctx) return;
-    const o = this.ctx.createOscillator(), g = this.ctx.createGain();
-    o.type = wave; o.frequency.value = this.f(midi);
-    g.gain.setValueAtTime(0, t);
-    g.gain.linearRampToValueAtTime(vol, t+0.008);
-    g.gain.exponentialRampToValueAtTime(0.001, t+dur);
-    o.connect(g); g.connect(this.musG);
-    o.start(t); o.stop(t+dur+0.03);
-  },
-  schedule(){
-    if (!this.ready || this.musicMuted || this.trackIdx === -1) return;
-    const tr = this.tracks[this.trackIdx];
-    if (!tr) return;
-    const stepDur = 60 / tr.bpm / 2;
-    while (this.nextT < this.ctx.currentTime + 0.16){
-      const s = this.step, t = this.nextT;
-      const m = tr.mel[s % tr.mel.length];
-      if (m) this.note(m, t, stepDur*1.8, tr.wave, tr.vol);
-      const b = tr.bass[s % tr.bass.length];
-      if (b) this.note(b, t, stepDur*1.5, 'triangle', .15);
-      this.step++;
-      this.nextT += stepDur;
-    }
-  },
-
-  /* Эффекты звука */
-  blip(f0, f1, dur, wave, vol){
-    if (!this.ready || this.sfxMuted || !this.ctx) return;
-    const t = this.ctx.currentTime;
-    const o = this.ctx.createOscillator(), g = this.ctx.createGain();
-    o.type = wave; o.frequency.setValueAtTime(f0,t); o.frequency.exponentialRampToValueAtTime(Math.max(f1,1), t+dur);
-    g.gain.setValueAtTime(vol,t); g.gain.exponentialRampToValueAtTime(0.001, t+dur);
-    o.connect(g); g.connect(this.sfxG); o.start(t); o.stop(t+dur+0.02);
-  },
-  noise(dur, vol, freq){
-    if (!this.ready || this.sfxMuted || !this.ctx) return;
-    const t = this.ctx.currentTime;
-    const s = this.ctx.createBufferSource(), g = this.ctx.createGain(), f = this.ctx.createBiquadFilter();
-    s.buffer=this.noiseBuf; f.type='lowpass'; f.frequency.value=freq||1000;
-    g.gain.setValueAtTime(vol,t); g.gain.exponentialRampToValueAtTime(0.001, t+dur);
-    s.connect(f); f.connect(g); g.connect(this.sfxG); s.start(t); s.stop(t+dur+0.02);
-  },
-  jump(){ this.blip(220,500,.08,'sine',.2); },
-  land(){ this.noise(.05,.08,450); },
-  hit(){ this.blip(180,60,.12,'sawtooth',.22); },
-  coin(){ this.blip(900,1600,0.12,'sine',0.2); },
-  blockPlace(){ this.blip(250,120,0.08,'triangle',0.25); },
-  blockBreak(){ this.noise(0.08, 0.25, 400); }
-};
-['pointerdown','keydown','touchstart'].forEach(ev =>
-  window.addEventListener(ev, ()=>{ Audio8.init(); Audio8.resume(); }, { passive:true }));
-
-
-/* ============================================================
-   ПРОЦЕДУРНЫЙ КАРКАС МИРА ТЕРРАРИИ
-   ============================================================ */
-const B = { AIR: 0, GRASS: 1, STONE: 2, WOOD: 3, LEAVES: 4, PLANKS: 5, BRICK: 6, TORCH: 7, LAVA: 8 };
-
-const BLOCK_DATA = {
-  [B.AIR]: { solid: false, color: null },
-  [B.GRASS]: { solid: true, color: '#55c34d', top: '#7de06f' },
-  [B.STONE]: { solid: true, color: '#7fa8c9' },
-  [B.WOOD]: { solid: true, color: '#8a5a33' },
-  [B.LEAVES]: { solid: false, color: '#31922a' },
-  [B.PLANKS]: { solid: true, color: '#c9b8e8' },
-  [B.BRICK]: { solid: true, color: '#ba3c3c' },
-  [B.TORCH]: { solid: false, color: '#ffd94f', light: 9 },
-  [B.LAVA]: { solid: false, color: '#ff4f1e', light: 7, hazard: true }
-};
-
-const worldMutations = new Map();
-
-function getBaseTile(tx, ty) {
-  if (tx < 0 || tx >= WW || ty < 0 || ty >= WH) return B.STONE;
-  if (ty >= WH - 4) return B.LAVA;
-
-  let surfaceY = Math.floor(40 + Math.sin(tx * 0.04) * 8 + Math.cos(tx * 0.12) * 3);
-  
-  if (ty < surfaceY) {
-    if (ty === surfaceY - 1 && (tx * 17) % 19 === 0) return B.WOOD; 
-    if (ty >= surfaceY - 4 && ty < surfaceY - 1 && ((tx + 1) * 17) % 19 === 1) return B.LEAVES; 
-    return B.AIR;
-  }
-  
-  if (ty === surfaceY) return B.GRASS;
-  if (ty > surfaceY && ty < surfaceY + 10) return B.GRASS;
-  
-  return B.STONE; 
+worldRef.set(worldData);
 }
-
-function tileAt(tx, ty) {
-  const key = `${tx}_${ty}`;
-  if (worldMutations.has(key)) return worldMutations.get(key);
-  return getBaseTile(tx, ty);
-}
-
-function isSolid(tx, ty) {
-  if (tx < 0 || tx >= WW || ty < 0 || ty >= WH) return true;
-  const t = tileAt(tx, ty);
-  return BLOCK_DATA[t] ? BLOCK_DATA[t].solid : false;
-}
-
-
-/* ============================================================
-   ПЕРСОНАЖ: ФИЗИКА, СТРОИТЕЛЬСТВО, ЗДОРОВЬЕ, МОНЕТЫ
-   ============================================================ */
-const keys = { left:false, right:false, jump:false };
-let jumpBuf = false;
-
-const P = {
-  x: 100 * TILE, y: 30 * TILE, w: 20, h: 28, vx: 0, vy: 0, dir: 1,
-  ground: false, hp: 100, maxHp: 100, coins: 0,
-  selectedBlock: B.GRASS,
-  deadT: 0
-};
-
-const cam = { x: 0, y: 0 };
-let screenShake = 0;
-const particles = [];
-
-function spawnP(x, y, vx, vy, life, color, size){
-  if (particles.length > 150) particles.shift();
-  particles.push({ x, y, vx, vy, life, maxLife: life, color, size });
-}
-
-function damagePlayer(amount, reason) {
-  if (P.deadT > 0) return;
-  P.hp = Math.max(0, P.hp - amount);
-  Audio8.hit();
-  screenShake = 12;
-  
-  for (let i = 0; i < 6; i++) {
-    spawnP(P.x + P.w/2, P.y + P.h/2, (Math.random()-0.5)*3, -Math.random()*2, 12, '#ff3b3b', 3.5);
-  }
-
-  if (P.hp <= 0) {
-    die(reason);
-  }
-}
-
-function die(reason) {
-  P.deadT = 80;
-  toast(`💀 Ты погиб (${reason})! Возрождение...`, 2500);
-  
-  const lostCoins = Math.floor(P.coins * 0.25);
-  P.coins -= lostCoins;
-  $('coinsCount').textContent = P.coins;
-
-  setTimeout(() => {
-    P.x = 100 * TILE;
-    P.y = 15 * TILE;
-    P.vx = 0; P.vy = 0;
-    P.hp = 100;
-    P.deadT = 0;
-    saveProgressExact();
-  }, 1500);
-}
-
-function collideX(){
-  const ty0 = Math.floor(P.y / TILE), ty1 = Math.floor((P.y + P.h - 1) / TILE);
-  if (P.vx > 0){
-    const tx = Math.floor((P.x + P.w) / TILE);
-    for (let ty = ty0; ty <= ty1; ty++) if (isSolid(tx, ty)){ P.x = tx * TILE - P.w - 0.01; P.vx = 0; break; }
-  } else if (P.vx < 0){
-    const tx = Math.floor(P.x / TILE);
-    for (let ty = ty0; ty <= ty1; ty++) if (isSolid(tx, ty)){ P.x = (tx + 1) * TILE + 0.01; P.vx = 0; break; }
-  }
-  P.x = clamp(P.x, 0, WORLD_PX_W - P.w);
-}
-
-function collideY(){
-  P.ground = false;
-  const tx0 = Math.floor((P.x + 2) / TILE), tx1 = Math.floor((P.x + P.w - 2) / TILE);
-  if (P.vy > 0){
-    const ty = Math.floor((P.y + P.h) / TILE);
-    for (let tx = tx0; tx <= tx1; tx++) if (isSolid(tx, ty)){
-      P.y = ty * TILE - P.h; 
-      if (P.vy > 15) {
-        damagePlayer(Math.floor((P.vy - 15) * 7), 'разбился при падении');
-      }
-      P.vy = 0; P.ground = true; 
-      break;
-    }
-  } else if (P.vy < 0){
-    const ty = Math.floor(P.y / TILE);
-    for (let tx = tx0; tx <= tx1; tx++) if (isSolid(tx, ty)){ P.y = (ty + 1) * TILE + 0.01; P.vy = 0; break; }
-  }
-}
-
-/* МОБИЛЬНЫЙ ТАП КЛИК */
-function handleMobileScreenTouch(touchX, touchY) {
-  if (P.deadT > 0) return;
-
-  const rect = cv.getBoundingClientRect();
-  const scaleX = vw / rect.width;
-  const scaleY = vh / rect.height;
-  const worldX = (touchX - rect.left) * scaleX + cam.x;
-  const worldY = (touchY - rect.top) * scaleY + cam.y;
-  
-  const tx = Math.floor(worldX / TILE);
-  const ty = Math.floor(worldY / TILE);
-
-  const px = Math.floor((P.x + P.w/2) / TILE);
-  const py = Math.floor((P.y + P.h/2) / TILE);
-  const dist = Math.hypot(tx - px, ty - py);
-  
-  if (dist > 5.8) {
-    toast('🛑 Слишком далеко!', 800);
-    return;
-  }
-
-  const key = `${tx}_${ty}`;
-
-  if (mobileInteractMode === 'build') {
-    if (tileAt(tx, ty) === B.AIR) {
-      const tRect = { x: tx*TILE, y: ty*TILE, w: TILE, h: TILE };
-      if (P.x < tRect.x + tRect.w && P.x + P.w > tRect.x && P.y < tRect.y + tRect.h && P.y + P.h > tRect.y && BLOCK_DATA[P.selectedBlock].solid) {
-        return; 
-      }
-      db.ref('world_changes/' + key).set(P.selectedBlock);
-      Audio8.blockPlace();
-    }
-  } else {
-    const currentBlock = tileAt(tx, ty);
-    if (currentBlock !== B.AIR) {
-      db.ref('world_changes/' + key).set(B.AIR);
-      Audio8.blockBreak();
-      
-      if (currentBlock === B.STONE && Math.random() < 0.14) {
-        P.coins += 1;
-        $('coinsCount').textContent = P.coins;
-        Audio8.coin();
-        toast('🪙 Найдена монета!', 600);
-        saveProgressExact();
-      }
-    }
-  }
-}
-
-function stepPlayer(){
-  if (P.deadT > 0) {
-    P.deadT--;
-    return;
-  }
-
-  const inputActive = (document.activeElement === $('chatInput'));
-
-  if (keys.left && !inputActive) { P.vx -= 0.55; P.dir = -1; }
-  else if (keys.right && !inputActive) { P.vx += 0.55; P.dir = 1; }
-  else { P.vx *= 0.72; if(Math.abs(P.vx) < 0.05) P.vx = 0; }
-  P.vx = clamp(P.vx, -4.8, 4.8);
-
-  P.vy += 0.42; 
-  if (P.vy > 16) P.vy = 16;
-
-  if (jumpBuf && !inputActive) {
-    if (P.ground) {
-      P.vy = -8.8;
-      P.ground = false;
-      Audio8.jump();
-    }
-    jumpBuf = false;
-  }
-
-  P.x += P.vx; collideX();
-  P.y += P.vy; collideY();
-
-  const currentTileUnder = tileAt(Math.floor((P.x + P.w/2)/TILE), Math.floor((P.y + P.h - 2)/TILE));
-  if (currentTileUnder === B.LAVA) {
-    damagePlayer(1.6, 'сгорел в лаве');
-  }
-
-  $('hpFill').style.width = (P.hp / P.maxHp * 100) + '%';
-  $('hpTxt').textContent = `${Math.ceil(P.hp)}/${P.maxHp}`;
-  $('coordX').textContent = Math.floor(P.x / TILE);
-  $('coordY').textContent = Math.floor(P.y / TILE);
-
-  const targetCamX = P.x + P.w/2 - vw * 0.5;
-  const targetCamY = P.y + P.h/2 - vh * 0.5;
-  cam.x = clamp(lerp(cam.x, targetCamX, 0.1), 0, WORLD_PX_W - vw);
-  cam.y = clamp(lerp(cam.y, targetCamY, 0.1), 0, WORLD_PX_H - vh);
-
-  if (screenShake > 0) {
-    cam.x += (Math.random() - 0.5) * screenShake;
-    cam.y += (Math.random() - 0.5) * screenShake;
-    screenShake *= 0.9;
-  }
-}
-
-function updParticles(){
-  for (let i = particles.length - 1; i >= 0; i--){
-    const p = particles[i];
-    p.x += p.vx; p.y += p.vy; p.life--;
-    if (p.life <= 0) particles.splice(i, 1);
-  }
-}
-
-
-/* ============================================================
-   СИНХРОНИЗАЦИЯ ЧЕРЕЗ REALTIME DATABASE
-   ============================================================ */
-let MY_UID = null, MY_NAME = '', joined = false;
-const remotes = {};
-let meRef = null;
-
-function joinNet(){
-  meRef = db.ref('players/' + MY_UID);
-  
-  db.ref('.info/connected').on('value', s => {
-    if (s.val() === true) {
-      meRef.onDisconnect().remove();
-      sendMyState();
-    }
-  });
-
-  db.ref('players').on('value', snap => {
-    const now = Date.now(), seen = new Set();
-    snap.forEach(ch => {
-      const v = ch.val();
-      if (!v || ch.key === MY_UID) return;
-      if (v.t && now - v.t > 15000) return; 
-      seen.add(ch.key);
-      let r = remotes[ch.key];
-      if (!r) r = remotes[ch.key] = { rx: v.x, ry: v.y, tx: v.x, ty: v.y };
-      r.n = v.n; r.tx = v.x; r.ty = v.y; r.d = v.d || 1; r.hp = v.hp || 100; r.coins = v.coins || 0;
-    });
-    for (const k in remotes) if (!seen.has(k)) delete remotes[k];
-    $('online').textContent = seen.size + 1;
-    updateLeaderboard();
-  });
-
-  db.ref('world_changes').on('child_added', snap => { worldMutations.set(snap.key, snap.val()); });
-  db.ref('world_changes').on('child_changed', snap => { worldMutations.set(snap.key, snap.val()); });
-  db.ref('world_changes').on('child_removed', snap => { worldMutations.delete(snap.key); });
-
-  db.ref('chat').limitToLast(12).on('child_added', snap => {
-    const data = snap.val();
-    if (!data) return;
-    const msgEl = document.createElement('div');
-    msgEl.innerHTML = `<span style="color:#ffe98a;font-weight:800;">${esc(data.name)}:</span> <span style="color:#fff;">${esc(data.text)}</span>`;
-    const box = $('chatMsgs');
-    box.appendChild(msgEl);
-    box.scrollTop = box.scrollHeight;
-  });
-
-  setInterval(sendMyState, 120);
-}
-
-function sendMyState(){
-  if (!meRef) return;
-  meRef.update({
-    n: MY_NAME,
-    x: Math.round(P.x), y: Math.round(P.y), d: P.dir, hp: Math.round(P.hp),
-    coins: P.coins,
-    t: firebase.database.ServerValue.TIMESTAMP
-  });
-}
-
-function sendChatMessage() {
-  const input = $('chatInput');
-  const txt = input.value.trim();
-  if (txt.length === 0) return;
-  db.ref('chat').push({
-    name: MY_NAME,
-    text: txt,
-    t: firebase.database.ServerValue.TIMESTAMP
-  });
-  input.value = '';
-}
-
-function saveProgressExact() {
-  if (!joined || !MY_UID) return;
-  const state = {
-    x: Math.round(P.x), y: Math.round(P.y),
-    hp: P.hp, coins: P.coins, t: Date.now()
-  };
-  try {
-    localStorage.setItem('terra_exact_save_v1', JSON.stringify(state));
-  } catch(e){}
-  db.ref('saves/' + MY_UID).set(state);
-}
-
-function updateLeaderboard(){
-  const list = [];
-  list.push({ n: MY_NAME, coins: P.coins, hp: P.hp, me: true });
-  for (const k in remotes) {
-    list.push({ n: remotes[k].n || 'Игрок', coins: remotes[k].coins || 0, hp: remotes[k].hp || 100 });
-  }
-  list.sort((a,b) => b.coins - a.coins);
-
-  $('boardRows').innerHTML = list.map((r, i) =>
-    `<div class="brow ${r.me ? 'me' : ''}">` +
-    `<span class="nm"><i>${i+1}.</i>${esc(r.n)}</span>` +
-    `<span class="bl">🪙 ${r.coins}</span></div>`
-  ).join('');
-}
-
-function smoothRemotes(){
-  for (const k in remotes){
-    const r = remotes[k];
-    r.rx = lerp(r.rx, r.tx, 0.22);
-    r.ry = lerp(r.ry, r.ty, 0.22);
-  }
-}
-
-auth.onAuthStateChanged(async user => {
-  if (user && !joined){
-    joined = true;
-    MY_UID = user.uid;
-    try {
-      const s = await db.ref('users/' + user.uid + '/name').once('value');
-      MY_NAME = s.val() || user.email.split('@')[0].slice(0, 14);
-    } catch(e){ MY_NAME = user.email.split('@')[0].slice(0, 14); }
-    startGame();
-  } else if (!user){
-    $('loading').classList.add('hidden');
-    $('auth').classList.remove('hidden');
-  }
+renderWorld();
 });
 
-async function startGame(){
-  $('auth').classList.add('hidden');
-  $('loading').classList.add('hidden');
-  $('hud').classList.add('on');
-
-  let local = null;
-  try {
-    local = localStorage.getItem('terra_exact_save_v1');
-  } catch(e){}
-
-  if (local) {
-    try {
-      const d = JSON.parse(local);
-      P.x = d.x; P.y = d.y; P.hp = d.hp || 100; P.coins = d.coins || 0;
-    } catch(e){}
-  } else {
-    try {
-      const snap = await db.ref('saves/' + MY_UID).once('value');
-      const d = snap.val();
-      if (d) {
-        P.x = d.x; P.y = d.y; P.hp = d.hp || 100; P.coins = d.coins || 0;
-      }
-    } catch(e){}
-  }
-
-  $('coinsCount').textContent = P.coins;
-  joinNet();
-  
-  toast(`🌲 Привет, <b>${esc(MY_NAME)}</b>! Выживай, добывай блоки и строй прямо с телефона!`, 4000);
-  Audio8.init();
-  Audio8.playTrack(0);
-
-  requestAnimationFrame(loop);
-}
-
-
-/* ============================================================
-   МОБИЛЬНОЕ СЕНСОРНОЕ УПРАВЛЕНИЕ (TOUCH EVENTS)
-   ============================================================ */
-function bindTouch(id, on, off){
-  const el = $(id);
-  const start = e => { 
-    e.preventDefault(); 
-    el.classList.add('act'); 
-    on(); 
-  };
-  const end = e => { 
-    e.preventDefault(); 
-    el.classList.remove('act'); 
-    off(); 
-  };
-  el.addEventListener('touchstart', start, { passive:false });
-  el.addEventListener('touchend', end, { passive:false });
-}
-
-bindTouch('tLeft', () => keys.left = true, () => keys.left = false);
-bindTouch('tRight', () => keys.right = true, () => keys.right = false);
-bindTouch('tJump', () => { if (!keys.jump) jumpBuf = true; keys.jump = true; }, () => keys.jump = false);
-
-// ТАП ПО ЭКРАНУ (КЛАДКА И КОПКА БЛОКОВ)
-cv.addEventListener('touchstart', e => {
-  const target = e.target;
-  if (target.tagName === 'BUTTON' || target.classList.contains('tbtn') || target.closest('#hotbar') || target.closest('#chat') || target.closest('#camControls') || target.closest('#tModeToggle')) {
-    return;
-  }
-  
-  e.preventDefault();
-  const touch = e.touches[0];
-  handleMobileScreenTouch(touch.clientX, touch.clientY);
-}, { passive: false });
-
-const tModeToggle = $('tModeToggle');
-tModeToggle.addEventListener('touchstart', e => {
-  e.preventDefault();
-  if (mobileInteractMode === 'dig') {
-    mobileInteractMode = 'build';
-    tModeToggle.classList.add('build-active');
-    $('tModeIcon').textContent = '🧱';
-    $('tModeText').textContent = 'СТРОИТЬ';
-    toast('🧱 Режим: СТРОИТЕЛЬСТВО', 1000);
-  } else {
-    mobileInteractMode = 'dig';
-    tModeToggle.classList.remove('build-active');
-    $('tModeIcon').textContent = '⛏️';
-    $('tModeText').textContent = 'КОПАТЬ';
-    toast('⛏️ Режим: РАЗРУШЕНИЕ', 1000);
-  }
-  Audio8.blockPlace();
+// Следим за другими игроками
+const playersRef = db.ref('players');
+playersRef.on('value', snap => {
+players = snap.val() || {};
+updatePlayerList();
 });
 
-document.querySelectorAll('#hotbar .slot').forEach((s, idx) => {
-  s.addEventListener('touchstart', e => {
-    e.preventDefault();
-    document.querySelectorAll('#hotbar .slot').forEach(slot => slot.classList.remove('active'));
-    s.classList.add('active');
-    P.selectedBlock = parseInt(s.dataset.type);
-    Audio8.blockPlace();
-  });
+// Сохраняем себя
+const myRef = db.ref('players/' + playerId);
+myRef.set({nick:playerNick, x:posX, y:posY, hp:hp, food:food});
+
+// Инвентарь
+document.querySelectorAll('#inventory .slot').forEach(el => {
+el.addEventListener('click', function() {
+document.querySelectorAll('#inventory .slot').forEach(s => s.classList.remove('active'));
+this.classList.add('active');
+myBlock = parseInt(this.dataset.block);
+});
 });
 
-if ('ontouchstart' in window) document.body.classList.add('touch');
-function checkOrient(){ document.body.classList.toggle('portrait', innerHeight > innerWidth); }
-window.addEventListener('resize', checkOrient); checkOrient();
+// Управление
+document.getElementById('jump-btn').addEventListener('touchstart', e => { e.preventDefault(); if(posY>2) posY-=2; updatePos(); });
+document.getElementById('break-btn').addEventListener('touchstart', e => { e.preventDefault(); breakBlock(); });
+document.getElementById('place-btn').addEventListener('touchstart', e => { e.preventDefault(); placeBlock(); });
 
-$('muteBtn').onclick = () => { const muted = Audio8.toggleSfx(); $('muteBtn').textContent = muted ? '🔇' : '🔊'; };
-$('musMuteBtn').onclick = () => { const muted = Audio8.toggleMusic(); $('musMuteBtn').textContent = muted ? '🔇' : '🎵'; };
-$('musBtn').onclick = () => { Audio8.playTrack((Audio8.trackIdx + 1) % Audio8.tracks.length); };
-$('chatToggleBtn').onclick = () => { $('chat').classList.toggle('hidden'); };
-
-
-/* ============================================================
-   РЕНДЕРЕР: РИСОВАНИЕ МИРА, ФАКЕЛОВ, ОСВЕЩЕНИЯ И СЕТКИ
-   ============================================================ */
-cv.addEventListener('touchmove', e => {
-  const touch = e.touches[0];
-  const rect = cv.getBoundingClientRect();
-  const scaleX = vw / rect.width;
-  const scaleY = vh / rect.height;
-  activeTouchWorldX = (touch.clientX - rect.left) * scaleX + cam.x;
-  activeTouchWorldY = (touch.clientY - rect.top) * scaleY + cam.y;
-}, { passive: true });
-
-cv.addEventListener('touchend', () => {
-  activeTouchWorldX = -1;
-  activeTouchWorldY = -1;
+// Движение пальцем
+let touchX = null, touchY = null;
+canvas.addEventListener('touchstart', e => {
+const t = e.touches[0];
+touchX = t.clientX; touchY = t.clientY;
 });
-
-function resize(){
-  dpr = Math.min(1.8, window.devicePixelRatio || 1);
-  vw = Math.ceil(innerWidth / ZOOM); vh = Math.ceil(innerHeight / ZOOM);
-  cv.width = innerWidth * dpr; cv.height = innerHeight * dpr;
-  ctx.setTransform(dpr * ZOOM, 0, 0, dpr * ZOOM, 0, 0);
+canvas.addEventListener('touchmove', e => {
+if(!touchX || !touchY) return;
+const t = e.touches[0];
+const dx = t.clientX - touchX;
+const dy = t.clientY - touchY;
+const threshold = 20;
+if(Math.abs(dx) > threshold) {
+posX += Math.sign(dx);
+touchX = t.clientX;
 }
-window.addEventListener('resize', resize); resize();
-
-$('zoomOutBtn').onclick = () => { ZOOM = clamp(ZOOM - 0.12, 0.75, 1.8); resize(); };
-$('zoomInBtn').onclick = () => { ZOOM = clamp(ZOOM + 0.12, 0.75, 1.8); resize(); };
-$('fullScrBtn').onclick = () => { tryFullscreen(); };
-
-function drawSky(){
-  const skyG = ctx.createLinearGradient(0, 0, 0, vh);
-  skyG.addColorStop(0, '#111638');
-  skyG.addColorStop(0.6, '#182046');
-  skyG.addColorStop(1, '#2c3960');
-  ctx.fillStyle = skyG;
-  ctx.fillRect(0, 0, vw, vh);
+if(Math.abs(dy) > threshold) {
+posY += Math.sign(dy);
+touchY = t.clientY;
 }
+posX = Math.max(0, Math.min(WORLD_SIZE-1, posX));
+posY = Math.max(0, Math.min(WORLD_SIZE-1, posY));
+updatePos();
+});
+canvas.addEventListener('touchend', () => { touchX = null; touchY = null; });
 
-function drawWorldAndPlayers(){
-  const tx0 = Math.max(0, Math.floor(cam.x / TILE) - 1);
-  const tx1 = Math.min(WW - 1, Math.floor((cam.x + vw) / TILE) + 1);
-  const ty0 = Math.max(0, Math.floor(cam.y / TILE) - 1);
-  const ty1 = Math.min(WH - 1, Math.floor((cam.y + vh) / TILE) + 1);
-
-  for (let ty = ty0; ty <= ty1; ty++) {
-    for (let tx = tx0; tx <= tx1; tx++) {
-      const v = tileAt(tx, ty);
-      if (v === B.AIR) continue;
-      
-      const x = tx * TILE - cam.x;
-      const y = ty * TILE - cam.y;
-      const data = BLOCK_DATA[v];
-
-      ctx.fillStyle = data.color;
-      ctx.fillRect(x, y, TILE, TILE);
-
-      if (v === B.GRASS) {
-        ctx.fillStyle = data.top;
-        ctx.fillRect(x, y, TILE, 4);
-      } else if (v === B.TORCH) {
-        ctx.fillStyle = '#ff8f1e';
-        ctx.fillRect(x + 14, y + 10, 4, 10);
-        ctx.fillStyle = '#ffdf4f';
-        ctx.fillRect(x + 12, y + 6, 8, 8);
-      } else if (v === B.LAVA) {
-        ctx.fillStyle = '#ffae2e';
-        ctx.fillRect(x, y + 4 + Math.sin(performance.now()/200 + tx)*2, TILE, 4);
-      }
-    }
-  }
-
-  // Рисование СЕТКИ под пальцем
-  if (activeTouchWorldX !== -1) {
-    const targetTX = Math.floor(activeTouchWorldX / TILE);
-    const targetTY = Math.floor(activeTouchWorldY / TILE);
-    
-    const px = Math.floor((P.x + P.w/2) / TILE);
-    const py = Math.floor((P.y + P.h/2) / TILE);
-    const dist = Math.hypot(targetTX - px, targetTY - py);
-
-    ctx.save();
-    ctx.strokeStyle = dist <= 5.8 ? 'rgba(125,255,125,0.8)' : 'rgba(255,125,125,0.8)';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(targetTX * TILE - cam.x, targetTY * TILE - cam.y, TILE, TILE);
-    ctx.restore();
-  }
-
-  // Частицы
-  for (const p of particles) {
-    ctx.globalAlpha = p.life / p.maxLife;
-    ctx.fillStyle = p.color;
-    ctx.fillRect(p.x - cam.x, p.y - cam.y, p.size, p.size);
-  }
-  ctx.globalAlpha = 1;
-
-  // Сетевые игроки
-  for (const k in remotes) {
-    const r = remotes[k];
-    if (r.rx + TILE < cam.x || r.rx > cam.x + vw || r.ry + TILE < cam.y || r.ry > cam.y + vh) continue;
-    drawChar(r.rx - cam.x, r.ry - cam.y, r.d, r.n, false, r.hp);
-  }
-
-  // Твой персонаж
-  if (P.deadT <= 0) {
-    drawChar(P.x - cam.x, P.y - cam.y, P.dir, MY_NAME, true, P.hp);
-  }
+function updatePos() {
+db.ref('players/'+playerId).update({x:posX, y:posY});
 }
 
-function drawChar(x, y, dir, name, isMe, hp) {
-  ctx.save();
-  ctx.translate(x + P.w/2, y + P.h/2);
-  ctx.scale(dir, 1);
-
-  ctx.fillStyle = isMe ? '#4f7cff' : '#39d98a';
-  ctx.fillRect(-P.w/2, -P.h/2, P.w, P.h);
-
-  ctx.fillStyle = '#fff';
-  ctx.fillRect(P.w/2 - 8, -P.h/2 + 5, 4, 4);
-  ctx.fillStyle = '#000';
-  ctx.fillRect(P.w/2 - 6, -P.h/2 + 5, 2, 2);
-
-  ctx.restore();
-
-  if (name) {
-    ctx.font = 'bold 11px Rubik';
-    ctx.textAlign = 'center';
-    ctx.fillStyle = '#fff';
-    ctx.shadowColor = '#000'; ctx.shadowBlur = 4;
-    ctx.fillText(name, x + P.w/2, y - 10);
-    ctx.shadowBlur = 0;
-
-    if (hp < 100) {
-      ctx.fillStyle = 'rgba(0,0,0,0.5)';
-      ctx.fillRect(x - 2, y - 6, P.w + 4, 3);
-      ctx.fillStyle = '#ff5c7a';
-      ctx.fillRect(x - 2, y - 6, (P.w + 4) * (hp/100), 3);
-    }
-  }
+function breakBlock() {
+const key = Math.round(posX)+'_'+Math.round(posY);
+if(worldData[key] !== null && worldData[key] !== undefined) {
+delete worldData[key];
+db.ref('world/'+key).remove();
+}
 }
 
-// RTX динамическое освещение вокруг факелов и персонажа
-function drawLighting() {
-  ctx.save();
-  ctx.globalCompositeOperation = 'multiply';
-
-  const lightMap = ctx.createLinearGradient(0, 0, 0, vh);
-  lightMap.addColorStop(0, 'rgba(255,255,255,1.0)'); 
-  lightMap.addColorStop(0.38, 'rgba(18,22,32,0.7)'); 
-  lightMap.addColorStop(1.0, 'rgba(8,10,18,0.96)');  
-  
-  ctx.fillStyle = lightMap;
-  ctx.fillRect(0, 0, vw, vh);
-
-  ctx.globalCompositeOperation = 'screen';
-
-  if (P.deadT <= 0) {
-    const pGlow = ctx.createRadialGradient(P.x+P.w/2 - cam.x, P.y+P.h/2 - cam.y, 10, P.x+P.w/2 - cam.x, P.y+P.h/2 - cam.y, 140);
-    pGlow.addColorStop(0, 'rgba(255,240,200,0.8)');
-    pGlow.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.fillStyle = pGlow;
-    ctx.beginPath(); ctx.arc(P.x+P.w/2 - cam.x, P.y+P.h/2 - cam.y, 140, 0, 7); ctx.fill();
-  }
-
-  const tx0 = Math.max(0, Math.floor(cam.x / TILE) - 1);
-  const tx1 = Math.min(WW - 1, Math.floor((cam.x + vw) / TILE) + 1);
-  const ty0 = Math.max(0, Math.floor(cam.y / TILE) - 1);
-  const ty1 = Math.min(WH - 1, Math.floor((cam.y + vh) / TILE) + 1);
-
-  for (let ty = ty0; ty <= ty1; ty++) {
-    for (let tx = tx0; tx <= tx1; tx++) {
-      const v = tileAt(tx, ty);
-      const data = BLOCK_DATA[v];
-      if (data && data.light) {
-        const x = tx * TILE + TILE/2 - cam.x;
-        const y = ty * TILE + TILE/2 - cam.y;
-        const rad = data.light * TILE;
-        
-        const glow = ctx.createRadialGradient(x, y, 8, x, y, rad);
-        if (v === B.TORCH) {
-          glow.addColorStop(0, 'rgba(255,210,110,0.9)');
-          glow.addColorStop(1, 'rgba(0,0,0,0)');
-        } else if (v === B.LAVA) {
-          glow.addColorStop(0, 'rgba(255,90,20,0.85)');
-          glow.addColorStop(1, 'rgba(0,0,0,0)');
-        }
-        
-        ctx.fillStyle = glow;
-        ctx.beginPath(); ctx.arc(x, y, rad, 0, 7); ctx.fill();
-      }
-    }
-  }
-
-  ctx.restore();
+function placeBlock() {
+const key = Math.round(posX+1)+'_'+Math.round(posY);
+if(!worldData[key]) {
+worldData[key] = myBlock;
+db.ref('world/'+key).set(myBlock);
+}
 }
 
-/* ---------- Игровой Loop ---------- */
-let lastTs = 0, dtAcc = 0;
-
-function update(){
-  stepPlayer();
-  updParticles();
-  smoothRemotes();
+function renderWorld() {
+const s = cellSize;
+ctx.clearRect(0,0,canvas.width,canvas.height);
+for(let y=0; y<WORLD_SIZE; y++) {
+for(let x=0; x<WORLD_SIZE; x++) {
+const key = x+'_'+y;
+const block = worldData[key];
+if(block !== null && block !== undefined) {
+ctx.fillStyle = BLOCK_COLORS[block] || '#555';
+ctx.fillRect(x*s, y*s, s, s);
+ctx.strokeStyle = '#333';
+ctx.lineWidth = 1;
+ctx.strokeRect(x*s, y*s, s, s);
+}
+}
+}
+for(const id in players) {
+const p = players[id];
+if(!p || !p.nick) continue;
+const px = p.x * s, py = p.y * s;
+const isMe = id === playerId;
+ctx.fillStyle = isMe ? '#f0c27f' : '#ff6b6b';
+ctx.beginPath();
+ctx.arc(px+s/2, py+s/2, s/2.5, 0, Math.PI*2);
+ctx.fill();
+ctx.fillStyle = '#fff';
+ctx.font = `${s/3}px sans-serif`;
+ctx.textAlign = 'center';
+ctx.fillText(p.nick, px+s/2, py-4);
+if(isMe) {
+ctx.strokeStyle = '#f0c27f';
+ctx.lineWidth = 3;
+ctx.strokeRect(px, py, s, s);
+}
+}
+requestAnimationFrame(renderWorld);
 }
 
-function loop(ts){
-  requestAnimationFrame(loop);
-  if (!lastTs) lastTs = ts;
-  dtAcc += Math.min(100, ts - lastTs);
-  lastTs = ts;
-
-  while(dtAcc >= 16.66) {
-    update();
-    dtAcc -= 16.66;
-  }
-
-  drawSky();
-  drawWorldAndPlayers();
-  drawLighting();
+function updatePlayerList() {
+const container = document.getElementById('player-list');
+container.innerHTML = '';
+for(const id in players) {
+const p = players[id];
+if(!p || !p.nick) continue;
+const div = document.createElement('div');
+div.textContent = p.nick + (id===playerId?' (ты)':'');
+if(id===playerId) div.className = 'me';
+container.appendChild(div);
+}
 }
 
-let toastT = null;
-function toast(msg, ms = 2200){
-  const el = $('toast'); el.innerHTML = msg; el.classList.add('show');
-  clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('show'), ms);
+renderWorld();
+
+setInterval(() => {
+if(playerId) {
+db.ref('players/'+playerId).update({hp:hp, food:food});
 }
+}, 2000);
+
+window.addEventListener('beforeunload', () => {
+if(playerId) db.ref('players/'+playerId).remove();
+auth.signOut();
+});
+}
+
 </script>
 </body>
 </html>
