@@ -2,14 +2,14 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>БЛОКРАН — мультиплеерный паркур-платформер</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Rubik:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-  html,body { width:100%; height:100%; overflow:hidden; background:#05070f; font-family:'Rubik',sans-serif; }
-  #game { position:fixed; inset:0; width:100%; height:100%; display:block; image-rendering:auto; }
+  html,body { width:100%; height:100%; overflow:hidden; background:#05070f; font-family:'Rubik',sans-serif; user-select:none; }
+  #game { position:fixed; inset:0; width:100%; height:100%; display:block; image-rendering:pixelated; }
 
   /* ---------- AUTH ---------- */
   #auth {
@@ -58,13 +58,26 @@
     position:absolute; top:10px; left:12px; display:flex; flex-direction:column; gap:6px;
     color:#eaf1ff; text-shadow:0 2px 6px #000;
   }
-  #zoneName { font-family:'Press Start 2P'; font-size:13px; letter-spacing:1px; color:#ffe98a; filter:drop-shadow(0 0 8px rgba(255,220,100,.4)); }
+  #zoneName { font-family:'Press Start 2P'; font-size:11px; letter-spacing:1px; color:#ffe98a; filter:drop-shadow(0 0 8px rgba(255,220,100,.4)); }
   #stats { font-size:13px; color:#c9d7ff; display:flex; gap:14px; }
   #stats b { color:#fff; }
-  #progWrap { width:min(340px,42vw); height:10px; border-radius:6px; background:rgba(8,12,30,.7); border:1px solid rgba(130,165,255,.3); position:relative; overflow:visible; }
+  #progWrap { width:min(320px,38vw); height:10px; border-radius:6px; background:rgba(8,12,30,.7); border:1px solid rgba(130,165,255,.3); position:relative; overflow:visible; }
   #progFill { height:100%; width:0%; border-radius:6px; background:linear-gradient(90deg,#39d98a,#ffe45c,#ff7a4f); box-shadow:0 0 10px rgba(120,255,170,.5); transition:width .3s; }
   .cpTick { position:absolute; top:-3px; width:2px; height:14px; background:rgba(255,255,255,.45); border-radius:2px; }
   #progTxt { font-size:11px; color:#9fb2e6; }
+
+  /* Cam controls & Fullscreen (+ -) */
+  #camControls {
+    position:absolute; top:10px; left:50%; transform:translateX(-50%);
+    display:flex; gap:8px; pointer-events:auto; z-index:30;
+  }
+  .hud-btn {
+    width:44px; height:44px; border-radius:12px; border:1px solid rgba(130,165,255,.3);
+    background:rgba(10,16,40,.75); color:#fff; font-size:16px; font-weight:800; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; backdrop-filter:blur(6px);
+    transition:transform 0.1s, background-color 0.15s; user-select:none; touch-action:manipulation;
+  }
+  .hud-btn:active { transform:scale(0.92); background-color:rgba(95,141,255,.4); }
 
   /* leaderboard */
   #board {
@@ -133,6 +146,13 @@
     <div id="progTxt">0%</div>
     <div id="stats"><span>💀 <b id="deaths">0</b></span><span>🚩 <b id="cps">0</b></span><span>👥 <b id="online">1</b></span><span>📦 <b id="blocks">0</b></span></div>
   </div>
+
+  <div id="camControls">
+    <button class="hud-btn" id="zoomOutBtn" title="Отдалить камеру">🔍−</button>
+    <button class="hud-btn" id="zoomInBtn" title="Приблизить камеру">🔍+</button>
+    <button class="hud-btn" id="fullScrBtn" title="Полный экран без рамок">📺</button>
+  </div>
+
   <div id="board">
     <h3>🏆 Лидеры <span id="boardUpd"></span></h3>
     <div id="boardRows"></div>
@@ -215,6 +235,24 @@ const lerp = (a,b,t) => a+(b-a)*t;
 function mulberry32(seed){ return function(){ seed|=0; seed=seed+0x6D2B79F5|0; let t=Math.imul(seed^seed>>>15,1|seed); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
 const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
+/* Fullscreen API utility */
+function toggleFullscreen() {
+  const doc = window.document;
+  const docEl = doc.documentElement;
+  const requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
+  const cancelFullScreen = doc.exitFullscreen || doc.mozCancelFullScreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
+
+  if(!doc.fullscreenElement && !doc.mozFullScreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement) {
+    requestFullScreen.call(docEl).then(() => {
+      if (screen.orientation && screen.orientation.lock) {
+        screen.orientation.lock('landscape').catch(() => {});
+      }
+    }).catch(err => console.log(err));
+  } else {
+    cancelFullScreen.call(doc);
+  }
+}
+
 /* ---------------- AUTH ---------------- */
 const AUTH_ERR = {
   'auth/invalid-email':'Некорректная почта',
@@ -238,6 +276,7 @@ async function doRegister(){
   if (!email || !pass) { $('authErr').textContent = 'Заполни почту и пароль'; return; }
   busyAuth = true; $('regBtn').innerHTML = '<span class="spin"></span> СОЗДАЮ…';
   try {
+    toggleFullscreen();
     const cr = await auth.createUserWithEmailAndPassword(email, pass);
     await db.ref('users/' + cr.user.uid).set({ name: nick, created: firebase.database.ServerValue.TIMESTAMP });
     MY_NAME = nick;
@@ -250,8 +289,175 @@ async function doLogin(){
   $('authErr').textContent = '';
   if (!email || !pass) { $('authErr').textContent = 'Введи почту и пароль'; return; }
   busyAuth = true; $('loginBtn').innerHTML = '<span class="spin"></span> ВХОЖУ…';
-  try { await auth.signInWithEmailAndPassword(email, pass); }
-  catch(e){ authError(e); }
+  try {
+    toggleFullscreen();
+    await auth.signInWithEmailAndPassword(email, pass);
+  } catch(e){ authError(e); }
+  busyAuth = false; $('loginBtn').textContent = 'ВОЙТИ В ИГРУ';
+}
+$('regBtn').onclick = doRegister;
+$('loginBtn').onclick = doLogin;
+$('pass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+</style>
+</head>
+<body>
+<canvas id="game"></canvas>
+<div id="vignette"></div>
+
+<div id="hud">
+  <div id="topbar">
+    <div id="zoneName">ЗЕЛЁНЫЕ ХОЛМЫ</div>
+    <div id="progWrap"><div id="progFill"></div></div>
+    <div id="progTxt">0%</div>
+    <div id="stats"><span>💀 <b id="deaths">0</b></span><span>🚩 <b id="cps">0</b></span><span>👥 <b id="online">1</b></span><span>📦 <b id="blocks">0</b></span></div>
+  </div>
+
+  <div id="camControls">
+    <button class="hud-btn" id="zoomOutBtn" title="Отдалить камеру">🔍−</button>
+    <button class="hud-btn" id="zoomInBtn" title="Приблизить камеру">🔍+</button>
+    <button class="hud-btn" id="fullScrBtn" title="Полный экран без рамок">📺</button>
+  </div>
+
+  <div id="board">
+    <h3>🏆 Лидеры <span id="boardUpd"></span></h3>
+    <div id="boardRows"></div>
+  </div>
+  <div id="toast"></div>
+  <button id="musBtn" title="Следующий трек">🎵</button>
+  <button id="muteBtn" title="Звук (M)">🔊</button>
+  <div id="trackName"></div>
+  <div id="touch">
+    <div class="tbtn" id="tLeft">◀</div>
+    <div class="tbtn" id="tRight">▶</div>
+    <div class="tbtn" id="tJump">⤒</div>
+  </div>
+</div>
+
+<div id="auth">
+  <div class="auth-card">
+    <div class="logo">
+      <svg width="42" height="42" viewBox="0 0 48 48">
+        <defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#6ee7ff"/><stop offset=".55" stop-color="#4f7cff"/><stop offset="1" stop-color="#b96bff"/>
+        </linearGradient></defs>
+        <rect x="4" y="26" width="18" height="18" rx="3" fill="url(#lg)"/>
+        <rect x="26" y="26" width="18" height="18" rx="3" fill="#39d98a"/>
+        <rect x="15" y="4" width="18" height="18" rx="3" fill="#ffd94f"/>
+        <circle cx="21" cy="11" r="2.4" fill="#20263f"/><circle cx="27" cy="11" r="2.4" fill="#20263f"/>
+      </svg>
+      <h1>БЛОКРАН</h1>
+    </div>
+    <div class="tagline">Один огромный уровень. Десять игроков. Куча смертей. 😄</div>
+    <div class="field" id="nickField">
+      <label>Ник (видят все игроки)</label>
+      <input id="nick" maxlength="14" placeholder="Например: КотБегун" autocomplete="off">
+    </div>
+    <div class="field">
+      <label>Почта</label>
+      <input id="email" type="email" placeholder="you@example.com" autocomplete="email">
+    </div>
+    <div class="field">
+      <label>Пароль</label>
+      <input id="pass" type="password" placeholder="Минимум 6 символов" autocomplete="current-password">
+    </div>
+    <button class="btn btn-primary" id="loginBtn">ВОЙТИ В ИГРУ</button>
+    <button class="btn btn-ghost" id="regBtn">СОЗДАТЬ АККАУНТ</button>
+    <div id="authErr"></div>
+    <div class="hint">🏃 A/D или ←/→ — бег · ПРОБЕЛ — прыжок (двойной!) · от стен можно отталкиваться<br>
+    💾 Флаги — точки возрождения · 🏆 Кто дальше всех — тот легенда</div>
+  </div>
+</div>
+
+<div id="rotate"><div class="ph">📱</div><p>Поверни телефон горизонтально — так паркурить гораздо веселее!</p></div>
+<div id="loading"><div class="spin" style="width:26px;height:26px;border-width:3px"></div><div id="loadTxt">ЗАГРУЗКА МИРА…</div></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script>
+'use strict';
+/* ============================================================
+   БЛОКРАН — мультиплеерный паркур-платформер
+   Firebase Realtime Database + Auth, один файл
+   ============================================================ */
+const firebaseConfig = {
+  apiKey: "AIzaSyBm0mIvHVznIeF2PoFk6dtdaiT5r877wyA",
+  authDomain: "meow-874ce.firebaseapp.com",
+  databaseURL: "https://meow-874ce-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "meow-874ce",
+  storageBucket: "meow-874ce.firebasestorage.app",
+  messagingSenderId: "471541334599",
+  appId: "1:471541334599:web:567af3e7dbe70a37572762"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.database();
+
+/* ---------------- утилиты ---------------- */
+const $ = id => document.getElementById(id);
+const clamp = (v,a,b) => v<a?a:(v>b?b:v);
+const lerp = (a,b,t) => a+(b-a)*t;
+function mulberry32(seed){ return function(){ seed|=0; seed=seed+0x6D2B79F5|0; let t=Math.imul(seed^seed>>>15,1|seed); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* Fullscreen API utility */
+function toggleFullscreen() {
+  const doc = window.document;
+  const docEl = doc.documentElement;
+  const requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
+  const cancelFullScreen = doc.exitFullscreen || doc.mozCancelFullScreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
+
+  if(!doc.fullscreenElement && !doc.mozFullScreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement) {
+    requestFullScreen.call(docEl).then(() => {
+      if (screen.orientation && screen.orientation.lock) {
+        screen.orientation.lock('landscape').catch(() => {});
+      }
+    }).catch(err => console.log(err));
+  } else {
+    cancelFullScreen.call(doc);
+  }
+}
+
+/* ---------------- AUTH ---------------- */
+const AUTH_ERR = {
+  'auth/invalid-email':'Некорректная почта',
+  'auth/user-not-found':'Игрок с такой почтой не найден',
+  'auth/wrong-password':'Неверный пароль',
+  'auth/invalid-credential':'Неверная почта или пароль',
+  'auth/email-already-in-use':'Такая почта уже зарегистрирована',
+  'auth/weak-password':'Пароль слишком слабый (мин. 6 символов)',
+  'auth/too-many-requests':'Слишком много попыток. Подожди немного',
+  'auth/network-request-failed':'Нет соединения с сервером'
+};
+function authError(e){ $('authErr').textContent = AUTH_ERR[e.code] || ('Ошибка: ' + (e.code||e.message)); }
+function validNick(n){ return /^[A-Za-zА-Яа-яЁё0-9_\-]{2,14}$/.test(n); }
+let busyAuth = false;
+
+async function doRegister(){
+  if (busyAuth) return;
+  const nick = $('nick').value.trim(), email = $('email').value.trim(), pass = $('pass').value;
+  $('authErr').textContent = '';
+  if (!validNick(nick)) { $('authErr').textContent = 'Ник: 2–14 символов (буквы, цифры, _ и -)'; return; }
+  if (!email || !pass) { $('authErr').textContent = 'Заполни почту и пароль'; return; }
+  busyAuth = true; $('regBtn').innerHTML = '<span class="spin"></span> СОЗДАЮ…';
+  try {
+    toggleFullscreen();
+    const cr = await auth.createUserWithEmailAndPassword(email, pass);
+    await db.ref('users/' + cr.user.uid).set({ name: nick, created: firebase.database.ServerValue.TIMESTAMP });
+    MY_NAME = nick;
+  } catch(e){ authError(e); }
+  busyAuth = false; $('regBtn').textContent = 'СОЗДАТЬ АККАУНТ';
+}
+async function doLogin(){
+  if (busyAuth) return;
+  const email = $('email').value.trim(), pass = $('pass').value;
+  $('authErr').textContent = '';
+  if (!email || !pass) { $('authErr').textContent = 'Введи почту и пароль'; return; }
+  busyAuth = true; $('loginBtn').innerHTML = '<span class="spin"></span> ВХОЖУ…';
+  try {
+    toggleFullscreen();
+    await auth.signInWithEmailAndPassword(email, pass);
+  } catch(e){ authError(e); }
   busyAuth = false; $('loginBtn').textContent = 'ВОЙТИ В ИГРУ';
 }
 $('regBtn').onclick = doRegister;
@@ -265,6 +471,7 @@ $('pass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); }
    ============================================================ */
 const Audio8 = {
   ctx:null, master:null, musG:null, sfxG:null, noiseBuf:null,
+  rainG:null, rainSrc:null,
   trackIdx:-1, step:0, nextT:0, timer:null, muted:false, ready:false,
 
   init(){
@@ -275,15 +482,43 @@ const Audio8 = {
     this.master = this.ctx.createGain(); this.master.gain.value = 0.6; this.master.connect(this.ctx.destination);
     this.musG = this.ctx.createGain(); this.musG.gain.value = 0.34; this.musG.connect(this.master);
     this.sfxG = this.ctx.createGain(); this.sfxG.gain.value = 0.5; this.sfxG.connect(this.master);
+    this.rainG = this.ctx.createGain(); this.rainG.gain.value = 0.0; this.rainG.connect(this.master);
+
     const len = this.ctx.sampleRate * 0.5, buf = this.ctx.createBuffer(1, len, this.ctx.sampleRate), d = buf.getChannelData(0);
     for (let i=0;i<len;i++) d[i] = Math.random()*2-1;
     this.noiseBuf = buf;
+
+    // Синтез процедурного шума дождя
+    const rainBufLen = this.ctx.sampleRate * 2;
+    const rainBuf = this.ctx.createBuffer(1, rainBufLen, this.ctx.sampleRate);
+    const rd = rainBuf.getChannelData(0);
+    for(let i=0; i<rainBufLen; i++) rd[i] = Math.random() * 2 - 1;
+
+    this.rainSrc = this.ctx.createBufferSource();
+    this.rainSrc.buffer = rainBuf;
+    this.rainSrc.loop = true;
+
+    const rainFilter = this.ctx.createBiquadFilter();
+    rainFilter.type = 'lowpass';
+    rainFilter.frequency.value = 1000;
+
+    this.rainSrc.connect(rainFilter);
+    rainFilter.connect(this.rainG);
+    this.rainSrc.start(0);
+
     this.ready = true;
     this.nextT = this.ctx.currentTime + 0.1;
     this.timer = setInterval(()=>this.schedule(), 40);
   },
   resume(){ if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume(); },
   toggleMute(){ this.muted = !this.muted; if (this.master) this.master.gain.value = this.muted ? 0 : 0.6; return this.muted; },
+
+  updateRainSound(intensity) {
+    if (!this.ready || this.muted) return;
+    if (this.rainG) {
+      this.rainG.gain.setTargetAtTime(intensity * 0.28, this.ctx.currentTime, 0.2);
+    }
+  },
 
   /* ---- треки: по одному на каждую зону ---- */
   tracks: [
@@ -394,7 +629,7 @@ const Audio8 = {
    Генерация детерминированная (одинаковый мир у всех игроков)
    ============================================================ */
 const TILE = 36, WW = 4800, WH = 70, WORLD_PX = WW * TILE, SEED = 20260717;
-const T = { E:0, S:1, SPK:2, LAV:3, CP:4, SPR:5, ICE:6, CRU:7 };
+const T = { E:0, S:1, SPK:2, LAV:3, CP:4, SPR:5, ICE:6, CRU:7, SLM:8 };
 const world = new Uint8Array(WW * WH);
 const surf = new Int16Array(WW).fill(WH);
 const ZONEW = WW / 5 | 0;
@@ -409,8 +644,8 @@ const ZONES = [
 ];
 
 const plats = [];    // двигающиеся платформы {ax,ay,bx,by,w,h,period,phase, px,py, dx,dy}
-const saws = [];     // пилы {ax,ay,bx,by,r,period,phase, px,py}
-const enemies = [];  // слаймы {ax,bx,y,sp,phase, deadUntil:Map(local)}
+const saws = [];     // пилы/ловушки
+const enemies = [];  // враги (слаймы, зомби, демонические глаза)
 const cps = [];      // чекпоинты {tx,ty,id,finish}
 const crystals = []; // декор-подсветка в пещерах
 let FINISH_X = 0;
@@ -423,7 +658,7 @@ function tileAt(tx, ty){
 }
 function solidAt(tx, ty){
   const v = tileAt(tx, ty);
-  if (v === T.S || v === T.ICE) return true;
+  if (v === T.S || v === T.ICE || v === T.SLM) return true;
   if (v === T.CRU){
     const c = crumbles.get(ty * WW + tx);
     return !(c && c.st === 2);
@@ -439,13 +674,18 @@ function genWorld(){
   function setGround(x0, x1, y, top){
     for (let x = x0; x < x1; x++){
       if (x < 0 || x >= WW) continue;
-      for (let yy = Math.max(0, y - 16); yy < y; yy++) if (world[yy * WW + x] === 0 || world[yy * WW + x] === T.S || world[yy * WW + x] === T.ICE) world[yy * WW + x] = 0;
+      for (let yy = Math.max(0, y - 16); yy < y; yy++) {
+        const v = world[yy * WW + x];
+        if (v === 0 || v === T.S || v === T.ICE || v === T.SLM) world[yy * WW + x] = 0;
+      }
       surf[x] = y;
       for (let yy = y; yy < WH; yy++) world[yy * WW + x] = T.S;
       if (top) world[y * WW + x] = top;
     }
   }
+
   const topFor = z => z === 2 ? T.ICE : T.S;
+
   function plat(ax, ay, bx, by, phase){
     const dist = Math.hypot(bx - ax, by - ay) || 1;
     plats.push({ ax, ay, bx, by, w: 3 * TILE, h: 14, period: 2 * dist / 95 * 1000, phase: phase || 0, px: ax, py: ay, dx: 0, dy: 0 });
@@ -459,6 +699,24 @@ function genWorld(){
     saws.push({ ax, ay, bx, by, r: 13, period: 2 * dist / 130 * 1000, phase: R(), bat: true, px: ax, py: ay });
   }
 
+  function spawnEnemy(type, ax, bx, y, sp, colorStyle) {
+    enemies.push({
+      type,
+      ax, bx, y,
+      ay: y,
+      sp: sp || 60,
+      phase: R(),
+      ex: ax,
+      ey: y,
+      dir: 1,
+      deadUntil: 0,
+      aggro: false,
+      jumpY: 0,
+      groundY: y,
+      typeColor: colorStyle || '#62c94f'
+    });
+  }
+
   /* ------- фичи (каждая возвращает [новыйX, новыйAnchor]) ------- */
   function fFlat(x, a, z, d){
     const len = ri(9, 20);
@@ -468,27 +726,51 @@ function genWorld(){
       setGround(x + i, Math.min(x + i + seg, x + len), y, topFor(z));
       y = clamp(y + ri(-1, 1), a - 2, a + 2);
     }
-    setGround(x, x + len, a, topFor(z)); // выравниваем финальным проходом с микрорельефом
+    setGround(x, x + len, a, topFor(z)); 
     let yy = a;
     for (let i = 0; i < len; i += ri(4, 7)){
       const seg = ri(4, 7);
       setGround(x + i, Math.min(x + i + seg, x + len), yy, topFor(z));
       yy = clamp(yy + ri(-1, 1), a - 2, a + 2);
     }
-    if (z >= 1 && R() < 0.45 && len >= 10)
-      enemies.push({ ax: (x + 1) * TILE, bx: (x + len - 2) * TILE, y: a * TILE, sp: (0.5 + d) * 55, phase: R() });
-    if (z >= 3 && R() < 0.3)
+
+    // Спавн разнообразных врагов по зонам
+    if (len >= 10) {
+      if (z === 0) {
+        spawnEnemy('slime', (x + 2) * TILE, (x + len - 2) * TILE, a * TILE, 45, '#62c94f');
+      } else if (z === 1) {
+        if (R() < 0.5) spawnEnemy('eye', (x + 3) * TILE, (x + len - 3) * TILE, (a - 4) * TILE, 50, '#ff5c5c');
+        else spawnEnemy('slime', (x + 2) * TILE, (x + len - 2) * TILE, a * TILE, 55, '#c98bff');
+      } else if (z === 2) {
+        spawnEnemy('zombie', (x + 2) * TILE, (x + len - 2) * TILE, a * TILE, 35, '#84b3d8'); // Ледяной зомби
+      } else if (z === 3) {
+        if (R() < 0.6) spawnEnemy('zombie', (x + 2) * TILE, (x + len - 2) * TILE, a * TILE, 45, '#a04a42'); // Адский зомби
+        else spawnEnemy('eye', (x + 3) * TILE, (x + len - 3) * TILE, (a - 5) * TILE, 70, '#ff3a3a');
+      } else if (z === 4) {
+        spawnEnemy('eye', (x + 2) * TILE, (x + len - 2) * TILE, (a - 4) * TILE, 80, '#eaf1ff');
+      }
+    }
+
+    if (z >= 3 && R() < 0.3) {
       bat((x + 2) * TILE, (a - 6) * TILE, (x + len - 2) * TILE, (a - 3) * TILE);
+    }
     return [x + len, a];
   }
+
   function fGap(x, a, z, d){
     const w = 3 + Math.round(d * 2) + ri(0, 1);
     const na = clamp(a + ri(-2, 2), 18, WH - 12);
-    if (z === 3) { // лава на дне пропасти
-      for (let i = 0; i < w; i++){ surf[x + i] = WH; for (let yy = a + 8; yy < WH; yy++) world[yy * WW + x + i] = T.S; world[(a + 7) * WW + x + i] = T.LAV; world[(a + 8) * WW + x + i] = T.LAV; }
+    if (z === 3) { 
+      for (let i = 0; i < w; i++){ 
+        surf[x + i] = WH; 
+        for (let yy = a + 8; yy < WH; yy++) world[yy * WW + x + i] = T.S; 
+        world[(a + 7) * WW + x + i] = T.LAV; 
+        world[(a + 8) * WW + x + i] = T.LAV; 
+      }
     }
     return [x + w, na];
   }
+
   function fWideGap(x, a, z, d){
     const w = ri(8, 11 + Math.round(d * 3));
     if (z >= 2 && R() < 0.35){
@@ -502,12 +784,14 @@ function genWorld(){
     const na = clamp(a + ri(-2, 2), 18, WH - 12);
     return [x + w, na];
   }
+
   function fSpikes(x, a, z, d){
     const w = 2 + Math.round(d * 3) + ri(0, 1);
     setGround(x, x + w + 2, a, topFor(z));
     for (let i = 1; i <= w; i++) world[(a - 1) * WW + x + i] = T.SPK;
     return [x + w + 2, a];
   }
+
   function fStairs(x, a, z, d){
     const steps = ri(3, 4);
     for (let i = 0; i < steps; i++){
@@ -519,21 +803,31 @@ function genWorld(){
     if (z >= 2 && R() < 0.4) saw((x + 1) * TILE, (na - 1) * TILE + 16, (x + steps * 3) * TILE, (na - 1) * TILE + 16, 13);
     return [x + steps * 3 + 5, na];
   }
+
   function fSpring(x, a, z, d){
     const h = ri(5, 6);
     setGround(x, x + 4, a, topFor(z));
-    world[(a - 1) * WW + x + 2] = T.SPR;
-    world[(a - 3) * WW + x + 2] = T.S; world[(a - 3) * WW + x + 3] = T.S; // запасная платформа
+    
+    // Новая механика: Местами упругий блок Слизи вместо обычной пружины!
+    if (R() < 0.5) {
+      world[(a - 1) * WW + x + 2] = T.SLM;
+    } else {
+      world[(a - 1) * WW + x + 2] = T.SPR;
+    }
+    
+    world[(a - 3) * WW + x + 2] = T.S; world[(a - 3) * WW + x + 3] = T.S; 
     const na = clamp(a - h, 18, WH - 12);
     setGround(x + 4, x + 10, na, topFor(z));
     return [x + 10, na];
   }
+
   function fCrumble(x, a, z, d){
     const w = 4 + Math.round(d * 4);
     for (let i = 0; i < w; i++){ surf[x + i] = a; world[a * WW + x + i] = T.CRU; }
     const na = clamp(a + ri(-1, 2), 18, WH - 12);
     return [x + w, na];
   }
+
   function fSaw(x, a, z, d){
     const len = ri(6, 9);
     setGround(x, x + len, a, topFor(z));
@@ -541,6 +835,7 @@ function genWorld(){
     if (R() < 0.4 + d * 0.3) saw((x + len - 1) * TILE, a * TILE - 12 - TILE, (x + 1) * TILE, a * TILE - 12 - TILE, 13);
     return [x + len, a];
   }
+
   function fLava(x, a, z, d){
     const w = ri(4, 6) + Math.round(d * 2);
     setGround(x, x + w, a + 3, T.S);
@@ -548,6 +843,7 @@ function genWorld(){
     if (R() < 0.5) bat((x + 1) * TILE, (a - 4) * TILE, (x + w - 1) * TILE, (a - 1) * TILE);
     return [x + w, a];
   }
+
   function fCheckpoint(x, a, z){
     setGround(x, x + 7, a, topFor(z));
     world[(a - 1) * WW + x + 3] = T.CP;
@@ -576,7 +872,7 @@ function genWorld(){
     const r = R(), tbl = tables[z];
     let kind = 'flat';
     for (const [k, p] of tbl){ if (r < p){ kind = k; break; } }
-    if (isGapKind(lastKind) && isGapKind(kind)) kind = 'flat'; // не две пропасти подряд
+    if (isGapKind(lastKind) && isGapKind(kind)) kind = 'flat'; 
     lastKind = kind;
     let res;
     switch (kind){
@@ -601,7 +897,7 @@ function genWorld(){
   world[(anchor - 1) * WW + (WW - 45)] = T.CP;
   cps.push({ tx: WW - 45, ty: anchor - 1, id: cps.length, finish: true });
 
-  /* кристаллы в пещерной зоне (декор + свет) */
+  /* кристаллы в пещерной зоне */
   for (let cx = ZONEW; cx < ZONEW * 2; cx += ri(14, 40)){
     if (surf[cx] < WH) crystals.push({ x: cx * TILE + 18, y: (surf[cx] - 1) * TILE + 36, h: ri(0, 3) });
   }
@@ -625,9 +921,12 @@ const P = {
 const cam = { x: 0, y: 0 };
 const DIE_LINES = ['💀 Ай! Попробуй ещё раз!', '😅 Это было близко! (нет)', '🪦 Тут твоя могилка №%d', '🔥 Поджарился!', '😵 Ловушка 1 : 0 ты', '🤸 Красивое падение!'];
 
+// Оптимизация: жесткое ограничение на количество частиц для мобильных устройств
 const particles = [];
+const MAX_PARTICLES = 120;
+
 function spawnP(x, y, vx, vy, life, color, size, grav){
-  if (particles.length > 400) particles.shift();
+  if (particles.length > MAX_PARTICLES) particles.shift();
   particles.push({ x, y, vx, vy, life, maxLife: life, color, size, grav: grav == null ? 0.25 : grav });
 }
 const dust = (x, y, n=5) => { for (let i=0;i<n;i++) spawnP(x+(Math.random()-.5)*16, y, (Math.random()-.5)*2, -Math.random()*1.6, 20+Math.random()*15, 'rgba(220,220,255,0.7)', 2+Math.random()*3, 0.12); };
@@ -642,7 +941,7 @@ function updParticles(){
   }
 }
 
-/* ------- сущности мира, движение по абсолютному времени (одинаково у всех) ------- */
+/* ------- СУЩНОСТИ И ВРАГИ (С ИИ И ПАТРУЛЕМ) ------- */
 function updEntities(now){
   for (const p of plats){
     const t = ((now / p.period) + p.phase) % 1;
@@ -655,11 +954,71 @@ function updEntities(now){
     const k = 0.5 - 0.5 * Math.cos(t * 6.2832);
     s.px = s.ax + (s.bx - s.ax) * k; s.py = s.ay + (s.by - s.ay) * k;
   }
+
+  // Расширенный ИИ врагов (Террария стайл)
   for (const e of enemies){
-    const span = e.bx - e.ax, per = 2 * span / e.sp * 1000;
-    const t = ((now / per) + e.phase) % 1;
-    const k = 0.5 - 0.5 * Math.cos(t * 6.2832);
-    e.ex = e.ax + span * k; e.dir = t < 0.5 ? 1 : -1;
+    if (e.deadUntil && e.deadUntil > now) continue;
+
+    const dx = P.x - e.ex;
+    const dy = P.y - e.y;
+    const dist = Math.hypot(dx, dy);
+
+    if (e.type === 'zombie') {
+      // ИИ Зомби: агрится и преследует игрока, умеет прыгать!
+      const inRange = dist < 240 && Math.abs(dy) < 90;
+      if (inRange) {
+        e.aggro = true;
+        e.dir = Math.sign(dx);
+        e.ex += e.dir * 1.8; // Быстрый бег при агре
+
+        // Если перед зомби препятствие - прыгает
+        const checkX = Math.floor((e.ex + e.dir * 12) / TILE);
+        const checkY = Math.floor((e.y - 4) / TILE);
+        if (solidAt(checkX, checkY) && e.jumpY === 0) {
+          e.jumpY = -8.5; // прыжок
+        }
+      } else {
+        e.aggro = false;
+        // обычный патруль в границах
+        const span = e.bx - e.ax;
+        const per = 2 * span / e.sp * 1000;
+        const t = ((now / per) + e.phase) % 1;
+        const k = 0.5 - 0.5 * Math.cos(t * 6.2832);
+        e.ex = e.ax + span * k; e.dir = t < 0.5 ? 1 : -1;
+      }
+
+      // Физика гравитации зомби
+      if (e.jumpY !== 0 || e.y < e.groundY) {
+        e.y += e.jumpY;
+        e.jumpY += 0.45; // гравитация
+        if (e.y >= e.groundY) {
+          e.y = e.groundY;
+          e.jumpY = 0;
+        }
+      }
+    } 
+    else if (e.type === 'eye') {
+      // ИИ Демонический глаз: плавно летит сквозь препятствия прямо на игрока!
+      const inRange = dist < 320;
+      if (inRange) {
+        e.ex += Math.sign(dx) * 1.25;
+        e.y += Math.sign(dy) * 1.0;
+        e.dir = Math.sign(dx) || 1;
+      } else {
+        // Парение на месте
+        e.ex = e.ax + Math.sin(now / 900 + e.phase * 5) * 45;
+        e.y = e.ay + Math.cos(now / 600 + e.phase * 5) * 20;
+        e.dir = Math.sin(now / 900 + e.phase * 5) > 0 ? 1 : -1;
+      }
+    } 
+    else {
+      // Стандартный слайм
+      const span = e.bx - e.ax;
+      const per = 2 * span / e.sp * 1000;
+      const t = ((now / per) + e.phase) % 1;
+      const k = 0.5 - 0.5 * Math.cos(t * 6.2832);
+      e.ex = e.ax + span * k; e.dir = t < 0.5 ? 1 : -1;
+    }
   }
 }
 
@@ -760,6 +1119,11 @@ function checkTiles(){
       P.vy = -18; P.dj = 1; Audio8.spring();
       for (let i=0;i<10;i++) spawnP(P.x+P.w/2, ty*TILE+36, (Math.random()-.5)*3, -Math.random()*3, 20, '#ff8a5c', 3, 0.15);
     }
+    // Новая механика: Блок упругой слизи (Bouncy Slime Block)
+    if (v === T.SLM && P.vy >= 0 && P.y + P.h > ty * TILE + 4){
+      P.vy = -20.5; P.dj = 1; Audio8.spring();
+      for (let i=0;i<12;i++) spawnP(P.x+P.w/2, ty*TILE+24, (Math.random()-.5)*4, -Math.random()*4, 25, '#39d98a', 4, 0.12);
+    }
   }
 }
 
@@ -773,12 +1137,21 @@ function checkHazards(){
   for (const e of enemies){
     if (e.deadUntil && e.deadUntil > nowMs) continue;
     if (Math.abs(e.ex - cx) > 60) continue;
-    const ey = e.y - 20;
-    if (P.x + P.w > e.ex - 13 && P.x < e.ex + 13 && P.y + P.h > ey && P.y < e.y){
+    
+    // В зависимости от типа врага высчитываем высоту
+    const isEye = e.type === 'eye';
+    const ey = isEye ? e.y : e.y - 20;
+    const sizeH = isEye ? 24 : 20;
+
+    if (P.x + P.w > e.ex - 14 && P.x < e.ex + 14 && P.y + P.h > ey - 10 && P.y < ey + sizeH){
+      // Если игрок падает сверху - убиваем врага
       if (P.vy > 1 && (P.y + P.h) - ey < 15){
         e.deadUntil = nowMs + 15000; P.vy = -9.5; Audio8.stomp();
-        burst(e.ex, ey + 10, '#7ddb6a', 16);
-      } else { die(); return; }
+        burst(e.ex, ey + 10, e.typeColor, 18);
+      } else { 
+        die(); 
+        return; 
+      }
     }
   }
   if (P.y > (WH - 1) * TILE) die();
@@ -862,9 +1235,9 @@ function stepPlayer(now){
   P.runT += Math.abs(P.vx);
   if (P.ground && Math.abs(P.vx) > 3 && Math.random() < 0.25) dust(P.x + P.w/2 - P.dir*8, P.y + P.h, 1);
 
-  // камера
-  cam.x = clamp(lerp(cam.x, P.x + P.w/2 - innerWidth * 0.42, 0.14), 0, Math.max(0, WORLD_PX - innerWidth));
-  cam.y = clamp(lerp(cam.y, P.y - innerHeight * 0.58, 0.12), -280, WH * TILE - innerHeight + 180);
+  // Камера слежения за игроком
+  cam.x = clamp(lerp(cam.x, P.x + P.w/2 - vw * 0.42, 0.14), 0, Math.max(0, WORLD_PX - vw));
+  cam.y = clamp(lerp(cam.y, P.y - vh * 0.58, 0.12), -280, WH * TILE - vh + 180);
 }
 
 /* ------- HUD ------- */
@@ -973,7 +1346,7 @@ function joinNet(){
     $('online').textContent = seen.size + 1;
   });
   setInterval(() => { if (Date.now() - lastSend > 90) sendNow(); }, 90);
-  setInterval(() => { saveProgress(false); loadBoard(); }, 30000); // таблица — раз в 30 сек, чтобы не нагружать базу
+  setInterval(() => { saveProgress(false); loadBoard(); }, 30000); 
   window.addEventListener('beforeunload', () => { try { meRef.remove(); } catch(e){} });
 }
 
@@ -1006,7 +1379,7 @@ function loadBoard(){
     rows.sort((a, b) => b.m - a.m);
     $('boardRows').innerHTML = rows.map((r, i) =>
       '<div class="brow' + (r.n === MY_NAME ? ' me' : '') + '">' +
-      '<span class="nm"><i>' + (i + 1) + '.</i>' + (r.fin ? '🏆 ' : '') + esc(r.n || '???') + '</span>' +
+      '<span class="nm" style="max-width:115px"><i style="margin-right:2px">' + (i + 1) + '.</i>' + (r.fin ? '🏆 ' : '') + esc(r.n || '???') + '</span>' +
       '<span class="bl">' + (r.m | 0) + '</span></div>').join('') ||
       '<div class="brow"><span class="nm">Пока пусто…</span></div>';
     $('boardUpd').textContent = new Date().toLocaleTimeString('ru-RU');
@@ -1058,28 +1431,57 @@ function startGame(){
 <script>
 'use strict';
 /* ============================================================
-   РЕНДЕР: canvas, параллакс, свечение, освещение, игровой цикл
+   РЕНДЕР: canvas, параллакс, погода, освещение, игровой цикл
    ============================================================ */
 const cv = $('game'), ctx = cv.getContext('2d');
+
+// Оптимизация: холст освещения downscaled в 4 раза! (Огромный прирост FPS на мобилках)
 const lcv = document.createElement('canvas'), lctx = lcv.getContext('2d');
+const LIGHT_SCALE = 4;
+
+// Кэшированный холст для градиента неба (оптимизация)
+const skyCv = document.createElement('canvas'), skyCtx = skyCv.getContext('2d');
+skyCv.width = 1; skyCv.height = 128;
+
 let vw = 0, vh = 0, dpr = 1, nowMs = 0;
-const ZOOM = 1.6;
+
+// TERRARIA ZOOM MECHANIC
+let ZOOM = 1.4; // Начальный комфортный масштаб
+
+// Динамическая погода и смена дня/ночи
+let weather = {
+  rainIntensity: 0.0,
+  isRaining: false,
+  timer: 1200, 
+  timeOfDay: 0.1, // 0.0 - 1.0 цикл суток
+};
+
 function resize(){
-  dpr = Math.min(2, window.devicePixelRatio || 1);
+  dpr = Math.min(1.8, window.devicePixelRatio || 1);
   vw = Math.ceil(innerWidth / ZOOM); vh = Math.ceil(innerHeight / ZOOM);
   cv.width = innerWidth * dpr; cv.height = innerHeight * dpr;
-  lcv.width = innerWidth * dpr; lcv.height = innerHeight * dpr;
+  
+  // Уменьшенный буфер освещения (downscaled в 4 раза для экономии fillrate GPU на смартфонах)
+  lcv.width = Math.ceil(innerWidth * dpr / LIGHT_SCALE); 
+  lcv.height = Math.ceil(innerHeight * dpr / LIGHT_SCALE);
+
   ctx.setTransform(dpr * ZOOM, 0, 0, dpr * ZOOM, 0, 0);
-  lctx.setTransform(dpr * ZOOM, 0, 0, dpr * ZOOM, 0, 0);
+  lctx.setTransform((dpr * ZOOM) / LIGHT_SCALE, 0, 0, (dpr * ZOOM) / LIGHT_SCALE, 0, 0);
 }
 window.addEventListener('resize', resize); resize();
+
+/* Обработка кнопок масштабирования */
+$('zoomOutBtn').onclick = () => { ZOOM = clamp(ZOOM - 0.2, 0.8, 2.4); resize(); };
+$('zoomInBtn').onclick = () => { ZOOM = clamp(ZOOM + 0.2, 0.8, 2.4); resize(); };
+$('fullScrBtn').onclick = () => { toggleFullscreen(); };
 
 function hexRGB(h){ return [parseInt(h.slice(1,3),16), parseInt(h.slice(3,5),16), parseInt(h.slice(5,7),16)]; }
 function mixCol(a, b, t){
   const A = hexRGB(a), B = hexRGB(b);
   return 'rgb(' + Math.round(lerp(A[0],B[0],t)) + ',' + Math.round(lerp(A[1],B[1],t)) + ',' + Math.round(lerp(A[2],B[2],t)) + ')';
 }
-/* текущая зона с плавным переходом на границах */
+
+/* текущая зона с плавным переходом */
 function zoneBlend(){
   const zf = clamp((cam.x + vw/2) / TILE / ZONEW, 0, 4.999);
   const i = zf | 0, f = zf - i;
@@ -1087,76 +1489,136 @@ function zoneBlend(){
   return { i, t };
 }
 function zcol(key, zb){ return zb.t > 0 ? mixCol(ZONES[zb.i][key], ZONES[zb.i+1][key], zb.t) : ZONES[zb.i][key]; }
-function zdark(zb){ return lerp(ZONES[zb.i].dark || 0, (ZONES[zb.i+1] || ZONES[zb.i]).dark || 0, zb.t); }
+function zdark(zb){ 
+  const zoneBaseDark = lerp(ZONES[zb.i].dark || 0, (ZONES[zb.i+1] || ZONES[zb.i]).dark || 0, zb.t);
+  // Влияние времени суток на темноту (ночь темнее)
+  let nightDark = 0.0;
+  if (weather.timeOfDay > 0.35 && weather.timeOfDay < 0.85) {
+    const t = weather.timeOfDay;
+    if (t < 0.45) nightDark = lerp(0, 0.65, (t - 0.35)/0.1);
+    else if (t > 0.75) nightDark = lerp(0.65, 0, (t - 0.75)/0.1);
+    else nightDark = 0.65;
+  }
+  return clamp(zoneBaseDark + nightDark, 0, 0.88);
+}
 
-/* ---------- фон ---------- */
+/* ---------- фон (день/ночь + небо) ---------- */
 function drawSky(zb, now){
-  const g = ctx.createLinearGradient(0, 0, 0, vh);
-  g.addColorStop(0, zcol('skyA', zb)); g.addColorStop(1, zcol('skyB', zb));
-  ctx.fillStyle = g; ctx.fillRect(0, 0, vw, vh);
+  const skyBaseA = zcol('skyA', zb);
+  const skyBaseB = zcol('skyB', zb);
 
-  // солнце / луна
+  // Смешивание с ночными цветами неба в зависимости от времени суток
+  let skyColorA = skyBaseA;
+  let skyColorB = skyBaseB;
+
+  if (weather.timeOfDay > 0.35 && weather.timeOfDay < 0.85) {
+    const nightSkyA = '#030514';
+    const nightSkyB = '#090d26';
+    let t = 0;
+    if (weather.timeOfDay < 0.45) t = (weather.timeOfDay - 0.35) / 0.1;
+    else if (weather.timeOfDay > 0.75) t = 1 - (weather.timeOfDay - 0.75) / 0.1;
+    else t = 1;
+
+    skyColorA = mixCol(skyBaseA, nightSkyA, t);
+    skyColorB = mixCol(skyBaseB, nightSkyB, t);
+  }
+
+  // Оптимизация: рисуем градиент неба на 1px холсте и растягиваем его
+  skyCtx.clearRect(0,0,1,128);
+  const skyG = skyCtx.createLinearGradient(0, 0, 0, 128);
+  skyG.addColorStop(0, skyColorA);
+  skyG.addColorStop(1, skyColorB);
+  skyCtx.fillStyle = skyG;
+  skyCtx.fillRect(0, 0, 1, 128);
+
+  ctx.drawImage(skyCv, 0, 0, vw, vh);
+
+  // Солнце / Луна
   const dark = zdark(zb);
   ctx.save();
-  ctx.globalAlpha = 0.9 - dark * 0.6;
-  const sg = ctx.createRadialGradient(vw*0.78, vh*0.2, 10, vw*0.78, vh*0.2, 90);
-  sg.addColorStop(0, 'rgba(255,250,220,1)'); sg.addColorStop(0.3, 'rgba(255,230,150,.55)'); sg.addColorStop(1, 'rgba(255,230,150,0)');
-  ctx.fillStyle = sg; ctx.beginPath(); ctx.arc(vw*0.78, vh*0.2, 90, 0, 7); ctx.fill();
+  ctx.globalAlpha = clamp(0.9 - dark * 0.7, 0.1, 0.9);
+  
+  // Положение светила зависит от времени суток
+  const sunX = vw * 0.2 + (weather.timeOfDay * vw * 0.7);
+  const sunY = vh * 0.35 + Math.sin(weather.timeOfDay * Math.PI) * (-vh * 0.25);
+  
+  const isNight = weather.timeOfDay > 0.45 && weather.timeOfDay < 0.75;
+  const sg = ctx.createRadialGradient(sunX, sunY, 5, sunX, sunY, isNight ? 40 : 80);
+  
+  if (isNight) {
+    // Луна
+    sg.addColorStop(0, 'rgba(230,240,255,0.95)');
+    sg.addColorStop(0.4, 'rgba(180,210,255,0.4)');
+    sg.addColorStop(1, 'rgba(180,210,255,0)');
+  } else {
+    // Солнце
+    sg.addColorStop(0, 'rgba(255,252,235,1)');
+    sg.addColorStop(0.3, 'rgba(255,220,130,0.5)');
+    sg.addColorStop(1, 'rgba(255,220,130,0)');
+  }
+  ctx.fillStyle = sg;
+  ctx.beginPath();
+  ctx.arc(sunX, sunY, isNight ? 40 : 80, 0, 7);
+  ctx.fill();
   ctx.restore();
 
-  // звёзды в тёмных зонах
-  if (dark > 0.05){
-    ctx.save(); ctx.globalAlpha = dark;
+  // Звёзды ночью
+  if (dark > 0.15){
+    ctx.save(); ctx.globalAlpha = dark * 0.8;
     const R = mulberry32(777);
-    for (let i = 0; i < 90; i++){
-      const sx = (R() * 4000 - cam.x * 0.08) % (vw + 60), sy = R() * vh * 0.75;
+    for (let i = 0; i < 65; i++){
+      const sx = (R() * 4000 - cam.x * 0.08) % (vw + 60);
+      const sy = R() * vh * 0.65;
       const x = (sx + vw + 30) % (vw + 60) - 30;
-      ctx.fillStyle = 'rgba(255,255,255,' + (0.3 + 0.7 * Math.abs(Math.sin(now/700 + i))) + ')';
+      ctx.fillStyle = 'rgba(255,255,255,' + (0.35 + 0.65 * Math.abs(Math.sin(now/600 + i))) + ')';
       ctx.fillRect(x, sy, 2, 2);
     }
     ctx.restore();
   }
 
-  // облака
+  // Облака
   ctx.save();
-  const nCl = zb.i === 4 ? 14 : 6;
-  ctx.fillStyle = 'rgba(255,255,255,' + (0.5 - dark * 0.35) + ')';
+  const nCl = zb.i === 4 ? 12 : 5;
+  ctx.fillStyle = 'rgba(255,255,255,' + (0.42 - dark * 0.3) + ')';
   for (let i = 0; i < nCl; i++){
-    const cx0 = ((i * 887 + now * 0.012 * (1 + i % 3)) % (vw + 400)) - 200;
-    const cy0 = 40 + (i * 137) % (vh * 0.45);
-    const s = 0.7 + (i % 4) * 0.3;
+    const cx0 = ((i * 887 + now * 0.010 * (1 + i % 3)) % (vw + 400)) - 200;
+    const cy0 = 35 + (i * 120) % (vh * 0.45);
+    const s = 0.75 + (i % 3) * 0.3;
     ctx.beginPath();
-    ctx.ellipse(cx0, cy0, 46*s, 15*s, 0, 0, 7);
-    ctx.ellipse(cx0 + 30*s, cy0 + 4*s, 32*s, 12*s, 0, 0, 7);
-    ctx.ellipse(cx0 - 32*s, cy0 + 5*s, 28*s, 10*s, 0, 0, 7);
+    ctx.ellipse(cx0, cy0, 46*s, 14*s, 0, 0, 7);
+    ctx.ellipse(cx0 + 28*s, cy0 + 3*s, 32*s, 11*s, 0, 0, 7);
+    ctx.ellipse(cx0 - 30*s, cy0 + 4*s, 28*s, 9*s, 0, 0, 7);
     ctx.fill();
   }
   ctx.restore();
 }
+
 function drawHills(zb){
-  const cols = [zcol('hill', zb) ];
   for (let L = 0; L < 3; L++){
     const par = [0.15, 0.32, 0.55][L];
     const col = zb.t > 0 ? mixCol(ZONES[zb.i].hill[L], ZONES[zb.i+1].hill[L], zb.t) : ZONES[zb.i].hill[L];
     ctx.fillStyle = col;
     ctx.beginPath();
     ctx.moveTo(0, vh);
-    const base = vh * (0.62 + L * 0.1);
-    for (let x = 0; x <= vw + 20; x += 20){
-      const wx = (x + cam.x * par) * 0.004 + L * 37;
-      const y = base + Math.sin(wx) * 40 + Math.sin(wx * 2.7 + 5) * 22 + Math.sin(wx * 0.43) * 55 - L * 26;
+    const base = vh * (0.64 + L * 0.08);
+    for (let x = 0; x <= vw + 24; x += 24){
+      const wx = (x + cam.x * par) * 0.0038 + L * 37;
+      const y = base + Math.sin(wx) * 35 + Math.sin(wx * 2.7 + 5) * 18 + Math.sin(wx * 0.43) * 45 - L * 22;
       ctx.lineTo(x, y);
     }
     ctx.lineTo(vw, vh); ctx.closePath(); ctx.fill();
   }
 }
 
-/* ---------- атмосферные частицы зон ---------- */
+/* ---------- атмосферные частицы и динамический дождь ---------- */
 const ambient = [];
-function drawAmbient(zb, now){
+function drawAmbientAndWeather(zb, now){
   const kind = ZONES[zb.i].ambient;
-  if (ambient.length < 46 && Math.random() < 0.5)
+  
+  // Спавн обычного эмбиента зон
+  if (ambient.length < 35 && Math.random() < 0.4)
     ambient.push({ x: cam.x + Math.random() * vw, y: cam.y - 20 + Math.random() * vh, ph: Math.random() * 7, sp: 0.5 + Math.random() });
+  
   for (let i = ambient.length - 1; i >= 0; i--){
     const a = ambient[i];
     if (kind === 'snow'){ a.y += 1.1 * a.sp; a.x += Math.sin(now/900 + a.ph) * 0.7; }
@@ -1170,27 +1632,58 @@ function drawAmbient(zb, now){
     else if (kind === 'leaf'){ ctx.fillStyle = 'rgba(120,200,90,.7)'; ctx.fillRect(sx, sy, 4, 3); }
     else if (kind === 'mote'){ ctx.fillStyle = 'rgba(140,230,255,' + (0.3 + 0.4 * Math.abs(Math.sin(now/600 + a.ph))) + ')'; ctx.fillRect(sx, sy, 2.5, 2.5); }
   }
+
+  // Отрисовка Дождя (Rain Weather)
+  if (weather.rainIntensity > 0.02) {
+    ctx.save();
+    ctx.strokeStyle = 'rgba(174, 219, 255, ' + (weather.rainIntensity * 0.38) + ')';
+    ctx.lineWidth = 1.2;
+    const dropCount = Math.floor(weather.rainIntensity * 50);
+    for (let i = 0; i < dropCount; i++) {
+      // Экранные координаты дождя (оптимизация)
+      const rx = (i * 37 + now * 0.9) % (vw + 40) - 20;
+      const ry = (i * 17 + now * 1.8) % (vh + 40) - 20;
+      ctx.beginPath();
+      ctx.moveTo(rx, ry);
+      ctx.lineTo(rx - 4, ry + 16);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
 }
 
-/* ---------- тайлы ---------- */
+/* ---------- отрисовка тайлов ---------- */
 function drawTiles(zb, now){
   const tx0 = Math.max(0, (cam.x / TILE | 0) - 1), tx1 = Math.min(WW - 1, ((cam.x + vw) / TILE | 0) + 1);
   const ty0 = Math.max(0, (cam.y / TILE | 0) - 1), ty1 = Math.min(WH - 1, ((cam.y + vh) / TILE | 0) + 1);
   const dirt = zcol('dirt', zb), dirtD = zcol('dirtD', zb), top = zcol('top', zb), topL = zcol('topL', zb);
   const lavaGlow = [];
+
   for (let ty = ty0; ty <= ty1; ty++){
     for (let tx = tx0; tx <= tx1; tx++){
       const v = world[ty * WW + tx];
       if (!v) continue;
       const x = tx * TILE - cam.x, y = ty * TILE - cam.y;
-      if (v === T.S || v === T.ICE){
+
+      if (v === T.S || v === T.ICE || v === T.SLM){
         const above = tileAt(tx, ty - 1);
         if (v === T.ICE){
           ctx.fillStyle = '#a8d8f0'; ctx.fillRect(x, y, TILE, TILE);
           ctx.fillStyle = 'rgba(255,255,255,.55)'; ctx.fillRect(x, y, TILE, 5);
           ctx.strokeStyle = 'rgba(255,255,255,.3)'; ctx.lineWidth = 1.5;
           ctx.beginPath(); ctx.moveTo(x + 6, y + 26); ctx.lineTo(x + 18, y + 10); ctx.moveTo(x + 18, y + 30); ctx.lineTo(x + 30, y + 14); ctx.stroke();
-        } else {
+        } 
+        else if (v === T.SLM) {
+          // Изумрудный упругий Слайм-блок (Террария)
+          ctx.fillStyle = '#2eb065'; ctx.fillRect(x, y, TILE, TILE);
+          ctx.fillStyle = '#4ade80'; ctx.fillRect(x, y, TILE, 5); // Блик сверху
+          ctx.fillStyle = '#207c46'; ctx.fillRect(x, y + TILE - 4, TILE, 4); // Тень снизу
+          // Текстура желе
+          ctx.fillStyle = 'rgba(255,255,255,0.22)';
+          ctx.fillRect(x + 6, y + 10, 6, 6);
+          ctx.fillRect(x + 22, y + 18, 8, 6);
+        }
+        else {
           ctx.fillStyle = above === 0 || above === T.SPK || above === T.CP || above === T.SPR ? top : dirt;
           ctx.fillRect(x, y, TILE, TILE);
           if (above === 0 || above === T.SPK || above === T.CP || above === T.SPR){
@@ -1321,24 +1814,86 @@ function drawEntities(now){
       ctx.beginPath(); ctx.arc(x, y, s.r + 12 + Math.sin(now/200)*3, 0, 7); ctx.fill(); ctx.restore();
     }
   }
-  // слаймы
+  
+  // Отрисовка ВРАГОВ (Слаймы, Зомби, Глаза)
   for (const e of enemies){
     if (e.deadUntil && e.deadUntil > nowMs) continue;
     const x = e.ex - cam.x, y = e.y - cam.y;
     if (x < -60 || x > vw + 60 || y < -60 || y > vh + 60) continue;
-    const sq = 1 + Math.sin(now / 180 + e.phase * 9) * 0.12;
-    ctx.save(); ctx.translate(x, y); ctx.scale(1/sq, sq);
-    ctx.fillStyle = '#62c94f';
-    ctx.beginPath(); ctx.ellipse(0, -11, 15, 12, 0, 0, 7); ctx.fill();
-    ctx.fillStyle = '#8fe07d';
-    ctx.beginPath(); ctx.ellipse(-3, -15, 8, 5, -0.3, 0, 7); ctx.fill();
-    ctx.fillStyle = '#fff';
-    ctx.beginPath(); ctx.arc(-5 * e.dir, -14, 3.4, 0, 7); ctx.arc(2 * e.dir, -14, 3.4, 0, 7); ctx.fill();
-    ctx.fillStyle = '#222';
-    ctx.beginPath(); ctx.arc(-5 * e.dir + e.dir, -14, 1.7, 0, 7); ctx.arc(2 * e.dir + e.dir, -14, 1.7, 0, 7); ctx.fill();
-    ctx.restore();
+
+    if (e.type === 'zombie') {
+      // Отрисовка Зомби (Террария стайл)
+      ctx.save(); 
+      ctx.translate(x, y);
+      ctx.scale(e.dir, 1);
+      
+      const bodyCol = e.typeColor;
+      
+      // Руки вытягивает вперед при агре
+      ctx.fillStyle = bodyCol;
+      if (e.aggro) {
+        ctx.fillRect(0, -18, 14, 5); // Вытянутая рука
+      } else {
+        ctx.fillRect(-4, -18, 5, 12); // Опущенная рука
+      }
+
+      // Тело зомби
+      rr(-10, -28, 20, 24, 6); ctx.fill();
+      // Синяя/красная одежда
+      ctx.fillStyle = e.aggro ? '#a83232' : '#314485';
+      ctx.fillRect(-10, -14, 20, 10);
+      
+      // Лицо и горящие глаза при агре
+      ctx.fillStyle = bodyCol;
+      ctx.fillRect(-8, -26, 16, 10);
+      ctx.fillStyle = e.aggro ? '#ff1212' : '#000000';
+      ctx.fillRect(4, -22, 3, 3);
+      
+      ctx.restore();
+    } 
+    else if (e.type === 'eye') {
+      // Отрисовка Демонического глаза (Террария стайл)
+      ctx.save();
+      ctx.translate(x, y);
+      const fl = Math.sin(now / 110 + e.phase * 8) * 4;
+      
+      // Сетчатка/Тентакли сзади
+      ctx.strokeStyle = '#c4313d'; ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(-6 * e.dir, 0); ctx.quadraticCurveTo(-14 * e.dir, -4 + fl, -22 * e.dir, -2 + fl);
+      ctx.moveTo(-6 * e.dir, 3); ctx.quadraticCurveTo(-14 * e.dir, 6 - fl, -18 * e.dir, 8 - fl);
+      ctx.stroke();
+
+      // Глазное яблоко
+      ctx.fillStyle = '#f0edf5';
+      ctx.beginPath(); ctx.arc(0, 0, 12, 0, 7); ctx.fill();
+      
+      // Радужка
+      ctx.fillStyle = e.typeColor;
+      ctx.beginPath(); ctx.arc(4 * e.dir, 0, 6, 0, 7); ctx.fill();
+      // Зрачок
+      ctx.fillStyle = '#08080c';
+      ctx.beginPath(); ctx.arc(5 * e.dir, 0, 3, 0, 7); ctx.fill();
+      
+      ctx.restore();
+    } 
+    else {
+      // Стандартный милый Слайм
+      const sq = 1 + Math.sin(now / 180 + e.phase * 9) * 0.12;
+      ctx.save(); ctx.translate(x, y); ctx.scale(1/sq, sq);
+      ctx.fillStyle = e.typeColor;
+      ctx.beginPath(); ctx.ellipse(0, -11, 15, 12, 0, 0, 7); ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.4)';
+      ctx.beginPath(); ctx.ellipse(-3, -15, 8, 5, -0.3, 0, 7); ctx.fill();
+      ctx.fillStyle = '#fff';
+      ctx.beginPath(); ctx.arc(-5 * e.dir, -14, 3.4, 0, 7); ctx.arc(2 * e.dir, -14, 3.4, 0, 7); ctx.fill();
+      ctx.fillStyle = '#222';
+      ctx.beginPath(); ctx.arc(-5 * e.dir + e.dir, -14, 1.7, 0, 7); ctx.arc(2 * e.dir + e.dir, -14, 1.7, 0, 7); ctx.fill();
+      ctx.restore();
+    }
   }
 }
+
 function rr(x, y, w, h, r){
   ctx.beginPath();
   ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
@@ -1385,31 +1940,41 @@ function drawPlayer(x, y, dir, color, name, st, squash, me, runPh, alpha){
   ctx.restore();
 }
 
-/* ---------- освещение тёмных зон ---------- */
+/* ---------- освещение тёмных зон (Downscaled для FPS) ---------- */
 function drawLighting(zb){
   const dark = zdark(zb);
   if (dark < 0.03) return;
+  
   lctx.clearRect(0, 0, vw, vh);
   lctx.globalCompositeOperation = 'source-over';
   lctx.fillStyle = 'rgba(4,6,20,' + dark + ')';
   lctx.fillRect(0, 0, vw, vh);
   lctx.globalCompositeOperation = 'destination-out';
+  
   const hole = (x, y, r, a) => {
     const g = lctx.createRadialGradient(x, y, r * 0.2, x, y, r);
     g.addColorStop(0, 'rgba(0,0,0,' + a + ')'); g.addColorStop(1, 'rgba(0,0,0,0)');
     lctx.fillStyle = g; lctx.beginPath(); lctx.arc(x, y, r, 0, 7); lctx.fill();
   };
+  
   hole(P.x + 11 - cam.x, P.y + 13 - cam.y, 240, 0.95);
   for (const k in remotes){ const r = remotes[k]; hole(r.rx + 11 - cam.x, r.ry + 13 - cam.y, 130, 0.7); }
   for (const c of crystals){ const x = c.x - cam.x, y = c.y - cam.y; if (x > -100 && x < vw + 100 && y > -100 && y < vh + 100) hole(x, y - 12, 130, 0.75); }
+  
   const tx0 = Math.max(0, (cam.x / TILE | 0) - 1), tx1 = Math.min(WW - 1, ((cam.x + vw) / TILE | 0) + 1);
   const ty0 = Math.max(0, (cam.y / TILE | 0) - 1), ty1 = Math.min(WH - 1, ((cam.y + vh) / TILE | 0) + 1);
+  
   for (let ty = ty0; ty <= ty1; ty++) for (let tx = tx0; tx <= tx1; tx++){
     const v = world[ty * WW + tx];
     if (v === T.LAV && tileAt(tx, ty - 1) !== T.LAV) hole(tx * TILE + 18 - cam.x, ty * TILE - cam.y, 120, 0.6);
     else if (v === T.CP) hole(tx * TILE + 18 - cam.x, ty * TILE - cam.y, 100, 0.55);
   }
+  
+  // Рисуем уменьшенный буфер света обратно на основной холст со сглаживанием
+  ctx.save();
+  ctx.globalCompositeOperation = 'source-over';
   ctx.drawImage(lcv, 0, 0, vw, vh);
+  ctx.restore();
 }
 
 /* ---------- частицы ---------- */
@@ -1426,6 +1991,27 @@ function drawParticles(){
 let lastTs = 0, acc = 0;
 function stepGame(){
   nowMs = performance.now();
+  
+  // Медленное продвижение цикла дня и ночи
+  weather.timeOfDay += 0.00018; 
+  if (weather.timeOfDay >= 1.0) weather.timeOfDay = 0.0;
+
+  // Погодный рандомайзер (дождь)
+  weather.timer--;
+  if (weather.timer <= 0) {
+    weather.isRaining = !weather.isRaining;
+    weather.timer = weather.isRaining ? (1800 + Math.random() * 2500) : (4000 + Math.random() * 6000);
+  }
+  
+  if (weather.isRaining) {
+    weather.rainIntensity = lerp(weather.rainIntensity, 1.0, 0.004);
+  } else {
+    weather.rainIntensity = lerp(weather.rainIntensity, 0.0, 0.004);
+  }
+
+  // Обновление синтезатора звука дождя
+  Audio8.updateRainSound(weather.rainIntensity);
+
   updEntities(nowMs);
   stepPlayer(nowMs);
   updParticles();
@@ -1433,6 +2019,7 @@ function stepGame(){
   updHUD(nowMs);
   Audio8.playTrack(zoneAt(P.x / TILE | 0));
 }
+
 function loop(ts){
   requestAnimationFrame(loop);
   if (!lastTs) lastTs = ts;
@@ -1443,9 +2030,10 @@ function loop(ts){
   const zb = zoneBlend();
   drawSky(zb, ts);
   drawHills(zb);
-  drawAmbient(zb, ts);
+  drawAmbientAndWeather(zb, ts);
   drawTiles(zb, ts);
   drawEntities(ts);
+  
   for (const k in remotes){
     const r = remotes[k];
     if (r.rx + 30 < cam.x || r.rx - 30 > cam.x + vw || r.ry + 30 < cam.y || r.ry - 30 > cam.y + vh) continue;
@@ -1453,6 +2041,7 @@ function loop(ts){
   }
   if (!(P.deadT > 0 && (P.deadT / 3 | 0) % 2))
     drawPlayer(P.x - cam.x, P.y - cam.y, P.dir, MY_COLOR, MY_NAME, P.ground ? (Math.abs(P.vx) > 0.5 ? 1 : 0) : 2, P.squash, true, P.runT, 1);
+  
   drawParticles();
   drawLighting(zb);
 }
