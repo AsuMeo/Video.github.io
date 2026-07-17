@@ -1,70 +1,648 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>БЛОКРАН — общий мир</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>БЛОКРАН — Мультиплеерное Выживание</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Rubik:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
-*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#07101d;color:#edf5ff;font:14px Arial,sans-serif}canvas{display:block;width:100%;height:100%;image-rendering:pixelated}button,input{font:inherit}button{cursor:pointer;border:1px solid #ffffff35;border-radius:9px;background:#172b4bdd;color:white;padding:8px 11px;font-weight:700}.panel{background:#081426d9;border:1px solid #8bb7ff3d;border-radius:12px;box-shadow:0 8px 35px #0006;backdrop-filter:blur(7px)}#hud{position:fixed;inset:0;pointer-events:none}.panel,.panel button,.panel input{pointer-events:auto}#top{position:absolute;left:12px;top:12px;padding:10px;min-width:285px}.muted{color:#aac0e2;font-size:12px}.bar{height:8px;background:#0008;border-radius:8px;overflow:hidden;margin:5px 0}.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#45df8b,#ffdf58,#ff6874)}#side{position:absolute;right:12px;top:12px;width:235px;padding:10px}#side h3{margin:0 0 7px}#chat{position:absolute;left:12px;bottom:12px;width:310px;height:155px;padding:7px;display:flex;flex-direction:column}.msgs{flex:1;overflow:auto;font-size:12px;line-height:1.4}.chatInput{border:0;border-top:1px solid #ffffff2b;background:#0005;color:white;outline:0;padding:8px}.hotbar{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);display:flex;gap:5px;pointer-events:auto}.slot{width:58px;height:58px;border:2px solid #ffffff38;border-radius:10px;background:#101f38e8;text-align:center;padding:3px;font-size:11px}.slot.sel{border-color:#ffe45c;box-shadow:0 0 16px #ffe45c66}.slot b{display:block;font-size:23px}.toast{position:absolute;top:18%;left:50%;transform:translateX(-50%);padding:10px 18px;background:#081426ef;border:1px solid #ffffff44;border-radius:12px;opacity:0;transition:.2s}.toast.on{opacity:1}.modal{position:fixed;inset:0;z-index:5;display:none;place-items:center;background:#02060bbb}.modal.open{display:grid}.window{width:min(760px,94vw);max-height:88vh;overflow:auto;padding:18px;background:#0b1a31;border:1px solid #8bb7ff55;border-radius:18px}.window h2{margin-top:0}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:8px}.card{padding:10px;background:#132845;border-radius:10px}.touch{display:none}@media(max-width:700px){#side{width:190px;font-size:12px}#chat{width:245px;height:120px}.hotbar{bottom:94px}.slot{width:48px;height:48px}.slot b{font-size:18px}.touch{display:block;pointer-events:auto}.touch button{position:absolute;width:62px;height:62px;font-size:22px;opacity:.78}.l{left:14px;bottom:20px}.r{left:82px;bottom:20px}.m{right:86px;bottom:20px}.j{right:14px;bottom:20px}}
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body { width:100%; height:100%; overflow:hidden; background:#05070f; font-family:'Rubik',sans-serif; user-select:none; color: #fff; }
+  canvas { position:fixed; inset:0; width:100%; height:100%; display:block; image-rendering:pixelated; }
+
+  /* ---------- UI PANELS ---------- */
+  .hud-layer { position:fixed; inset:0; z-index:20; pointer-events:none; display:none; }
+  .hud-layer.on { display:block; }
+  
+  #topUI { position:absolute; top:12px; left:12px; width:300px; padding:12px; background:rgba(10,20,40,0.8); border:1px solid rgba(130,170,255,0.3); border-radius:12px; backdrop-filter:blur(8px); pointer-events:auto; }
+  .bar-container { height:10px; background:rgba(0,0,0,0.5); border-radius:5px; margin:6px 0; overflow:hidden; border:1px solid rgba(255,255,255,0.1); }
+  #hpBar { width:100%; height:100%; background:linear-gradient(90deg, #ff4e50, #f9d423); transition: width 0.3s; }
+  #xpBar { width:0%; height:100%; background:linear-gradient(90deg, #00f2fe, #4facfe); transition: width 0.3s; }
+  .stats-row { display:flex; justify-content:space-between; font-size:12px; font-weight:800; color:#c9d7ff; margin-top:4px; }
+  
+  #sideUI { position:absolute; top:12px; right:12px; width:200px; padding:10px; background:rgba(10,20,40,0.6); border-radius:12px; border:1px solid rgba(255,255,255,0.15); pointer-events:auto; text-align:right; }
+  #sideUI h3 { font-size:11px; color:#ffe98a; margin-bottom:5px; font-family:'Press Start 2P'; }
+  
+  /* HOTBAR */
+  #hotbar { position:absolute; bottom:20px; left:50%; transform:translateX(-50%); display:flex; gap:8px; pointer-events:auto; }
+  .slot { width:56px; height:56px; background:rgba(15,25,50,0.85); border:3px solid rgba(130,170,255,0.3); border-radius:12px; display:flex; flex-direction:column; align-items:center; justify-content:center; position:relative; transition: transform 0.1s; }
+  .slot.active { border-color: #ffd94f; box-shadow: 0 0 15px rgba(255,217,79,0.4); transform: scale(1.1); }
+  .slot-icon { font-size:24px; }
+  .slot-count { position:absolute; bottom:2px; right:4px; font-size:10px; font-weight:800; color:#fff; }
+  .slot-key { position:absolute; top:2px; left:4px; font-size:9px; color:rgba(255,255,255,0.5); }
+
+  /* CHAT */
+  #chatBox { position:absolute; bottom:90px; left:16px; width:280px; height:180px; background:rgba(5,10,25,0.6); border:1px solid rgba(255,255,255,0.1); border-radius:12px; display:flex; flex-direction:column; pointer-events:auto; }
+  #messages { flex:1; overflow-y:auto; padding:8px; font-size:12px; display:flex; flex-direction:column; gap:4px; }
+  #chatInput { background:rgba(0,0,0,0.3); border:none; border-top:1px solid rgba(255,255,255,0.1); padding:10px; color:#fff; font-size:13px; outline:none; border-radius:0 0 12px 12px; }
+
+  /* MODALS */
+  .modal { position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:100; display:none; align-items:center; justify-content:center; backdrop-filter:blur(10px); pointer-events:auto; }
+  .modal-content { width:min(600px, 90vw); background:#152035; border:2px solid #3f5a94; border-radius:24px; padding:24px; position:relative; }
+  .close-btn { position:absolute; top:15px; right:20px; font-size:24px; cursor:pointer; color:#7f93c9; }
+  .craft-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap:12px; margin-top:15px; max-height:400px; overflow-y:auto; }
+  .recipe-card { background:rgba(10,20,40,0.5); border:1px solid rgba(130,170,255,0.2); padding:10px; border-radius:12px; text-align:center; transition:0.2s; cursor:pointer; }
+  .recipe-card:hover { background:rgba(130,170,255,0.1); border-color:#ffd94f; }
+  .recipe-icon { font-size:28px; margin-bottom:5px; }
+  .recipe-name { font-size:12px; font-weight:800; margin-bottom:4px; }
+  .recipe-cost { font-size:10px; color:#8fa3d9; }
+
+  /* AUTH */
+  #authScreen { position:fixed; inset:0; z-index:500; display:flex; align-items:center; justify-content:center; background:radial-gradient(circle at center, #1b2b5e 0%, #05070f 100%); }
+  .auth-card { width:360px; padding:30px; background:rgba(13,20,46,0.8); border:1px solid rgba(120,160,255,0.3); border-radius:22px; text-align:center; backdrop-filter:blur(15px); }
+  input[type="text"], input[type="email"], input[type="password"] { width:100%; padding:12px; border-radius:10px; border:1px solid #3f5a94; background:#0a1020; color:#fff; margin-bottom:10px; outline:none; }
+  .primary-btn { width:100%; padding:14px; background:linear-gradient(135deg, #3f7bff, #7b4dff); border:none; border-radius:12px; color:#fff; font-weight:800; cursor:pointer; margin-top:5px; }
+
+  #toast { position:fixed; top:20%; left:50%; transform:translateX(-50%); padding:12px 24px; background:rgba(10,16,40,0.9); border:1px solid #ffd94f; border-radius:14px; opacity:0; transition:0.3s; z-index:1000; pointer-events:none; }
+  #toast.on { opacity:1; }
+
+  .mobile-ctrl { position:fixed; bottom:20px; z-index:30; display:none; gap:10px; pointer-events:auto; }
+  body.touch .mobile-ctrl { display:flex; }
+  .joy-btn { width:70px; height:70px; background:rgba(255,255,255,0.1); border:2px solid rgba(255,255,255,0.3); border-radius:20px; display:flex; align-items:center; justify-content:center; font-size:30px; color:#fff; backdrop-filter:blur(5px); }
+  .joy-btn.active { background:rgba(255,255,255,0.3); }
+
+  #bossHealthUI { position:fixed; top:80px; left:50%; transform:translateX(-50%); width:400px; display:none; text-align:center; }
+  #bossName { font-family:'Press Start 2P'; font-size:12px; color:#ff4e50; margin-bottom:5px; }
 </style>
 </head>
 <body>
+
 <canvas id="game"></canvas>
-<div id="hud">
- <div id="top" class="panel"><b>🌍 БЛОКРАН — ОБЩИЙ МИР</b><div id="status" class="muted">Подключение…</div><div>❤️ <span id="hp">100</span> · ⭐ Ур. <span id="lvl">1</span> · XP <span id="xp">0/100</span></div><div class="bar"><i id="xpbar"></i></div><div>🪙 <span id="coins">0</span> · 👥 <span id="online">1</span></div><div class="muted">Мир синхронизируется через Firebase</div></div>
- <div id="side" class="panel"><h3 id="weather">☀️ Лето · Ясно</h3><div>Выбрано: <b id="selected">Земля</b></div><div class="muted">A/D или ←/→ — ходьба · W/Пробел — прыжок<br>ЛКМ — добыть · ПКМ — поставить · 1–8 — слот<br>E — инвентарь · B — босс</div><br><button id="guide">📖 Гайд</button> <button id="craftBtn">🔨 Крафт</button></div>
- <div id="chat" class="panel"><div class="msgs" id="msgs"></div><input id="chatInput" class="chatInput" maxlength="100" placeholder="Enter — чат"></div>
- <div id="hotbar" class="hotbar"></div><div id="toast" class="toast"></div>
- <div class="touch"><button class="l" id="left">◀</button><button class="r" id="right">▶</button><button class="m" id="mine">⛏</button><button class="j" id="jump">⤒</button></div>
+
+<!-- HUD LAYER -->
+<div id="hud" class="hud-layer">
+  <div id="topUI">
+    <div style="font-size:14px; font-weight:800; display:flex; justify-content:space-between;">
+      <span id="pName">Загрузка...</span>
+      <span style="color:#ffd94f;">🪙 <span id="coinCount">0</span></span>
+    </div>
+    <div class="bar-container"><div id="hpBar"></div></div>
+    <div class="bar-container"><div id="xpBar"></div></div>
+    <div class="stats-row">
+      <span>⭐ LVL <span id="lvlVal">1</span></span>
+      <span>👥 ОНЛАЙН: <span id="onlineVal">1</span></span>
+      <span>XP: <span id="xpVal">0</span></span>
+    </div>
+  </div>
+
+  <div id="sideUI">
+    <h3 id="seasonName">ЛЕТО</h3>
+    <div style="font-size:10px; color:#8fa3d9;" id="weatherText">ЯСНО</div>
+    <div style="margin-top:10px;">
+      <button onclick="toggleModal('craftModal')" style="padding:5px 10px; background:#3f5a94; border:none; color:#fff; border-radius:5px; cursor:pointer; font-weight:bold; font-size:10px;">🎒 КРАФТ (E)</button>
+    </div>
+    <div style="margin-top:5px;">
+      <button onclick="requestBoss()" style="padding:5px 10px; background:#ff4e50; border:none; color:#fff; border-radius:5px; cursor:pointer; font-weight:bold; font-size:10px;">👑 БОСС (B)</button>
+    </div>
+  </div>
+
+  <div id="bossHealthUI">
+    <div id="bossName">ОКО ПУСТОТЫ</div>
+    <div class="bar-container" style="height:14px;"><div id="bossHP" style="width:100%; background: #ff4e50; height:100%;"></div></div>
+  </div>
+
+  <div id="chatBox">
+    <div id="messages"></div>
+    <input id="chatInput" maxlength="80" placeholder="Нажми Enter, чтобы написать...">
+  </div>
+
+  <div id="hotbar">
+    <!-- Generated by JS -->
+  </div>
+
+  <div class="mobile-ctrl" style="left:20px;">
+    <div class="joy-btn" id="mLeft">◀</div>
+    <div class="joy-btn" id="mRight">▶</div>
+  </div>
+  <div class="mobile-ctrl" style="right:20px;">
+    <div class="joy-btn" id="mJump">▲</div>
+    <div class="joy-btn" id="mAction">⛏</div>
+  </div>
 </div>
-<div class="modal" id="modal"><div class="window"><button id="close" style="float:right">✕</button><div id="modalBody"></div></div></div>
+
+<!-- MODALS -->
+<div id="craftModal" class="modal">
+  <div class="modal-content">
+    <span class="close-btn" onclick="toggleModal('craftModal')">&times;</span>
+    <h2 style="font-family:'Press Start 2P'; font-size:16px; margin-bottom:15px; color:#ffd94f;">🔨 КРАФТИНГ</h2>
+    <p style="font-size:12px; color:#8fa3d9;">Создавай предметы из добытых ресурсов.</p>
+    <div class="craft-grid" id="craftGrid"></div>
+  </div>
+</div>
+
+<!-- AUTH -->
+<div id="authScreen">
+  <div class="auth-card">
+    <h1 style="font-family:'Press Start 2P'; font-size:22px; margin-bottom:10px; color:#5cb8ff;">БЛОКРАН</h1>
+    <p style="font-size:12px; color:#8fa3d9; margin-bottom:20px;">Мультиплеерное выживание</p>
+    <input type="text" id="nickInput" placeholder="Ваш никнейм" maxlength="12">
+    <input type="email" id="emailInput" placeholder="Email">
+    <input type="password" id="passInput" placeholder="Пароль (мин. 6 симв.)">
+    <button class="primary-btn" onclick="handleAuth('login')">ВОЙТИ</button>
+    <button class="primary-btn" onclick="handleAuth('reg')" style="background:#152035; border:1px solid #3f7bff; margin-top:10px;">РЕГИСТРАЦИЯ</button>
+    <div id="authErr" style="color:#ff4e50; font-size:12px; margin-top:10px;"></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<!-- SCRIPTS -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
 <script>
 'use strict';
-const $=id=>document.getElementById(id),cv=$('game'),ctx=cv.getContext('2d');
-const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),lerp=(a,b,t)=>a+(b-a)*t;
-const firebaseConfig={apiKey:'AIzaSyBm0mIvHVznIeF2PoFk6dtdaiT5r877wyA',authDomain:'meow-874ce.firebaseapp.com',databaseURL:'https://meow-874ce-default-rtdb.europe-west1.firebasedatabase.app',projectId:'meow-874ce',storageBucket:'meow-874ce.firebasestorage.app',messagingSenderId:'471541334599',appId:'1:471541334599:web:567af3e7dbe70a37572762'};
-let db,auth,uid='local-'+Math.random().toString(36).slice(2),name='Странник';try{firebase.initializeApp(firebaseConfig);db=firebase.database();auth=firebase.auth()}catch(e){console.warn(e)}
-const TILE=28,W=420,H=120,SEA=72,CHUNK=16,world=new Uint8Array(W*H),B={air:0,dirt:1,grass:2,stone:3,wood:4,leaf:5,ore:6,sand:7,water:8,bedrock:9,brick:10,torch:11};
-const item={dirt:{n:'Земля',i:'🟫',b:B.dirt},stone:{n:'Камень',i:'🪨',b:B.stone},wood:{n:'Дерево',i:'🪵',b:B.wood},sand:{n:'Песок',i:'🟨',b:B.sand},ore:{n:'Руда',i:'💎',b:B.ore},brick:{n:'Кирпич',i:'🧱',b:B.brick},torch:{n:'Факел',i:'🔥',b:B.torch},chest:{n:'Сундук',i:'📦',b:0}};
-const slots=['dirt','stone','wood','sand','ore','brick','torch','chest'];let inv={dirt:12,stone:0,wood:0,sand:0,ore:0,brick:0,torch:0,chest:0},sel=0;
-const P={x:12*TILE,y:40*TILE,w:18,h:25,vx:0,vy:0,ground:false,hp:100,level:1,xp:0,coins:0,skin:'#55b7ff',name:'',lastSave:0};let keys={l:false,r:false},jump=false,cam={x:0,y:0},mouse={x:0,y:0,down:false,button:0},remotes={},mobs=[],boss=null,weather={season:0,rain:0,time:0};
-function noise(x){let t=Math.sin(x*12.9898+73421)*43758.5453;return t-Math.floor(t)}function at(x,y){if(x<0||x>=W)return B.bedrock;if(y<0)return 0;if(y>=H)return B.bedrock;return world[y*W+x]}function set(x,y,v){if(x>=0&&x<W&&y>=0&&y<H)world[y*W+x]=v}
-function generate(){let h=SEA;for(let x=0;x<W;x++){h=clamp(h+(noise(x)*3|0)-1,48,78);for(let y=0;y<H;y++){let v=y===H-1?B.bedrock:y>=h+7?B.stone:y>=h?B.dirt:y===h-1?B.grass:B.air;set(x,y,v)}if(x%17===0&&noise(x+.7)>.35){for(let y=h-2;y>h-6;y--)set(x,y,B.wood);for(let dx=-2;dx<=2;dx++)for(let dy=-3;dy<=0;dy++)if(Math.abs(dx)+Math.abs(dy)<5)set(x+dx,h+dy-6,B.leaf)}if(x%23===4)for(let y=h+2;y<h+6;y++)set(x,y,B.ore)}for(let x=0;x<W;x++)for(let y=SEA-7;y<SEA;y++)if(!at(x,y))set(x,y,B.water)}generate();
-function resize(){cv.width=innerWidth*devicePixelRatio;cv.height=innerHeight*devicePixelRatio;ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0)}addEventListener('resize',resize);resize();
-function toast(s,ms=1800){$('toast').textContent=s;$('toast').classList.add('on');clearTimeout(window._toast);window._toast=setTimeout(()=>$('toast').classList.remove('on'),ms)}
-function notify(s){$('status').textContent=s}
-function key(x,y){return x+','+y}function xy(k){let a=k.split(',');return[+a[0],+a[1]]}
-function add(id,n=1){inv[id]=(inv[id]||0)+n;renderBar()}
-function gain(n){P.xp+=n;let need=100+(P.level-1)*80;while(P.xp>=need){P.xp-=need;P.level++;need=100+(P.level-1)*80;toast('⭐ Уровень '+P.level+'! Новая способность открыта')}if(P.level>=3)P.vx=6;if(P.level>=6)P.skin='#ffd94f';if(P.level>=10)P.skin='#c98bff'}
-function allowed(tx,ty){return Math.abs(tx*TILE-(P.x+P.w/2))<=TILE*5&&Math.abs(ty*TILE-(P.y+P.h/2))<=TILE*5}
-function writeBlock(tx,ty,v){if(!db||!uid){set(tx,ty,v);return Promise.resolve()}return db.ref('world/blocks/'+key(tx,ty)).transaction(old=>old===null?v:(old===v?null:old)).then(r=>{if(r.committed&&r.snapshot.val()===v)set(tx,ty,v)})}
-function mine(tx,ty){let v=at(tx,ty);if(!allowed(tx,ty)||!v||v===B.bedrock||v===B.water)return;let id=v===B.grass||v===B.dirt?'dirt':v===B.stone?'stone':v===B.wood?'wood':v===B.sand?'sand':v===B.ore?'ore':v===B.brick?'brick':'dirt';writeBlock(tx,ty,B.air).then(()=>{add(id);gain(v===B.ore?25:5);if(v===B.ore)P.coins+=2;toast('⛏ '+item[id].i+' '+item[id].n)})}
-function build(tx,ty){let id=slots[sel],it=item[id];if(!allowed(tx,ty)||!it||id==='torch'||id==='chest'||!inv[id]||at(tx,ty)!==B.air)return;writeBlock(tx,ty,it.b).then(()=>{inv[id]--;renderBar();save()})}
-function spawnChest(tx,ty){if(inv.chest<1||at(tx,ty)!==B.air||!allowed(tx,ty))return;inv.chest--;writeBlock(tx,ty,B.brick).then(()=>db&&db.ref('world/chests/'+key(tx,ty)).transaction(v=>v||{owner:uid,items:{ore:1,dirt:3}}));renderBar()}
-function physics(){let speed=P.level>=3?6:5;P.vx+=(keys.r-keys.l)*.42;P.vx*=P.ground?.78:.92;P.vx=clamp(P.vx,-speed,speed);if(jump&&P.ground){P.vy=-10;P.ground=false}jump=false;P.vy=clamp(P.vy+.5,-20,13);P.x+=P.vx;collide('x');P.y+=P.vy;P.ground=false;collide('y');if(P.y>H*TILE-80){P.hp-=1;if(P.hp<=0){P.hp=100;P.x=12*TILE;P.y=40*TILE}}for(let m of mobs){m.x+=m.dir*.35;if(Math.abs(m.x-P.x)<24&&Math.abs(m.y-P.y)<28)P.hp-=.15}cam.x=clamp(lerp(cam.x,P.x-innerWidth*.42,.12),0,W*TILE-innerWidth);cam.y=clamp(lerp(cam.y,P.y-innerHeight*.55,.12),0,H*TILE-innerHeight)}
-function collide(axis){if(axis==='x'){let y0=Math.floor(P.y/TILE),y1=Math.floor((P.y+P.h-1)/TILE);if(P.vx>0){let tx=Math.floor((P.x+P.w)/TILE);for(let y=y0;y<=y1;y++)if(at(tx,y)&&at(tx,y)!==B.water){P.x=tx*TILE-P.w-.1;P.vx=0}}else if(P.vx<0){let tx=Math.floor(P.x/TILE);for(let y=y0;y<=y1;y++)if(at(tx,y)&&at(tx,y)!==B.water){P.x=(tx+1)*TILE+.1;P.vx=0}}}else{let x0=Math.floor((P.x+2)/TILE),x1=Math.floor((P.x+P.w-2)/TILE),ty=P.vy>=0?Math.floor((P.y+P.h)/TILE):Math.floor(P.y/TILE);for(let x=x0;x<=x1;x++)if(at(x,ty)&&at(x,ty)!==B.water){if(P.vy>=0){P.y=ty*TILE-P.h;P.ground=true}else P.y=(ty+1)*TILE;P.vy=0;break}}}
-function draw(){let w=innerWidth,h=innerHeight;ctx.clearRect(0,0,w,h);let night=weather.time>.55&&weather.time<.9,g=ctx.createLinearGradient(0,0,0,h);g.addColorStop(0,night?'#07102b':'#62bdf0');g.addColorStop(1,night?'#172047':'#e0f5ff');ctx.fillStyle=g;ctx.fillRect(0,0,w,h);ctx.fillStyle=night?'#e2ecff':'#fff0a0';ctx.beginPath();ctx.arc(w*.78,90,night?24:36,0,7);ctx.fill();let x0=Math.max(0,cam.x/TILE|0-2),x1=Math.min(W,(cam.x+w)/TILE|0+3),y0=Math.max(0,cam.y/TILE|0-2),y1=Math.min(H,(cam.y+h)/TILE|0+3);for(let y=y0;y<y1;y++)for(let x=x0;x<x1;x++){let v=at(x,y);if(!v)continue;let col={1:'#8c5a36',2:'#55c34d',3:'#596273',4:'#80502d',5:'#3f9b55',6:'#4cc7da',7:'#d9b46a',8:'#4c9fe8',9:'#202531',10:'#9b6650',11:'#eab34c'}[v];ctx.fillStyle=col||'#888';ctx.fillRect(x*TILE-cam.x,y*TILE-cam.y,TILE+1,TILE+1);if(v===B.grass){ctx.fillStyle='#82e66c';ctx.fillRect(x*TILE-cam.x,y*TILE-cam.y,TILE,4)}}ctx.strokeStyle='rgba(190,225,255,'+weather.rain*.65+')';for(let i=0;i<weather.rain*90;i++){let rx=(i*47+performance.now()*.35)%w,ry=(i*29+performance.now()*.8)%h;ctx.beginPath();ctx.moveTo(rx,ry);ctx.lineTo(rx-4,ry+13);ctx.stroke()}for(let id in remotes)player(remotes[id].x-cam.x,remotes[id].y-cam.y,remotes[id].skin,remotes[id].n);player(P.x-cam.x,P.y-cam.y,P.skin,P.name);for(let m of mobs)mob(m.x-cam.x,m.y-cam.y,m);if(boss)bossDraw(boss.x-cam.x,boss.y-cam.y)}
-function player(x,y,col,n){ctx.fillStyle=col||'#fff';ctx.fillRect(x,y,18,25);ctx.fillStyle='#fff';ctx.fillRect(x+3,y+6,4,4);ctx.fillRect(x+11,y+6,4,4);ctx.fillStyle='#102038';ctx.fillRect(x+4,y+7,2,2);ctx.fillRect(x+12,y+7,2,2);ctx.font='11px Arial';ctx.textAlign='center';ctx.fillStyle='#fff';ctx.fillText(n||'',x+9,y-5)}function mob(x,y,m){ctx.fillStyle=m.type==='slime'?'#54d37e':'#b65d66';ctx.beginPath();ctx.ellipse(x+12,y+15,13,14,0,0,7);ctx.fill();ctx.fillStyle='#fff';ctx.fillRect(x+7,y+10,3,3);ctx.fillRect(x+15,y+10,3,3)}function bossDraw(x,y){ctx.fillStyle='#9b4dff';ctx.beginPath();ctx.arc(x+25,y+25,25,0,7);ctx.fill();ctx.fillStyle='#ffdf58';ctx.fillRect(x+12,y+18,7,7);ctx.fillRect(x+30,y+18,7,7);ctx.fillStyle='#fff';ctx.font='12px Arial';ctx.fillText('БОСС '+Math.ceil((boss.hp||0)/boss.max*100)+'%',x+25,y-10)}
-function update(){let need=100+(P.level-1)*80;$('hp').textContent=Math.max(0,P.hp|0);$('lvl').textContent=P.level;$('xp').textContent=P.xp+'/'+need;$('xpbar').style.width=P.xp/need*100+'%';$('coins').textContent=P.coins;$('online').textContent=Object.keys(remotes).length+1;let ss=['ЛЕТО','ОСЕНЬ','ЗИМА','ВЕСНА'][weather.season];$('weather').textContent=(weather.rain>.1?(weather.season===2?'❄️ Снег':'🌧️ Дождь'):'☀️ Ясно')+' · '+ss}
-function tick(){let t=Date.now();weather.time=t%240000/240000;weather.season=Math.floor(t%1200000/300000);weather.rain=t%90000<30000?Math.min(1,weather.rain+.025):Math.max(0,weather.rain-.018);if(Math.random()<.0015){let x=(P.x/TILE|0)+30+(Math.random()*80|0);mobs.push({x:x*TILE,y:40*TILE,dir:Math.random()>.5?1:-1,type:'slime'})}}
-function renderBar(){$('hotbar').innerHTML=slots.map((id,i)=>`<div class="slot ${i===sel?'sel':''}" data-i="${i}"><b>${item[id].i}</b>${i+1} · ${inv[id]||0}</div>`).join('');document.querySelectorAll('.slot').forEach(e=>e.onclick=()=>{sel=+e.dataset.i;renderBar();$('selected').textContent=item[slots[sel]].n})}
-function save(){let d={x:Math.round(P.x),y:Math.round(P.y),hp:P.hp,level:P.level,xp:P.xp,coins:P.coins,skin:P.skin,inv:inv,name:P.name};localStorage.setItem('blockran_shared_save',JSON.stringify(d));if(db&&uid)db.ref('players/'+uid+'/save').set(d).catch(()=>{})}
-function send(){if(meRef)meRef.update({n:P.name,x:Math.round(P.x),y:Math.round(P.y),skin:P.skin,l:P.level,t:firebase.database.ServerValue.TIMESTAMP})}
-function connect(){if(!db)return;meRef=db.ref('players/'+uid);meRef.onDisconnect().remove();db.ref('players').on('value',s=>{let r={};s.forEach(c=>{if(c.key!==uid){let v=c.val();if(!v||Date.now()-(v.t||0)>15000)return;r[c.key]={x:v.x,y:v.y,n:v.n,skin:v.skin}});remotes=r;update()});db.ref('chat').limitToLast(30).on('child_added',s=>{let v=s.val(),d=document.createElement('div');d.textContent=(v.n||'Игрок')+': '+v.text;$('msgs').appendChild(d);$('msgs').scrollTop=99999});db.ref('world/blocks').on('child_added',s=>applyChange(s));db.ref('world/blocks').on('child_changed',s=>applyChange(s));db.ref('world/blocks').on('child_removed',s=>{let [x,y]=xy(s.key);set(x,y,0)});db.ref('world/boss').on('value',s=>boss=s.val());setInterval(send,120);setInterval(save,5000);send()}
-function applyChange(s){let [x,y]=xy(s.key),v=s.val();set(x,y,v===null?0:v)}
-function loadSave(){let raw=localStorage.getItem('blockran_shared_save');if(raw)try{let d=JSON.parse(raw);Object.assign(P,d);inv=d.inv||inv;name=P.name||name}catch(e){}}async function start(){loadSave();if(auth){try{let u=auth.currentUser||await auth.signInAnonymously();uid=u.user?u.user.uid:u.uid;name=P.name||('Игрок_'+uid.slice(0,5));P.name=name;connect();notify('✅ Общий мир подключен')}catch(e){notify('⚠️ Firebase недоступен, локальный режим')}}else notify('⚠️ Локальный режим')}start();renderBar();
-function action(){if(!mouse.down)return;let tx=mouse.x/TILE|0,ty=mouse.y/TILE|0;if(sel===7){spawnChest(tx,ty);mouse.down=false;return}mouse.button===0?mine(tx,ty):build(tx,ty)}
-addEventListener('keydown',e=>{if(e.target===$('chatInput')){if(e.key==='Enter'){let text=e.target.value.trim();if(text&&db)db.ref('chat').push({n:P.name,text,t:Date.now()});e.target.value=''}return}if(e.code==='KeyA'||e.code==='ArrowLeft')keys.l=true;if(e.code==='KeyD'||e.code==='ArrowRight')keys.r=true;if((e.code==='Space'||e.code==='KeyW'||e.code==='ArrowUp')&&!e.repeat)jump=true;if(e.key>='1'&&e.key<='8'){sel=+e.key-1;renderBar()}if(e.code==='Enter')$('chatInput').focus();if(e.code==='KeyE')openGuide();if(e.code==='KeyB')startBoss()});addEventListener('keyup',e=>{if(e.code==='KeyA'||e.code==='ArrowLeft')keys.l=false;if(e.code==='KeyD'||e.code==='ArrowRight')keys.r=false});
-cv.onmousemove=e=>{mouse.x=e.clientX+cam.x;mouse.y=e.clientY+cam.y};cv.onmousedown=e=>{mouse.down=true;mouse.button=e.button;e.preventDefault()};addEventListener('mouseup',()=>mouse.down=false);cv.oncontextmenu=e=>e.preventDefault();
-function hold(id,on,off){let b=$(id);b.onpointerdown=e=>{e.preventDefault();on()};b.onpointerup=off;b.onpointercancel=off}hold('left',()=>keys.l=true,()=>keys.l=false);hold('right',()=>keys.r=true,()=>keys.r=false);hold('jump',()=>jump=true,()=>{});hold('mine',()=>{let tx=(P.x/P.w|0)+1,ty=(P.y/TILE|0);mine(tx,ty)},()=>{});
-function openGuide(){ $('modal').classList.add('open');$('modalBody').innerHTML=`<h2>📖 Мир БЛОКРАН</h2><p>Это общий серверный мир: поставленный или добытый блок виден всем игрокам. Уровни открывают способности: 3 — ускорение, 6 — золотой скин, 10 — фиолетовая аура.</p><div class="grid"><div class="card">⛏ Добывай руду<br>💎 руда даёт XP и монеты</div><div class="card">🧱 Строй укрытия<br>ПКМ ставит выбранный блок</div><div class="card">📦 Сундук<br>8-й слот создаёт общий объект</div><div class="card">👑 Босс<br>Нажми B для общего события</div></div><h3>Крафт</h3><button onclick="craft('brick',['stone','stone'])">2 камня → кирпич</button> <button onclick="craft('torch',['wood','ore'])">дерево + руда → факел</button>`}
-function craft(out,need){if(need.every(x=>(inv[x]||0)>0)){need.forEach(x=>inv[x]--);add(out);toast('🔨 Создано: '+item[out].n);save()}else toast('Не хватает ресурсов')}$('guide').onclick=openGuide;$('craftBtn').onclick=openGuide;$('close').onclick=()=>$('modal').classList.remove('open');
-function startBoss(){if(!db||!uid){toast('Босс доступен в общем мире');return}db.ref('world/boss').transaction(v=>v||{x:Math.round(P.x+250),y:Math.round(P.y-40),hp:1000,max:1000,started:Date.now()}).then(()=>toast('👑 Общее событие: босс призван!'))}
-cv.addEventListener('dblclick',()=>{if(boss&&Math.abs(boss.x-P.x)<180){db.ref('world/boss/hp').transaction(v=>Math.max(0,(v||0)-25));gain(10)}});
-let last=0,acc=0;function loop(t){let dt=Math.min(60,t-last||16);last=t;acc+=dt;while(acc>16){tick();physics();action();acc-=16}draw();update();requestAnimationFrame(loop)}requestAnimationFrame(loop);
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBm0mIvHVznIeF2PoFk6dtdaiT5r877wyA",
+  authDomain: "meow-874ce.firebaseapp.com",
+  databaseURL: "https://meow-874ce-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "meow-874ce",
+  storageBucket: "meow-874ce.firebasestorage.app",
+  messagingSenderId: "471541334599",
+  appId: "1:471541334599:web:567af3e7dbe70a37572762"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.database();
+
+const $ = id => document.getElementById(id);
+const toast = (m) => { const e = $('toast'); e.textContent = m; e.classList.add('on'); setTimeout(() => e.classList.remove('on'), 2000); };
+
+/* ============================================================
+   WORLD ENGINE & GENERATION
+   ============================================================ */
+const TILE = 32, WW = 400, WH = 100; // 2D Grid
+const B = { AIR: 0, DIRT: 1, GRASS: 2, STONE: 3, WOOD: 4, LEAF: 5, COAL: 6, IRON: 7, GOLD: 8, WATER: 9, BRICK: 10, CHEST: 11, TORCH: 12 };
+const world = new Uint8Array(WW * WH);
+const worldEdits = new Map(); // Local store for synchronized edits
+
+function getTile(x, y) {
+  if (x < 0 || x >= WW || y < 0 || y >= WH) return B.STONE;
+  return world[y * WW + x];
+}
+
+function setTile(x, y, v) {
+  if (x < 0 || x >= WW || y < 0 || y >= WH) return;
+  world[y * WW + x] = v;
+}
+
+// Seed-based procedural terrain
+function generateBaseTerrain() {
+  const seed = 12345;
+  const rng = (x) => {
+    let t = Math.sin(x * 12.9898 + seed) * 43758.5453;
+    return t - Math.floor(t);
+  };
+  
+  const surfaceY = 40;
+  for (let x = 0; x < WW; x++) {
+    const h = Math.floor(surfaceY + Math.sin(x * 0.1) * 5 + rng(x) * 2);
+    for (let y = 0; y < WH; y++) {
+      let b = B.AIR;
+      if (y > h + 5) b = B.STONE;
+      else if (y > h) b = B.DIRT;
+      else if (y === h) b = B.GRASS;
+      
+      // Ores
+      if (b === B.STONE && rng(x + y * 10) < 0.05) {
+        const r = rng(x * y);
+        if (r < 0.1) b = B.GOLD;
+        else if (r < 0.4) b = B.IRON;
+        else b = B.COAL;
+      }
+      
+      setTile(x, y, b);
+    }
+    
+    // Trees
+    if (x % 15 === 0 && rng(x) > 0.5) {
+      const hLimit = Math.floor(surfaceY + Math.sin(x * 0.1) * 5 + rng(x) * 2) - 1;
+      for (let ty = hLimit; ty > hLimit - 5; ty--) setTile(x, ty, B.WOOD);
+      for (let lx = -2; lx <= 2; lx++) {
+        for (let ly = -2; ly <= 0; ly++) {
+          if (getTile(x + lx, hLimit - 5 + ly) === B.AIR) setTile(x + lx, hLimit - 5 + ly, B.LEAF);
+        }
+      }
+    }
+  }
+}
+
+/* ============================================================
+   PLAYER & SYSTEMS
+   ============================================================ */
+const P = {
+  uid: null, nick: "Игрок",
+  x: 200 * TILE, y: 30 * TILE, vx: 0, vy: 0,
+  w: 20, h: 28, ground: false,
+  hp: 100, maxHp: 100, xp: 0, level: 1, coins: 0,
+  inv: { [B.DIRT]: 10, [B.WOOD]: 5 },
+  activeSkin: 'default'
+};
+
+const ITEMS = {
+  [B.DIRT]: { n: "Земля", i: "🟫", place: B.DIRT },
+  [B.STONE]: { n: "Камень", i: "🪨", place: B.STONE },
+  [B.WOOD]: { n: "Дерево", i: "🪵", place: B.WOOD },
+  [B.BRICK]: { n: "Кирпич", i: "🧱", place: B.BRICK },
+  [B.COAL]: { n: "Уголь", i: "🌑", place: null },
+  [B.IRON]: { n: "Железо", i: "🔘", place: null },
+  [B.GOLD]: { n: "Золото", i: "🟡", place: null },
+  [B.TORCH]: { n: "Факел", i: "🔥", place: B.TORCH },
+  [B.CHEST]: { n: "Сундук", i: "📦", place: B.CHEST }
+};
+
+const hotbarSlots = [B.DIRT, B.STONE, B.WOOD, B.BRICK, B.TORCH, B.CHEST];
+let activeSlotIdx = 0;
+
+const RECIPES = [
+  { out: B.BRICK, count: 4, needs: { [B.STONE]: 2 }, n: "Кирпич", i: "🧱" },
+  { out: B.TORCH, count: 4, needs: { [B.WOOD]: 1, [B.COAL]: 1 }, n: "Факел", i: "🔥" },
+  { out: B.CHEST, count: 1, needs: { [B.WOOD]: 8 }, n: "Сундук", i: "📦" }
+];
+
+/* ============================================================
+   NETWORKING & REALTIME WORLD
+   ============================================================ */
+function syncBlock(tx, ty, type) {
+  const key = `${tx}_${ty}`;
+  db.ref('world_edits/' + key).set(type);
+}
+
+function listenToWorld() {
+  db.ref('world_edits').on('child_added', snap => {
+    const [tx, ty] = snap.key.split('_').map(Number);
+    setTile(tx, ty, snap.val());
+  });
+  db.ref('world_edits').on('child_changed', snap => {
+    const [tx, ty] = snap.key.split('_').map(Number);
+    setTile(tx, ty, snap.val());
+  });
+}
+
+const remotes = {};
+function syncPlayer() {
+  if (!P.uid) return;
+  db.ref('players/' + P.uid).set({
+    n: P.nick, x: P.x, y: P.y, hp: P.hp, lvl: P.level, skin: P.activeSkin, t: Date.now()
+  });
+}
+
+function listenPlayers() {
+  db.ref('players').on('value', snap => {
+    const now = Date.now();
+    snap.forEach(s => {
+      if (s.key === P.uid) return;
+      const v = s.val();
+      if (now - v.t < 10000) remotes[s.key] = v;
+      else delete remotes[s.key];
+    });
+    $('onlineVal').textContent = Object.keys(remotes).length + 1;
+  });
+}
+
+/* ============================================================
+   CORE GAME LOGIC
+   ============================================================ */
+const keys = {};
+const mouse = { x: 0, y: 0, down: false };
+let cam = { x: P.x, y: P.y };
+
+function handleInput() {
+  // Movement
+  let ax = 0;
+  if (keys['a'] || keys['ArrowLeft']) ax -= 1;
+  if (keys['d'] || keys['ArrowRight']) ax += 1;
+  
+  const speed = P.level >= 3 ? 5.5 : 4.2;
+  P.vx += ax * 0.6;
+  P.vx *= P.ground ? 0.8 : 0.92;
+  
+  if ((keys[' '] || keys['w']) && P.ground) {
+    P.vy = -10.5;
+    P.ground = false;
+  }
+  
+  P.vy += 0.5; // Gravity
+  
+  P.x += P.vx;
+  checkCollision('x');
+  P.y += P.vy;
+  checkCollision('y');
+  
+  // Interaction
+  if (mouse.down) {
+    const worldX = mouse.x + cam.x;
+    const worldY = mouse.y + cam.y;
+    const tx = Math.floor(worldX / TILE);
+    const ty = Math.floor(worldY / TILE);
+    
+    // Range check
+    const dist = Math.hypot(P.x + P.w/2 - worldX, P.y + P.h/2 - worldY);
+    if (dist < TILE * 5) {
+      if (mouse.btn === 0) mine(tx, ty);
+      else if (mouse.btn === 2) build(tx, ty);
+    }
+  }
+}
+
+function checkCollision(axis) {
+  const x1 = Math.floor(P.x / TILE);
+  const x2 = Math.floor((P.x + P.w) / TILE);
+  const y1 = Math.floor(P.y / TILE);
+  const y2 = Math.floor((P.y + P.h) / TILE);
+
+  if (axis === 'x') {
+    for (let y = y1; y <= y2; y++) {
+      if (getTile(P.vx > 0 ? x2 : x1, y) !== B.AIR) {
+        if (P.vx > 0) P.x = x2 * TILE - P.w - 1;
+        else P.x = (x1 + 1) * TILE + 1;
+        P.vx = 0;
+      }
+    }
+  } else {
+    P.ground = false;
+    for (let x = x1; x <= x2; x++) {
+      if (getTile(x, P.vy > 0 ? y2 : y1) !== B.AIR) {
+        if (P.vy > 0) {
+          P.y = y2 * TILE - P.h - 1;
+          P.ground = true;
+        } else {
+          P.y = (y1 + 1) * TILE + 1;
+        }
+        P.vy = 0;
+      }
+    }
+  }
+}
+
+function mine(tx, ty) {
+  const t = getTile(tx, ty);
+  if (t === B.AIR || t === B.WATER) return;
+  
+  setTile(tx, ty, B.AIR);
+  syncBlock(tx, ty, B.AIR);
+  
+  P.inv[t] = (P.inv[t] || 0) + 1;
+  P.xp += (t >= B.COAL ? 20 : 2);
+  checkLevel();
+  updateHUD();
+}
+
+function build(tx, ty) {
+  if (getTile(tx, ty) !== B.AIR) return;
+  const itemType = hotbarSlots[activeSlotIdx];
+  const item = ITEMS[itemType];
+  if (!item || !item.place || (P.inv[itemType] || 0) <= 0) return;
+  
+  setTile(tx, ty, item.place);
+  syncBlock(tx, ty, item.place);
+  P.inv[itemType]--;
+  updateHUD();
+}
+
+function checkLevel() {
+  const nextXp = P.level * 200;
+  if (P.xp >= nextXp) {
+    P.xp -= nextXp;
+    P.level++;
+    toast(`⭐ НОВЫЙ УРОВЕНЬ: ${P.level}!`);
+    if (P.level === 6) P.activeSkin = 'golden';
+  }
+}
+
+/* ============================================================
+   RENDERING
+   ============================================================ */
+const cv = $('game'), ctx = cv.getContext('2d');
+function render() {
+  ctx.fillStyle = "#0a1020";
+  ctx.fillRect(0, 0, cv.width, cv.height);
+  
+  // Camera smooth follow
+  cam.x = lerp(cam.x, P.x - cv.width/2, 0.1);
+  cam.y = lerp(cam.y, P.y - cv.height/2, 0.1);
+  
+  // Draw Tiles
+  const tx0 = Math.floor(cam.x / TILE);
+  const ty0 = Math.floor(cam.y / TILE);
+  const tx1 = tx0 + Math.ceil(cv.width / TILE) + 1;
+  const ty1 = ty0 + Math.ceil(cv.height / TILE) + 1;
+  
+  for (let y = ty0; y <= ty1; y++) {
+    for (let x = tx0; x <= tx1; x++) {
+      const t = getTile(x, y);
+      if (t === B.AIR) continue;
+      
+      const px = x * TILE - cam.x;
+      const py = y * TILE - cam.y;
+      
+      ctx.fillStyle = getTileColor(t);
+      ctx.fillRect(px, py, TILE, TILE);
+      
+      // Highlight top of grass
+      if (t === B.GRASS) {
+        ctx.fillStyle = "#82e66c";
+        ctx.fillRect(px, py, TILE, 4);
+      }
+    }
+  }
+  
+  // Draw Players
+  drawChar(P.x - cam.x, P.y - cam.y, P.nick, P.activeSkin);
+  for (let id in remotes) {
+    const r = remotes[id];
+    drawChar(r.x - cam.x, r.y - cam.y, r.n, r.skin);
+  }
+  
+  requestAnimationFrame(render);
+}
+
+function getTileColor(t) {
+  switch(t) {
+    case B.DIRT: return "#8c5e3c";
+    case B.GRASS: return "#55b848";
+    case B.STONE: return "#5d6a7a";
+    case B.WOOD: return "#6d4328";
+    case B.LEAF: return "#2d5a27";
+    case B.COAL: return "#1a1a1a";
+    case B.IRON: return "#9aa5b1";
+    case B.GOLD: return "#ffd94f";
+    case B.BRICK: return "#a04a3c";
+    case B.WATER: return "rgba(0, 150, 255, 0.6)";
+    default: return "#f00";
+  }
+}
+
+function drawChar(x, y, name, skin) {
+  const col = skin === 'golden' ? '#ffd94f' : '#5cb8ff';
+  ctx.fillStyle = col;
+  ctx.fillRect(x, y, P.w, P.h);
+  // Eyes
+  ctx.fillStyle = "#fff";
+  ctx.fillRect(x + 4, y + 6, 4, 4);
+  ctx.fillRect(x + 12, y + 6, 4, 4);
+  // Name
+  ctx.fillStyle = "#fff";
+  ctx.font = "bold 10px Arial";
+  ctx.textAlign = "center";
+  ctx.fillText(name, x + P.w/2, y - 8);
+}
+
+/* ============================================================
+   UI & EVENTS
+   ============================================================ */
+function updateHUD() {
+  $('hpBar').style.width = (P.hp / P.maxHp * 100) + '%';
+  const nextXp = P.level * 200;
+  $('xpBar').style.width = (P.xp / nextXp * 100) + '%';
+  $('lvlVal').textContent = P.level;
+  $('xpVal').textContent = P.xp;
+  $('coinCount').textContent = P.coins;
+  $('pName').textContent = P.nick;
+  
+  renderHotbar();
+}
+
+function renderHotbar() {
+  const hb = $('hotbar');
+  hb.innerHTML = '';
+  hotbarSlots.forEach((type, i) => {
+    const item = ITEMS[type];
+    const slot = document.createElement('div');
+    slot.className = `slot ${activeSlotIdx === i ? 'active' : ''}`;
+    slot.innerHTML = `
+      <span class="slot-key">${i+1}</span>
+      <span class="slot-icon">${item.i}</span>
+      <span class="slot-count">${P.inv[type] || 0}</span>
+    `;
+    slot.onclick = () => { activeSlotIdx = i; renderHotbar(); };
+    hb.appendChild(slot);
+  });
+}
+
+function toggleModal(id) {
+  const m = $(id);
+  const isOpening = m.style.display !== 'flex';
+  m.style.display = isOpening ? 'flex' : 'none';
+  if (isOpening && id === 'craftModal') renderCrafting();
+}
+
+function renderCrafting() {
+  const grid = $('craftGrid');
+  grid.innerHTML = '';
+  RECIPES.forEach(r => {
+    const card = document.createElement('div');
+    card.className = 'recipe-card';
+    let costText = "";
+    for (let id in r.needs) costText += `${ITEMS[id].i}x${r.needs[id]} `;
+    
+    card.innerHTML = `
+      <div class="recipe-icon">${r.i}</div>
+      <div class="recipe-name">${r.n}</div>
+      <div class="recipe-cost">${costText}</div>
+    `;
+    card.onclick = () => craft(r);
+    grid.appendChild(card);
+  });
+}
+
+function craft(r) {
+  for (let id in r.needs) {
+    if ((P.inv[id] || 0) < r.needs[id]) { toast("Недостаточно ресурсов!"); return; }
+  }
+  // All good
+  for (let id in r.needs) P.inv[id] -= r.needs[id];
+  P.inv[r.out] = (P.inv[r.out] || 0) + r.count;
+  toast(`Скрафчено: ${r.n}`);
+  updateHUD();
+  renderCrafting();
+}
+
+/* ============================================================
+   SYSTEMS & LIFECYCLE
+   ============================================================ */
+async function handleAuth(type) {
+  const email = $('emailInput').value, pass = $('passInput').value, nick = $('nickInput').value;
+  try {
+    if (type === 'reg') {
+      const res = await auth.createUserWithEmailAndPassword(email, pass);
+      await db.ref('users/' + res.user.uid).set({ n: nick });
+    } else {
+      await auth.signInWithEmailAndPassword(email, pass);
+    }
+  } catch(e) { $('authErr').textContent = e.message; }
+}
+
+auth.onAuthStateChanged(async user => {
+  if (user) {
+    P.uid = user.uid;
+    const snap = await db.ref('users/' + user.uid).once('value');
+    P.nick = snap.val()?.n || "Странник";
+    $('authScreen').style.display = 'none';
+    $('hud').classList.add('on');
+    initGame();
+  }
+});
+
+function initGame() {
+  generateBaseTerrain();
+  listenToWorld();
+  listenPlayers();
+  
+  // Game loops
+  setInterval(handleInput, 1000/60);
+  setInterval(syncPlayer, 100);
+  
+  updateHUD();
+  render();
+}
+
+// Global Events
+window.onresize = () => { cv.width = window.innerWidth; cv.height = window.innerHeight; };
+window.onresize();
+
+window.onkeydown = e => {
+  keys[e.key.toLowerCase()] = true;
+  if (e.key >= '1' && e.key <= '6') { activeSlotIdx = parseInt(e.key) - 1; renderHotbar(); }
+  if (e.key === 'e') toggleModal('craftModal');
+};
+window.onkeyup = e => keys[e.key.toLowerCase()] = false;
+
+cv.onmousedown = e => { mouse.down = true; mouse.btn = e.button; };
+window.onmouseup = () => mouse.down = false;
+cv.onmousemove = e => { mouse.x = e.clientX; mouse.y = e.clientY; };
+cv.oncontextmenu = e => e.preventDefault();
+
+// Chat
+$('chatInput').onkeydown = e => {
+  if (e.key === 'Enter') {
+    const t = e.target.value.trim();
+    if (t) db.ref('chat').push({ n: P.nick, m: t, skin: P.activeSkin });
+    e.target.value = '';
+  }
+};
+db.ref('chat').limitToLast(10).on('child_added', snap => {
+  const v = snap.val();
+  const d = document.createElement('div');
+  d.innerHTML = `<span style="color:#ffd94f">${v.n}:</span> ${v.m}`;
+  $('messages').appendChild(d);
+  $('messages').scrollTop = $('messages').scrollHeight;
+});
+
+// Mobile Controls
+const bindJoy = (id, k) => {
+  $(id).ontouchstart = (e) => { e.preventDefault(); keys[k] = true; };
+  $(id).ontouchend = () => keys[k] = false;
+};
+bindJoy('mLeft', 'a'); bindJoy('mRight', 'd'); bindJoy('mJump', ' ');
+$('mAction').ontouchstart = (e) => { e.preventDefault(); mouse.down = true; mouse.btn = 0; mouse.x = cv.width/2; mouse.y = cv.height/2; };
+$('mAction').ontouchend = () => mouse.down = false;
+
+if ('ontouchstart' in window) document.body.classList.add('touch');
 </script>
 </body>
 </html>
