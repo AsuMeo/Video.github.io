@@ -2,598 +2,595 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=1.5">
-  <title>Милые Чили Аниме Тянки | Симулятор кейсов + Мессенджер</title>
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🔥 ЧИЛИ-КЕЙС 3D | Симулятор Майнкрафт</title>
   <style>
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      font-family: 'Segoe UI', 'Poppins', system-ui, sans-serif;
     }
+    
     body {
-      background: linear-gradient(145deg, #1a1e2b 0%, #2a1e3c 100%);
-      min-height: 100vh;
+      font-family: 'Segoe UI', 'Arial', sans-serif;
+      background: linear-gradient(135deg, #0a0a0a 0%, #1a0a0a 50%, #0a0a1a 100%);
+      overflow: hidden;
+      height: 100vh;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    
+    #gameContainer {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+    }
+    
+    #ui {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 20px;
       display: flex;
       justify-content: center;
       align-items: center;
-      padding: 20px;
+      gap: 20px;
+      z-index: 10;
+      pointer-events: none;
     }
-    .app-container {
-      max-width: 1300px;
-      width: 100%;
-      background: rgba(255, 245, 250, 0.1);
-      backdrop-filter: blur(20px);
-      border-radius: 40px;
-      padding: 20px;
-      box-shadow: 0 30px 50px rgba(0,0,0,0.7);
-      border: 1px solid rgba(255,200,255,0.25);
-      color: #fbe9ff;
+    
+    #ui > * {
+      pointer-events: auto;
     }
-    .hidden {
-      display: none !important;
-    }
-    /* Аватарки генерятся через canvas, стили ниже */
-    .avatar-circle {
-      width: 55px;
-      height: 55px;
-      border-radius: 50%;
-      border: 2px solid #ffb3e6;
-      object-fit: cover;
-      background: #3e2a4f;
-    }
-    .profile-avatar-large {
-      width: 100px;
-      height: 100px;
-      border-radius: 50%;
-      border: 3px solid #ff99cc;
-      background: #4a3660;
-    }
-    button {
-      background: #ff99cc;
-      border: none;
-      color: #1a1025;
+    
+    .btn {
+      background: linear-gradient(180deg, #5a5a5a 0%, #2a2a2a 100%);
+      border: 3px solid #1a1a1a;
+      border-bottom: 5px solid #000;
+      color: #fff;
+      padding: 15px 30px;
+      font-size: 18px;
       font-weight: bold;
-      padding: 10px 18px;
-      border-radius: 30px;
       cursor: pointer;
-      transition: 0.2s;
-      box-shadow: 0 0 12px #ff99ccaa;
-      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      position: relative;
+      transition: all 0.1s;
+      text-shadow: 2px 2px 0 #000;
+      box-shadow: 0 5px 0 #000, 0 10px 20px rgba(0,0,0,0.5);
+      image-rendering: pixelated;
     }
-    button:hover {
-      background: #ffb3e6;
-      box-shadow: 0 0 20px #ff99cc;
+    
+    .btn:hover {
+      background: linear-gradient(180deg, #7a7a7a 0%, #4a4a4a 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 7px 0 #000, 0 15px 25px rgba(255,100,0,0.3);
     }
-    button.secondary {
-      background: #7b5e9c;
-      color: white;
-      box-shadow: none;
+    
+    .btn:active {
+      transform: translateY(4px);
+      box-shadow: 0 2px 0 #000;
     }
-    input, textarea {
-      background: rgba(20, 15, 30, 0.8);
-      border: 1px solid #b87c9e;
-      border-radius: 20px;
-      padding: 12px 18px;
-      color: #ffeef9;
-      outline: none;
-      width: 100%;
+    
+    .btn.open-case {
+      background: linear-gradient(180deg, #ff6b35 0%, #c41e3a 100%);
+      border-color: #8b0000;
+      animation: glow 1.5s infinite;
+      font-size: 24px;
+      padding: 20px 50px;
     }
-    .tabs {
-      display: flex;
-      gap: 10px;
-      margin: 15px 0;
-      flex-wrap: wrap;
+    
+    @keyframes glow {
+      0%, 100% {
+        box-shadow: 0 5px 0 #4a0000, 0 10px 30px rgba(255,50,0,0.4);
+      }
+      50% {
+        box-shadow: 0 5px 0 #4a0000, 0 15px 40px rgba(255,100,0,0.8), 0 0 60px rgba(255,50,0,0.6);
+      }
     }
-    .card-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-      gap: 15px;
-      margin-top: 15px;
+    
+    .rarity-label {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 48px;
+      font-weight: bold;
+      color: #fff;
+      text-shadow: 3px 3px 0 #000;
+      z-index: 20;
+      opacity: 0;
+      animation: none;
+      pointer-events: none;
     }
-    .chi-card {
-      background: rgba(45, 30, 55, 0.7);
-      backdrop-filter: blur(8px);
-      border-radius: 24px;
-      padding: 12px;
-      text-align: center;
-      border: 1px solid #b680c2;
-      transition: 0.2s;
+    
+    .rarity-label.show {
+      animation: revealRarity 3s ease-out;
     }
-    .chi-card canvas {
-      width: 100%;
-      height: auto;
-      border-radius: 20px;
-      margin-bottom: 6px;
+    
+    @keyframes revealRarity {
+      0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.1) rotateY(0deg);
+      }
+      15% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(2) rotateY(360deg);
+      }
+      30% {
+        transform: translate(-50%, -50%) scale(1.5) rotateY(720deg);
+      }
+      60% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.2);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.8) translateY(-100px);
+      }
     }
-    .rarity-common { border-color: #aaaaaa; }
-    .rarity-uncommon { border-color: #7bc97b; }
-    .rarity-rare { border-color: #5b8def; }
-    .rarity-epic { border-color: #c95bde; }
-    .rarity-legendary { border-color: #f5a623; }
-    .rarity-mythical { border-color: #ff4d6d; }
-
-    .chat-window {
-      background: rgba(30, 20, 40, 0.7);
-      border-radius: 25px;
+    
+    .inventory-panel {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(0,0,0,0.8);
+      border: 4px solid #555;
       padding: 15px;
-      height: 400px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin: 10px 0;
+      color: #fff;
+      min-width: 200px;
+      z-index: 5;
     }
-    .message {
-      background: #5d4770;
-      padding: 10px 16px;
-      border-radius: 20px;
-      max-width: 80%;
-      align-self: flex-start;
+    
+    .inventory-panel h3 {
+      margin-bottom: 10px;
+      color: #ffaa00;
+      text-shadow: 2px 2px 0 #000;
     }
-    .message.mine {
-      background: #c94d7c;
-      align-self: flex-end;
-    }
-    .flex-row {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      flex-wrap: wrap;
+    
+    .case-counter {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #fff;
+      font-size: 20px;
+      background: rgba(0,0,0,0.8);
+      padding: 10px 20px;
+      border: 3px solid #ffaa00;
+      z-index: 5;
     }
   </style>
 </head>
 <body>
-<div class="app-container" id="appContainer">
-  <!-- Экран авторизации -->
-  <div id="authScreen">
-    <h2 style="text-align:center; color:#ffb3e6;">🌸 Мир Чили Тянок 🌸</h2>
-    <div style="max-width:350px; margin:20px auto;">
-      <input type="email" id="emailInput" placeholder="Почта" style="margin-bottom:10px;">
-      <input type="password" id="passwordInput" placeholder="Пароль" style="margin-bottom:15px;">
-      <div class="flex-row" style="justify-content:center;">
-        <button id="loginBtn">Войти</button>
-        <button id="registerBtn" class="secondary">Регистрация</button>
-      </div>
-      <p style="font-size:12px; margin-top:10px; text-align:center;">Аватарки и профиль появятся после входа</p>
+  <div id="gameContainer">
+    <div class="case-counter" id="caseCounter">🔑 Ключей: 3</div>
+    <div class="rarity-label" id="rarityLabel"></div>
+    <div class="inventory-panel">
+      <h3>📦 Инвентарь</h3>
+      <div id="inventoryList"></div>
+      <div style="margin-top:10px; color:#ffaa00;">💰 Монеты: <span id="coinsDisplay">100</span></div>
+    </div>
+    <div id="ui">
+      <button class="btn open-case" id="openCaseBtn">
+        🔥 ОТКРЫТЬ КЕЙС
+      </button>
+      <button class="btn" id="buyKeyBtn">
+        🗝️ Купить ключ (50💰)
+      </button>
     </div>
   </div>
 
-  <!-- Основной интерфейс -->
-  <div id="mainUI" class="hidden">
-    <div class="flex-row" style="justify-content:space-between;">
-      <h2>🌸 Чили-Тянки</h2>
-      <div class="flex-row">
-        <canvas id="myAvatar" width="50" height="50" class="avatar-circle"></canvas>
-        <span id="myNickDisplay"></span>
-        <span id="myBalanceDisplay" style="margin-left:10px;">💰 0</span>
-        <button id="logoutBtn" class="secondary">Выход</button>
-      </div>
-    </div>
-
-    <div class="tabs">
-      <button id="tabCases">📦 Кейсы</button>
-      <button id="tabInventory">🎒 Инвентарь</button>
-      <button id="tabMarket">📊 Биржа</button>
-      <button id="tabMessages">💬 Чаты</button>
-      <button id="tabProfile">👤 Профиль</button>
-      <button id="tabSearchUsers">🔍 Поиск</button>
-    </div>
-
-    <!-- Кейсы -->
-    <div id="casesPanel">
-      <h3>Открыть кейс</h3>
-      <div class="flex-row">
-        <button id="openCaseBtn">✨ Открыть кейс (50💰)</button>
-        <span>Баланс: <span id="caseBalance">0</span>💰</span>
-      </div>
-      <div id="caseResult" style="margin-top:15px; text-align:center;"></div>
-    </div>
-
-    <!-- Инвентарь -->
-    <div id="inventoryPanel" class="hidden">
-      <h3>Мои карточки</h3>
-      <div id="inventoryGrid" class="card-grid"></div>
-    </div>
-
-    <!-- Биржа -->
-    <div id="marketPanel" class="hidden">
-      <h3>Биржа карточек</h3>
-      <div class="flex-row">
-        <button id="createListingBtn">📤 Выставить на продажу</button>
-      </div>
-      <div id="marketListings" class="card-grid" style="margin-top:15px;"></div>
-      <div id="sellModal" class="hidden" style="margin-top:15px; background:#302040; padding:15px; border-radius:20px;">
-        <p>Выберите карточку и цену</p>
-        <select id="sellCardSelect"></select>
-        <input id="sellPriceInput" type="number" placeholder="Цена" value="100">
-        <button id="confirmSellBtn">Выставить</button>
-        <button id="cancelSellBtn" class="secondary">Отмена</button>
-      </div>
-    </div>
-
-    <!-- Мессенджер -->
-    <div id="messagesPanel" class="hidden">
-      <h3>Личные сообщения</h3>
-      <div class="flex-row">
-        <input id="chatPartnerInput" placeholder="ID пользователя для чата">
-        <button id="startChatBtn">Открыть чат</button>
-      </div>
-      <div id="activeChatWith" style="margin:5px 0;"></div>
-      <div id="chatMessages" class="chat-window"></div>
-      <div class="flex-row">
-        <input id="messageInput" placeholder="Сообщение...">
-        <button id="sendMessageBtn">Отправить</button>
-      </div>
-    </div>
-
-    <!-- Профиль -->
-    <div id="profilePanel" class="hidden">
-      <h3>Мой профиль</h3>
-      <canvas id="profileAvatar" width="100" height="100" class="profile-avatar-large"></canvas>
-      <input id="profileNickInput" placeholder="Никнейм" style="margin:10px 0;">
-      <textarea id="profileDescInput" placeholder="Описание профиля..." rows="3"></textarea>
-      <button id="saveProfileBtn">Сохранить</button>
-      <div id="inventoryValue" style="margin-top:10px;">💰 Стоимость инвентаря: 0</div>
-    </div>
-
-    <!-- Поиск пользователей -->
-    <div id="searchPanel" class="hidden">
-      <h3>Поиск пользователей</h3>
-      <input id="searchUserInput" placeholder="Введите ник или ID">
-      <button id="searchUserBtn">Найти</button>
-      <div id="searchResults" style="margin-top:15px;"></div>
-    </div>
-  </div>
-</div>
-
-<script>
-  // Инициализация Firebase
-  const firebaseConfig = {
-    apiKey: "AIzaSyBm0mIvHVznIeF2PoFk6dtdaiT5r877wyA",
-    authDomain: "meow-874ce.firebaseapp.com",
-    databaseURL: "https://meow-874ce-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "meow-874ce",
-    storageBucket: "meow-874ce.firebasestorage.app",
-    messagingSenderId: "471541334599",
-    appId: "1:471541334599:web:567af3e7dbe70a37572762"
-  };
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db = firebase.database();
-
-  // ---------- ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ----------
-  let currentUser = null;
-  let currentUserId = null;
-  let userData = {}; // ник, описание, баланс, аватар (seed)
-  let inventory = {}; // карточки пользователя
-  let allUsersCache = {};
-  let activeChatPartner = null;
-
-  // Редкости и система выпадения (новая прогрессивная)
-  const rarities = [
-    { name: 'common', color: '#aaaaaa', label: 'Обычная', weight: 50, valueMultiplier: 1 },
-    { name: 'uncommon', color: '#7bc97b', label: 'Необычная', weight: 25, valueMultiplier: 2.5 },
-    { name: 'rare', color: '#5b8def', label: 'Редкая', weight: 12, valueMultiplier: 6 },
-    { name: 'epic', color: '#c95bde', label: 'Эпическая', weight: 7, valueMultiplier: 15 },
-    { name: 'legendary', color: '#f5a623', label: 'Легендарная', weight: 4, valueMultiplier: 40 },
-    { name: 'mythical', color: '#ff4d6d', label: 'Мифическая', weight: 2, valueMultiplier: 100 }
-  ];
-
-  // Генерация случайной редкости по весам + динамический шанс
-  function getRandomRarity() {
-    const totalWeight = rarities.reduce((sum, r) => sum + r.weight, 0);
-    let random = Math.random() * totalWeight;
-    for (let r of rarities) {
-      if (random < r.weight) return r;
-      random -= r.weight;
-    }
-    return rarities[0];
-  }
-
-  // Генерация уникального ID карточки
-  function generateCardId() {
-    return 'card_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-  }
-
-  // Создание карточки (SVG через canvas)
-  function drawChibiCard(card, size = 120) {
-    const canvas = document.createElement('canvas');
-    canvas.width = size;
-    canvas.height = size;
-    const ctx = canvas.getContext('2d');
-    const seed = card.seed || 42;
-    const rarityColor = card.rarityColor || '#aaaaaa';
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script>
+    // ============ ОСНОВНАЯ ИГРА ============
     
-    // Фон
-    ctx.fillStyle = rarityColor + '33';
-    ctx.fillRect(0,0,size,size);
-    ctx.fillStyle = '#1a1025';
-    ctx.fillRect(4,4,size-8,size-8);
+    // Редкости и предметы
+    const rarities = [
+      { name: 'Обычный', color: 0xaaaaaa, weight: 40, value: 10, label: 'common' },
+      { name: 'Необычный', color: 0x55ff55, weight: 25, value: 30, label: 'uncommon' },
+      { name: 'Редкий', color: 0x5555ff, weight: 15, value: 80, label: 'rare' },
+      { name: 'Эпический', color: 0xaa00ff, weight: 10, value: 200, label: 'epic' },
+      { name: 'Легендарный', color: 0xffaa00, weight: 7, value: 500, label: 'legendary' },
+      { name: 'МИФИЧЕСКИЙ', color: 0xff0044, weight: 3, value: 1500, label: 'mythical' }
+    ];
     
-    // Генератор псевдо-случайных на основе seed
-    function seededRandom(s) {
-      let x = Math.sin(s) * 10000;
-      return x - Math.floor(x);
-    }
-    const r = (offset) => seededRandom(seed + offset);
+    // Предметы Minecraft стиля
+    const items = [
+      { name: 'Земляной блок', rarity: 'common' },
+      { name: 'Каменный меч', rarity: 'common' },
+      { name: 'Деревянная кирка', rarity: 'common' },
+      { name: 'Железный слиток', rarity: 'uncommon' },
+      { name: 'Лук', rarity: 'uncommon' },
+      { name: 'Зелье скорости', rarity: 'uncommon' },
+      { name: 'Алмаз', rarity: 'rare' },
+      { name: 'Зачарованная книга', rarity: 'rare' },
+      { name: 'Изумруд', rarity: 'rare' },
+      { name: 'Алмазный меч', rarity: 'epic' },
+      { name: 'Элитры', rarity: 'epic' },
+      { name: 'Тотем бессмертия', rarity: 'epic' },
+      { name: 'Незеритовая броня', rarity: 'legendary' },
+      { name: 'Звезда Незера', rarity: 'legendary' },
+      { name: '🐉 ЯЙЦО ДРАКОНА', rarity: 'mythical' },
+      { name: '🔥 МЕЧ ЧИЛИ', rarity: 'mythical' }
+    ];
     
-    // Волосы
-    ctx.fillStyle = `hsl(${r(1)*360}, 70%, 60%)`;
-    ctx.beginPath();
-    ctx.arc(size/2, size/3, size/4, 0, Math.PI*2);
-    ctx.fill();
-    // Лицо
-    ctx.fillStyle = '#ffe0bd';
-    ctx.beginPath();
-    ctx.arc(size/2, size/2.2, size/5, 0, Math.PI*2);
-    ctx.fill();
-    // Глаза
-    ctx.fillStyle = '#333';
-    ctx.beginPath();
-    ctx.arc(size/2.7, size/2.4, size/20, 0, Math.PI, false);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(size/1.6, size/2.4, size/20, 0, Math.PI, false);
-    ctx.fill();
-    // Рот
-    ctx.strokeStyle = '#c44';
-    ctx.beginPath();
-    ctx.arc(size/2, size/1.9, size/25, 0, Math.PI);
-    ctx.stroke();
-    // Чили перец (символ)
-    ctx.fillStyle = '#d44';
-    ctx.beginPath();
-    ctx.ellipse(size/2, size/1.35, size/12, size/18, 0, 0, Math.PI*2);
-    ctx.fill();
-    ctx.fillStyle = '#3a3';
-    ctx.fillRect(size/2-2, size/1.25, 4, size/12);
-    
-    return canvas;
-  }
-
-  // ---------- АВТОРИЗАЦИЯ ----------
-  document.getElementById('loginBtn').addEventListener('click', async () => {
-    const email = document.getElementById('emailInput').value.trim();
-    const pass = document.getElementById('passwordInput').value;
-    try {
-      await auth.signInWithEmailAndPassword(email, pass);
-    } catch (e) { alert('Ошибка входа: ' + e.message); }
-  });
-  document.getElementById('registerBtn').addEventListener('click', async () => {
-    const email = document.getElementById('emailInput').value.trim();
-    const pass = document.getElementById('passwordInput').value;
-    try {
-      await auth.createUserWithEmailAndPassword(email, pass);
-    } catch (e) { alert('Ошибка регистрации: ' + e.message); }
-  });
-  document.getElementById('logoutBtn').addEventListener('click', () => auth.signOut());
-
-  auth.onAuthStateChanged(user => {
-    if (user) {
-      currentUser = user;
-      currentUserId = user.uid;
-      document.getElementById('authScreen').classList.add('hidden');
-      document.getElementById('mainUI').classList.remove('hidden');
-      initUserData();
-    } else {
-      currentUser = null; currentUserId = null;
-      document.getElementById('authScreen').classList.remove('hidden');
-      document.getElementById('mainUI').classList.add('hidden');
-    }
-  });
-
-  function initUserData() {
-    db.ref('users/' + currentUserId).once('value').then(snap => {
-      if (!snap.exists()) {
-        const defaultData = {
-          nick: 'Тян_' + currentUserId.substring(0,5),
-          desc: 'Люблю чили перчики!',
-          balance: 200,
-          avatarSeed: Math.floor(Math.random()*1000),
-          inventoryValue: 0
-        };
-        db.ref('users/' + currentUserId).set(defaultData);
-      }
-    });
-    db.ref('users/' + currentUserId).on('value', snap => {
-      userData = snap.val() || {};
-      document.getElementById('myNickDisplay').innerText = userData.nick || '...';
-      document.getElementById('myBalanceDisplay').innerText = '💰 ' + (userData.balance||0);
-      drawAvatarOnCanvas('myAvatar', userData.avatarSeed || 1);
-      if (document.getElementById('profilePanel').classList.contains('hidden')===false) {
-        document.getElementById('profileNickInput').value = userData.nick || '';
-        document.getElementById('profileDescInput').value = userData.desc || '';
-        drawAvatarOnCanvas('profileAvatar', userData.avatarSeed||1);
-      }
-    });
-    db.ref('inventory/' + currentUserId).on('value', snap => {
-      inventory = snap.val() || {};
-      updateInventoryUI();
-    });
-  }
-
-  function drawAvatarOnCanvas(canvasId, seed) {
-    const canvas = document.getElementById(canvasId);
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    const s = canvas.width;
-    ctx.clearRect(0,0,s,s);
-    ctx.fillStyle = '#4a3660';
-    ctx.beginPath(); ctx.arc(s/2,s/2,s/2,0,Math.PI*2); ctx.fill();
-    const r = (o) => Math.sin(seed+o)*0.5+0.5;
-    ctx.fillStyle = `hsl(${r(10)*360},70%,70%)`;
-    ctx.beginPath(); ctx.arc(s/2,s/2.5,s/3.5,0,Math.PI*2); ctx.fill();
-    ctx.fillStyle = '#ffe0bd';
-    ctx.beginPath(); ctx.arc(s/2,s/1.9,s/4.5,0,Math.PI*2); ctx.fill();
-    ctx.fillStyle = '#000';
-    ctx.beginPath(); ctx.arc(s/2.5,s/2.1,s/15,0,Math.PI); ctx.fill();
-    ctx.beginPath(); ctx.arc(s/1.7,s/2.1,s/15,0,Math.PI); ctx.fill();
-  }
-
-  // ---------- ИНВЕНТАРЬ И КЕЙСЫ ----------
-  document.getElementById('openCaseBtn').addEventListener('click', () => {
-    if ((userData.balance||0) < 50) return alert('Недостаточно средств!');
-    const rarity = getRandomRarity();
-    const newCard = {
-      id: generateCardId(),
-      rarity: rarity.name,
-      rarityColor: rarity.color,
-      label: rarity.label,
-      seed: Math.floor(Math.random()*99999),
-      value: Math.floor(rarity.valueMultiplier * (10 + Math.random()*30))
+    // Состояние игры
+    let gameState = {
+      keys: parseInt(localStorage.getItem('keys') || '3'),
+      coins: parseInt(localStorage.getItem('coins') || '100'),
+      inventory: JSON.parse(localStorage.getItem('inventory') || '[]'),
+      isOpening: false
     };
-    db.ref('users/' + currentUserId + '/balance').transaction(bal => (bal||0) - 50);
-    db.ref('inventory/' + currentUserId + '/' + newCard.id).set(newCard);
-    const resDiv = document.getElementById('caseResult');
-    const canvas = drawChibiCard(newCard, 100);
-    resDiv.innerHTML = '';
-    resDiv.appendChild(canvas);
-    resDiv.innerHTML += `<p>${newCard.label} (${newCard.value}💰)</p>`;
-  });
-
-  function updateInventoryUI() {
-    const grid = document.getElementById('inventoryGrid');
-    if (!grid) return;
-    grid.innerHTML = '';
-    let totalValue = 0;
-    Object.values(inventory).forEach(card => {
-      totalValue += card.value || 0;
-      const cardDiv = document.createElement('div');
-      cardDiv.className = 'chi-card rarity-' + (card.rarity||'common');
-      const canvas = drawChibiCard(card, 100);
-      cardDiv.appendChild(canvas);
-      cardDiv.innerHTML += `<strong>${card.label}</strong><br>💰${card.value}`;
-      grid.appendChild(cardDiv);
+    
+    // Three.js сцена
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x1a0a2e);
+    scene.fog = new THREE.Fog(0x1a0a2e, 10, 50);
+    
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
+    camera.position.set(0, 3, 12);
+    camera.lookAt(0, 0, 0);
+    
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    document.getElementById('gameContainer').appendChild(renderer.domElement);
+    
+    // Освещение
+    const ambientLight = new THREE.AmbientLight(0x404060);
+    scene.add(ambientLight);
+    
+    const mainLight = new THREE.DirectionalLight(0xffeedd, 1.2);
+    mainLight.position.set(10, 20, 10);
+    mainLight.castShadow = true;
+    mainLight.shadow.mapSize.width = 1024;
+    mainLight.shadow.mapSize.height = 1024;
+    scene.add(mainLight);
+    
+    const colorLight1 = new THREE.PointLight(0xff4400, 2, 15);
+    colorLight1.position.set(5, 2, 5);
+    scene.add(colorLight1);
+    
+    const colorLight2 = new THREE.PointLight(0x4400ff, 2, 15);
+    colorLight2.position.set(-5, 2, -5);
+    scene.add(colorLight2);
+    
+    // Пол
+    const floorGeometry = new THREE.PlaneGeometry(30, 30);
+    const floorMaterial = new THREE.MeshStandardMaterial({ 
+      color: 0x2a1a3a,
+      roughness: 0.8,
+      metalness: 0.2
     });
-    db.ref('users/' + currentUserId + '/inventoryValue').set(totalValue);
-    document.getElementById('inventoryValue').innerText = '💰 Стоимость инвентаря: ' + totalValue;
-  }
-
-  // ---------- БИРЖА ----------
-  document.getElementById('createListingBtn').addEventListener('click', () => {
-    document.getElementById('sellModal').classList.toggle('hidden');
-    const select = document.getElementById('sellCardSelect');
-    select.innerHTML = '';
-    Object.entries(inventory).forEach(([id, card]) => {
-      const opt = document.createElement('option');
-      opt.value = id;
-      opt.text = `${card.label} (💰${card.value})`;
-      select.appendChild(opt);
-    });
-  });
-  document.getElementById('cancelSellBtn').addEventListener('click', ()=> document.getElementById('sellModal').classList.add('hidden'));
-  document.getElementById('confirmSellBtn').addEventListener('click', () => {
-    const cardId = document.getElementById('sellCardSelect').value;
-    const price = parseInt(document.getElementById('sellPriceInput').value);
-    if (!cardId || !price || price<=0) return;
-    const card = inventory[cardId];
-    db.ref('market/' + cardId).set({...card, seller: currentUserId, price: price});
-    db.ref('inventory/' + currentUserId + '/' + cardId).remove();
-    document.getElementById('sellModal').classList.add('hidden');
-  });
-
-  db.ref('market').on('value', snap => {
-    const grid = document.getElementById('marketListings');
-    if (!grid) return;
-    grid.innerHTML = '';
-    const listings = snap.val() || {};
-    Object.entries(listings).forEach(([id, item]) => {
-      if (item.seller === currentUserId) return;
-      const div = document.createElement('div');
-      div.className = 'chi-card';
-      div.appendChild(drawChibiCard(item, 80));
-      div.innerHTML += `<strong>${item.label}</strong><br>💰${item.price}<br><small>Продавец: ${item.seller?.substring(0,6)}</small>`;
-      const buyBtn = document.createElement('button');
-      buyBtn.innerText = 'Купить';
-      buyBtn.onclick = () => {
-        if ((userData.balance||0) < item.price) return alert('Мало денег');
-        db.ref('users/' + currentUserId + '/balance').transaction(b => (b||0) - item.price);
-        db.ref('users/' + item.seller + '/balance').transaction(b => (b||0) + item.price);
-        db.ref('inventory/' + currentUserId + '/' + id).set({...item, seller: null, price: null});
-        db.ref('market/' + id).remove();
-      };
-      div.appendChild(buyBtn);
-      grid.appendChild(div);
-    });
-  });
-
-  // ---------- МЕССЕНДЖЕР ----------
-  document.getElementById('startChatBtn').addEventListener('click', () => {
-    const partner = document.getElementById('chatPartnerInput').value.trim();
-    if (partner) { activeChatPartner = partner; loadChat(); }
-  });
-  function loadChat() {
-    if (!activeChatPartner) return;
-    document.getElementById('activeChatWith').innerText = 'Чат с: ' + activeChatPartner;
-    const chatId = [currentUserId, activeChatPartner].sort().join('_');
-    db.ref('chats/' + chatId).off();
-    db.ref('chats/' + chatId).on('value', snap => {
-      const messages = snap.val() || {};
-      const container = document.getElementById('chatMessages');
-      container.innerHTML = '';
-      Object.values(messages).sort((a,b)=> a.time-b.time).forEach(msg => {
-        const div = document.createElement('div');
-        div.className = 'message ' + (msg.from === currentUserId ? 'mine' : '');
-        div.innerText = msg.text;
-        container.appendChild(div);
+    const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+    floor.rotation.x = -Math.PI / 2;
+    floor.position.y = -4;
+    floor.receiveShadow = true;
+    scene.add(floor);
+    
+    // Декоративные блоки Minecraft стиля
+    function createBlock(x, y, z, color) {
+      const geometry = new THREE.BoxGeometry(0.8, 0.8, 0.8);
+      const material = new THREE.MeshStandardMaterial({ 
+        color: color,
+        roughness: 0.3,
+        metalness: 0.1
       });
-    });
-  }
-  document.getElementById('sendMessageBtn').addEventListener('click', () => {
-    const text = document.getElementById('messageInput').value.trim();
-    if (!text || !activeChatPartner) return;
-    const chatId = [currentUserId, activeChatPartner].sort().join('_');
-    db.ref('chats/' + chatId).push({from: currentUserId, text, time: Date.now()});
-    document.getElementById('messageInput').value = '';
-  });
-
-  // ---------- ПРОФИЛЬ ----------
-  document.getElementById('saveProfileBtn').addEventListener('click', () => {
-    const nick = document.getElementById('profileNickInput').value.trim();
-    const desc = document.getElementById('profileDescInput').value.trim();
-    db.ref('users/' + currentUserId).update({nick, desc});
-  });
-
-  // Поиск
-  document.getElementById('searchUserBtn').addEventListener('click', () => {
-    const query = document.getElementById('searchUserInput').value.trim().toLowerCase();
-    db.ref('users').once('value').then(snap => {
-      const users = snap.val();
-      const res = document.getElementById('searchResults');
-      res.innerHTML = '';
-      Object.entries(users).forEach(([uid, data]) => {
-        if (uid === currentUserId) return;
-        if (data.nick?.toLowerCase().includes(query) || uid.includes(query)) {
-          const div = document.createElement('div');
-          div.className = 'flex-row';
-          div.innerHTML = `<strong>${data.nick}</strong> (${uid.substring(0,6)})`;
-          const btn = document.createElement('button');
-          btn.innerText = 'Написать';
-          btn.onclick = ()=> { activeChatPartner = uid; document.getElementById('chatPartnerInput').value = uid; loadChat(); };
-          div.appendChild(btn);
-          res.appendChild(div);
+      const block = new THREE.Mesh(geometry, material);
+      block.position.set(x, y, z);
+      block.castShadow = true;
+      block.receiveShadow = true;
+      return block;
+    }
+    
+    // Создаем окружение
+    for (let i = -5; i <= 5; i++) {
+      for (let j = -5; j <= 5; j++) {
+        if (Math.random() > 0.7) {
+          const block = createBlock(i * 1.5, -4, j * 1.5, 
+            Math.random() > 0.5 ? 0x5a3a2a : 0x3a5a3a);
+          scene.add(block);
         }
-      });
+      }
+    }
+    
+    // Частицы
+    const particlesGeometry = new THREE.BufferGeometry();
+    const particlesCount = 200;
+    const positions = new Float32Array(particlesCount * 3);
+    for (let i = 0; i < particlesCount * 3; i += 3) {
+      positions[i] = (Math.random() - 0.5) * 15;
+      positions[i + 1] = Math.random() * 10 - 3;
+      positions[i + 2] = (Math.random() - 0.5) * 15;
+    }
+    particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    const particlesMaterial = new THREE.PointsMaterial({
+      color: 0xff8844,
+      size: 0.1,
+      blending: THREE.AdditiveBlending
     });
-  });
-
-  // Переключение вкладок
-  document.getElementById('tabCases').addEventListener('click', ()=> showPanel('casesPanel'));
-  document.getElementById('tabInventory').addEventListener('click', ()=> showPanel('inventoryPanel'));
-  document.getElementById('tabMarket').addEventListener('click', ()=> showPanel('marketPanel'));
-  document.getElementById('tabMessages').addEventListener('click', ()=> showPanel('messagesPanel'));
-  document.getElementById('tabProfile').addEventListener('click', ()=> { showPanel('profilePanel'); document.getElementById('profileNickInput').value = userData.nick||''; document.getElementById('profileDescInput').value = userData.desc||''; drawAvatarOnCanvas('profileAvatar', userData.avatarSeed||1); });
-  document.getElementById('tabSearchUsers').addEventListener('click', ()=> showPanel('searchPanel'));
-
-  function showPanel(id) {
-    ['casesPanel','inventoryPanel','marketPanel','messagesPanel','profilePanel','searchPanel'].forEach(p => document.getElementById(p).classList.add('hidden'));
-    document.getElementById(id).classList.remove('hidden');
-  }
-</script>
+    const particles = new THREE.Points(particlesGeometry, particlesMaterial);
+    scene.add(particles);
+    
+    // Кейс (сундук Minecraft стиля)
+    const caseGroup = new THREE.Group();
+    
+    const chestBase = new THREE.Mesh(
+      new THREE.BoxGeometry(2.5, 1.8, 1.8),
+      new THREE.MeshStandardMaterial({ color: 0x8B4513, roughness: 0.4, metalness: 0.3 })
+    );
+    chestBase.castShadow = true;
+    caseGroup.add(chestBase);
+    
+    const chestLid = new THREE.Mesh(
+      new THREE.BoxGeometry(2.5, 0.6, 1.8),
+      new THREE.MeshStandardMaterial({ color: 0xA0522D, roughness: 0.4, metalness: 0.3 })
+    );
+    chestLid.position.y = 1.2;
+    chestLid.castShadow = true;
+    caseGroup.add(chestLid);
+    
+    const lockGeometry = new THREE.BoxGeometry(0.4, 0.4, 0.2);
+    const lockMaterial = new THREE.MeshStandardMaterial({ 
+      color: 0xFFD700,
+      roughness: 0.2,
+      metalness: 0.8,
+      emissive: 0xFFD700,
+      emissiveIntensity: 0.5
+    });
+    const lock = new THREE.Mesh(lockGeometry, lockMaterial);
+    lock.position.set(0, 0.9, 0.9);
+    caseGroup.add(lock);
+    
+    caseGroup.position.y = -1.5;
+    scene.add(caseGroup);
+    
+    // Анимация кейса
+    let caseRotation = 0;
+    let caseBob = 0;
+    
+    // Предмет для отображения результата
+    let resultItem = null;
+    let resultParticles = [];
+    
+    // UI элементы
+    const openCaseBtn = document.getElementById('openCaseBtn');
+    const buyKeyBtn = document.getElementById('buyKeyBtn');
+    const rarityLabel = document.getElementById('rarityLabel');
+    const caseCounter = document.getElementById('caseCounter');
+    const coinsDisplay = document.getElementById('coinsDisplay');
+    const inventoryList = document.getElementById('inventoryList');
+    
+    function updateUI() {
+      caseCounter.textContent = `🔑 Ключей: ${gameState.keys}`;
+      coinsDisplay.textContent = gameState.coins;
+      localStorage.setItem('keys', gameState.keys);
+      localStorage.setItem('coins', gameState.coins);
+      localStorage.setItem('inventory', JSON.stringify(gameState.inventory));
+      
+      inventoryList.innerHTML = gameState.inventory.slice(-5).map(item => 
+        `<div style="color:#${item.rarityColor.toString(16).padStart(6,'0')}">${item.name} (${item.value}💰)</div>`
+      ).join('');
+      
+      openCaseBtn.disabled = gameState.isOpening || gameState.keys <= 0;
+    }
+    
+    function getRandomRarity() {
+      const totalWeight = rarities.reduce((sum, r) => sum + r.weight, 0);
+      let random = Math.random() * totalWeight;
+      for (const rarity of rarities) {
+        if (random < rarity.weight) return rarity;
+        random -= rarity.weight;
+      }
+      return rarities[0];
+    }
+    
+    function getItemByRarity(rarityLabel) {
+      const matchingItems = items.filter(item => item.rarity === rarityLabel);
+      return matchingItems[Math.floor(Math.random() * matchingItems.length)];
+    }
+    
+    function createItemMesh(color, size = 0.8) {
+      const group = new THREE.Group();
+      
+      // Основной куб предмета
+      const geometry = new THREE.BoxGeometry(size, size, size);
+      const material = new THREE.MeshStandardMaterial({ 
+        color: color,
+        roughness: 0.2,
+        metalness: 0.5,
+        emissive: color,
+        emissiveIntensity: 0.3
+      });
+      const cube = new THREE.Mesh(geometry, material);
+      cube.castShadow = true;
+      group.add(cube);
+      
+      // Свечение
+      const glowGeometry = new THREE.BoxGeometry(size * 1.2, size * 1.2, size * 1.2);
+      const glowMaterial = new THREE.MeshBasicMaterial({ 
+        color: color,
+        transparent: true,
+        opacity: 0.3,
+        blending: THREE.AdditiveBlending
+      });
+      const glow = new THREE.Mesh(glowGeometry, glowMaterial);
+      group.add(glow);
+      
+      return group;
+    }
+    
+    function spawnResultParticles(color) {
+      const particles = [];
+      for (let i = 0; i < 50; i++) {
+        const geometry = new THREE.BoxGeometry(0.1, 0.1, 0.1);
+        const material = new THREE.MeshBasicMaterial({ color: color });
+        const particle = new THREE.Mesh(geometry, material);
+        particle.position.set(0, 0, 0);
+        particle.velocity = new THREE.Vector3(
+          (Math.random() - 0.5) * 0.5,
+          Math.random() * 0.5 + 0.3,
+          (Math.random() - 0.5) * 0.5
+        );
+        particle.life = 1;
+        scene.add(particle);
+        particles.push(particle);
+      }
+      return particles;
+    }
+    
+    function openCase() {
+      if (gameState.isOpening || gameState.keys <= 0) return;
+      
+      gameState.isOpening = true;
+      gameState.keys--;
+      updateUI();
+      
+      const rarity = getRandomRarity();
+      const item = getItemByRarity(rarity.label);
+      
+      // Анимация открытия
+      const startTime = Date.now();
+      const openDuration = 3000;
+      
+      function animateOpening() {
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min(elapsed / openDuration, 1);
+        
+        // Тряска кейса
+        caseGroup.rotation.z = Math.sin(elapsed * 0.05) * 0.2 * (1 - progress);
+        caseGroup.position.y = -1.5 + Math.sin(elapsed * 0.03) * 0.5 * (1 - progress);
+        
+        if (progress >= 0.5 && !resultItem) {
+          // Показываем предмет
+          resultItem = createItemMesh(rarity.color);
+          resultItem.position.y = 2;
+          resultItem.scale.set(0, 0, 0);
+          scene.add(resultItem);
+          
+          resultParticles = spawnResultParticles(rarity.color);
+          
+          // Показываем редкость
+          rarityLabel.textContent = `${rarity.name}: ${item.name}`;
+          rarityLabel.style.color = '#' + rarity.color.toString(16).padStart(6, '0');
+          rarityLabel.classList.add('show');
+          setTimeout(() => rarityLabel.classList.remove('show'), 3000);
+          
+          // Добавляем в инвентарь
+          gameState.inventory.push({
+            name: item.name,
+            rarity: rarity.name,
+            rarityColor: rarity.color,
+            value: rarity.value
+          });
+          updateUI();
+        }
+        
+        if (resultItem) {
+          resultItem.scale.lerp(new THREE.Vector3(1.5, 1.5, 1.5), 0.1);
+          resultItem.rotation.y += 0.05;
+          resultItem.rotation.x += 0.03;
+          resultItem.position.y = 2 + Math.sin(elapsed * 0.005) * 0.3;
+          
+          // Обновление частиц
+          resultParticles = resultParticles.filter(p => p.life > 0);
+          resultParticles.forEach(p => {
+            p.position.add(p.velocity);
+            p.velocity.y -= 0.01;
+            p.life -= 0.02;
+            p.material.opacity = p.life;
+            if (p.life <= 0) {
+              scene.remove(p);
+            }
+          });
+        }
+        
+        if (progress < 1) {
+          requestAnimationFrame(animateOpening);
+        } else {
+          // Завершение
+          setTimeout(() => {
+            if (resultItem) {
+              scene.remove(resultItem);
+              resultItem = null;
+            }
+            resultParticles.forEach(p => scene.remove(p));
+            resultParticles = [];
+            gameState.isOpening = false;
+            updateUI();
+          }, 2000);
+        }
+      }
+      
+      animateOpening();
+    }
+    
+    function buyKey() {
+      if (gameState.coins >= 50) {
+        gameState.coins -= 50;
+        gameState.keys++;
+        updateUI();
+      } else {
+        alert('Недостаточно монет! Нужно 50💰');
+      }
+    }
+    
+    openCaseBtn.addEventListener('click', openCase);
+    buyKeyBtn.addEventListener('click', buyKey);
+    
+    // Анимация
+    function animate() {
+      requestAnimationFrame(animate);
+      
+      if (!gameState.isOpening) {
+        caseRotation += 0.005;
+        caseBob = Math.sin(Date.now() * 0.002) * 0.3;
+        caseGroup.rotation.y = caseRotation;
+        caseGroup.position.y = -1.5 + caseBob;
+        lock.material.emissiveIntensity = 0.5 + Math.sin(Date.now() * 0.003) * 0.3;
+      }
+      
+      particles.rotation.y += 0.0005;
+      
+      renderer.render(scene, camera);
+    }
+    
+    // Обработка изменения размера окна
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+    
+    // Обработка кликов для взаимодействия с 3D
+    renderer.domElement.addEventListener('click', (event) => {
+      if (gameState.isOpening) return;
+      
+      const mouse = new THREE.Vector2();
+      mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+      
+      const raycaster = new THREE.Raycaster();
+      raycaster.setFromCamera(mouse, camera);
+      
+      const intersects = raycaster.intersectObject(caseGroup, true);
+      if (intersects.length > 0) {
+        openCase();
+      }
+    });
+    
+    // Инициализация
+    updateUI();
+    animate();
+    
+    console.log('🔥 ЧИЛИ-КЕЙС 3D ЗАПУЩЕН!');
+    console.log('🎮 Кликай на сундук или жми кнопку ОТКРЫТЬ КЕЙС');
+    console.log('💰 Система редкостей: Обычный → Необычный → Редкий → Эпический → Легендарный → МИФИЧЕСКИЙ');
+    console.log('🗝️ Покупай ключи за монеты и открывай кейсы!');
+  </script>
 </body>
 </html>
