@@ -89,7 +89,7 @@
     color: #7f93c9;
   }
 
-  /* Cam & Radio Controls (Moved completely to the top to prevent clashing with mobile jump controls) */
+  /* Cam & Radio Controls (Placed completely at the top to prevent clashing with mobile controls) */
   #camControls {
     position:absolute; top:10px; left:50%; transform:translateX(-50%);
     display:flex; gap:6px; pointer-events:auto; z-index:30;
@@ -102,7 +102,7 @@
   }
   .hud-btn:active { transform:scale(0.92); background-color:rgba(95,141,255,.45); }
 
-  /* leaderboard */
+  /* Leaderboard */
   #board {
     position:absolute; top:10px; right:12px; min-width:190px; max-width:240px;
     background:rgba(8,12,30,.5); backdrop-filter:blur(6px);
@@ -129,7 +129,7 @@
     border:1px solid rgba(130,165,255,0.25); pointer-events:none; text-shadow:0 1px 3px #000;
   }
 
-  /* touch controls */
+  /* Touch controls */
   #touch { position:absolute; inset:0; display:none; }
   body.touch #touch { display:block; }
   .tbtn {
@@ -170,6 +170,72 @@
   #loading { position:fixed; inset:0; z-index:80; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:14px;
     background:#05070f; color:#8fa3d9; font-size:14px; letter-spacing:1px; transition:opacity .4s; }
   #loading.hidden { opacity:0; pointer-events:none; }
+
+  /* ---------- BOOK / GUIDE OVERLAY ---------- */
+  #bookOverlay {
+    position:fixed; inset:0; z-index:100; display:none; align-items:center; justify-content:center;
+    background:rgba(3,5,15,0.85); backdrop-filter:blur(8px); transition:opacity 0.3s;
+  }
+  #bookOverlay.open { display:flex; }
+  .book-container {
+    width:min(720px, 95vw); height:min(480px, 85vh);
+    background:#3e2723; border:6px solid #2d1a12; border-radius:16px;
+    box-shadow:0 20px 50px rgba(0,0,0,0.6), inset 0 2px 10px rgba(255,255,255,0.25);
+    display:flex; flex-direction:column; overflow:hidden; position:relative;
+  }
+  .book-header {
+    background:#2d1a12; padding:10px 16px; display:flex; justify-content:space-between; align-items:center; color:#ffe98a;
+    font-family:'Press Start 2P', monospace; font-size:11px; border-bottom:3px solid #1a0f0a;
+  }
+  .book-body {
+    flex:1; display:flex; background:#f4eccf; color:#3e2723; padding:18px; gap:20px; overflow:hidden;
+  }
+  .book-page {
+    flex:1; display:flex; flex-direction:column; overflow-y:auto; padding-right:6px;
+  }
+  .book-page.divider {
+    border-right:2px dashed rgba(62, 39, 35, 0.25);
+  }
+  .book-page h3 {
+    font-size:16px; font-weight:800; border-bottom:2px solid #3e2723; padding-bottom:4px; margin-bottom:10px; color:#5d4037;
+    display:flex; align-items:center; gap:6px;
+  }
+  .book-page p { font-size:13px; line-height:1.5; margin-bottom:10px; font-weight:600; }
+  .book-page ul { margin-left:16px; margin-bottom:12px; font-size:12px; font-weight:600; line-height:1.4; }
+  
+  /* Skin Shop Elements inside the Book */
+  .skin-card {
+    background:rgba(62, 39, 35, 0.08); border:2px solid #5d4037; border-radius:10px;
+    padding:8px; display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;
+    transition: transform 0.2s, background-color 0.2s;
+  }
+  .skin-card.equipped {
+    background:rgba(46, 125, 50, 0.15); border-color:#2e7d32;
+  }
+  .skin-info { display:flex; align-items:center; gap:8px; }
+  .skin-preview-box {
+    width:24px; height:24px; border-radius:4px; border:2px solid #3e2723;
+  }
+  .skin-name { font-size:12px; font-weight:800; color:#3e2723; }
+  .skin-price { font-size:11px; font-weight:800; color:#e65100; display:flex; align-items:center; gap:2px; }
+  .skin-btn {
+    padding:4px 8px; border-radius:6px; font-weight:800; font-size:10px; cursor:pointer; border:none;
+  }
+  .skin-btn.buy { background:#e65100; color:#fff; }
+  .skin-btn.equip { background:#3e2723; color:#f4eccf; }
+  .skin-btn.active { background:#2e7d32; color:#fff; cursor:default; }
+
+  .book-footer {
+    background:#2d1a12; padding:8px 16px; display:flex; justify-content:space-between; align-items:center;
+    border-top:3px solid #1a0f0a;
+  }
+  .book-close-btn {
+    background:#c62828; color:#fff; border:none; padding:6px 12px; border-radius:8px; font-weight:800; font-size:11px; cursor:pointer;
+  }
+  .book-nav-btn {
+    background:#5d4037; color:#ffe98a; border:none; padding:6px 12px; border-radius:8px; font-weight:800; font-size:11px; cursor:pointer;
+  }
+  .book-nav-btn:disabled { opacity:0.3; cursor:default; }
 </style>
 </head>
 <body>
@@ -185,7 +251,8 @@
       <span>💀 <b id="deaths">0</b></span>
       <span>🚩 <b id="cps">0</b></span>
       <span>👥 <b id="online">1</b></span>
-      <span>📦 <b id="blocks">0</b></span>
+      <span>🪙 <b id="coinsCount">0</b></span>
+      <span style="color:#ffe98a;">🍂 <b id="seasonLabel">ЛЕТО</b></span>
     </div>
     <!-- Динамическая панель скиллов по пути -->
     <div id="skillsRow" style="display:flex; gap:6px; margin-top:4px;"></div>
@@ -195,6 +262,7 @@
     <button class="hud-btn" id="zoomOutBtn" title="Отдалить камеру">🔍−</button>
     <button class="hud-btn" id="zoomInBtn" title="Приблизить камеру">🔍+</button>
     <button class="hud-btn" id="fullScrBtn" title="Полный экран">📺</button>
+    <button class="hud-btn" id="guideBookBtn" title="Книга гайдов и скины">📖</button>
     <button class="hud-btn" id="musBtn" title="Радио (Сменить трек)">📻</button>
     <button class="hud-btn" id="musMuteBtn" title="Музыка Вкл/Выкл">🎵</button>
     <button class="hud-btn" id="muteBtn" title="Звуки Вкл/Выкл">🔊</button>
@@ -220,6 +288,35 @@
     <div class="tbtn" id="tDash">⚡</div>
     <!-- Новая кнопка мобильного Квантового блинка (открывается на 70%) -->
     <div class="tbtn" id="tTeleport">🔮</div>
+  </div>
+</div>
+
+<!-- GUIDE BOOK & SKINS SHOP MODAL -->
+<div id="bookOverlay">
+  <div class="book-container">
+    <div class="book-header">
+      <span>📖 КНИГА ПРОХОЖДЕНИЯ</span>
+      <span id="bookProgress">0.0%</span>
+    </div>
+    <div class="book-body">
+      <!-- Left Page: Guide text (changes dynamically) -->
+      <div class="book-page divider" id="bookLeftPage">
+        <!-- Content will be updated via JS -->
+      </div>
+      <!-- Right Page: Skins Shop / Dressing Room -->
+      <div class="book-page" id="bookRightPage">
+        <h3>👗 ГАРДЕРОБ СКИНОВ</h3>
+        <p style="font-size:12px; margin-bottom:12px;">Собирай 🪙 монетки на карте и покупай скины! Они мгновенно меняются в мультиплеере.</p>
+        <div id="skinsShopContainer">
+          <!-- Skins generated dynamically by JS -->
+        </div>
+      </div>
+    </div>
+    <div class="book-footer">
+      <button class="book-nav-btn" id="bookPrevBtn">◀ Назад</button>
+      <button class="book-close-btn" id="bookCloseBtn">Закрыть книгу</button>
+      <button class="book-nav-btn" id="bookNextBtn">Вперед ▶</button>
+    </div>
   </div>
 </div>
 
@@ -365,13 +462,13 @@ $('pass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); }
 <script>
 'use strict';
 /* ============================================================
-   АУДИО: Плейлист-радио, переключаемые процедурные треки + SFX
+   АУДИО: Плейлист-радио, процедурные рок/фонк/фанк треки + SFX
    ============================================================ */
 const Audio8 = {
   ctx:null, master:null, musG:null, sfxG:null, noiseBuf:null,
   rainG:null, rainSrc:null,
   trackIdx:-1, step:0, nextT:0, timer:null, musicMuted:false, sfxMuted:false, ready:false,
-  manualRadio:false, // Игрок зафиксировал ручной выбор трека
+  manualRadio:false, 
 
   init(){
     if (this.ready) return;
@@ -388,7 +485,7 @@ const Audio8 = {
     for (let i=0;i<len;i++) d[i] = Math.random()*2-1;
     this.noiseBuf = buf;
 
-    // Процедурный уютный шум дождя
+    // Шум динамического дождя
     const rainBufLen = this.ctx.sampleRate * 2;
     const rainBuf = this.ctx.createBuffer(1, rainBufLen, this.ctx.sampleRate);
     const rd = rainBuf.getChannelData(0);
@@ -400,7 +497,7 @@ const Audio8 = {
 
     const rainFilter = this.ctx.createBiquadFilter();
     rainFilter.type = 'lowpass';
-    rainFilter.frequency.value = 1000;
+    rainFilter.frequency.value = 850;
 
     this.rainSrc.connect(rainFilter);
     rainFilter.connect(this.rainG);
@@ -431,23 +528,23 @@ const Audio8 = {
     }
   },
 
-  /* ---- Треки (Радиостанция) ---- */
+  /* ---- Треки (Рок, Фонк, Фанк, Майнкрафт) ---- */
   tracks: [
-    { name:'🌿 Лесная тропа (Классика)', bpm:116, wave:'square', vol:.15,
+    { name:'🌿 Лесная тропа (Классика)', bpm:116, wave:'square', vol:.14,
       mel:[72,76,79,0,81,0,79,76, 74,76,79,76,74,72,74,0, 72,76,79,0,81,0,84,83, 81,79,76,74,72,0,0,0],
       bass:[48,0,43,0,45,0,43,0, 41,0,43,0,48,0,43,0] },
-    { name:'💎 Майнкрафт Вайб (Дзен)', bpm:70, wave:'sine', vol:.26,
+    { name:'💎 Майнкрафт Вайб (Дзен)', bpm:70, wave:'sine', vol:.28,
       mel:[67,71,74,79,0,74,71,0, 69,72,76,81,0,76,72,0, 67,71,74,79,0,74,71,0, 64,67,71,76,0,71,67,0],
       bass:[43,0,43,0,45,0,45,0, 43,0,43,0,40,0,40,0] },
-    { name:'⚡ Динамичный Ран', bpm:138, wave:'sawtooth', vol:.09,
-      mel:[72,74,76,77,79,77,76,74, 72,0,72,0,76,0,76,0, 77,79,81,83,84,83,81,79, 77,0,77,0,81,0,81,0],
-      bass:[48,48,43,43,45,45,43,43, 41,41,43,43,48,48,43,43] },
-    { name:'❄️ Ледяной Космос', bpm:96, wave:'square', vol:.12,
-      mel:[76,83,79,83,76,83,79,0, 74,81,77,81,74,81,77,0, 72,79,76,79,72,79,76,0, 74,81,77,81,76,83,79,0],
-      bass:[40,0,40,0,38,0,38,0, 36,0,36,0,38,0,40,0] },
-    { name:'🌋 Ярость Пикселей', bpm:130, wave:'sawtooth', vol:.10,
-      mel:[60,63,67,70,60,63,67,70, 58,61,65,68,58,61,65,68, 56,59,63,66,56,59,63,66, 58,61,65,68,60,0,0,0],
-      bass:[36,36,36,36,34,34,34,34, 32,32,32,32,34,34,36,36] },
+    { name:'🎸 Грязный Рок-Драйв', bpm:128, wave:'sawtooth', vol:.09,
+      mel:[60,0,63,60,65,60,67,65, 60,0,63,60,65,60,67,0, 58,0,61,58,63,58,65,63, 58,0,61,58,63,0,65,0],
+      bass:[36,36,39,36,41,36,43,41, 36,36,39,36,41,36,43,0] },
+    { name:'🚗 Сибирский Фонк (Cowbell)', bpm:125, wave:'sawtooth', vol:.09,
+      mel:[72,0,72,75,0,72,77,0, 79,0,79,77,0,75,72,0, 70,0,70,74,0,70,75,0, 77,0,77,75,0,74,70,0],
+      bass:[48,48,48,48,48,48,48,48, 46,46,46,46,46,46,46,46] },
+    { name:'🕺 Пиксельный Ретро-Фанк', bpm:110, wave:'triangle', vol:.25,
+      mel:[60,67,0,60,67,60,69,0, 62,69,0,62,69,62,71,0, 64,71,0,64,71,64,72,0, 62,69,0,62,69,0,60,0],
+      bass:[36,0,48,36,0,48,38,0, 38,0,50,38,0,50,40,0] },
     { name:'🌧️ Дзен Атмосфера (Без музыки)', bpm:60, wave:'sine', vol:0.0,
       mel:[0,0,0,0], bass:[0,0,0,0] }
   ],
@@ -462,7 +559,6 @@ const Audio8 = {
     this.manualRadio = true;
     let next = this.trackIdx + 1;
     if (next >= this.tracks.length) {
-      // Вернуться в режим авто-саундтрека по зонам
       this.manualRadio = false;
       this.playTrack(-1);
       toast('🌍 Режим: Автоматическая музыка зон', 1500);
@@ -507,7 +603,7 @@ const Audio8 = {
     
     let activeIdx = this.trackIdx;
     if (activeIdx === -1) {
-      activeIdx = zoneAt(P.x / TILE | 0);
+      activeIdx = clamp(zoneAt(P.x / TILE | 0), 0, this.tracks.length - 1);
     }
     const tr = this.tracks[activeIdx];
     if (!tr || tr.vol <= 0) return;
@@ -551,6 +647,7 @@ const Audio8 = {
   die(){ this.blip(420,55,.4,'sawtooth',.25); this.noise(.3,.2,900); },
   checkpoint(){ this.blip(660,660,.09,'square',.18); setTimeout(()=>this.blip(990,990,.16,'square',.18),90); },
   stomp(){ this.blip(500,120,.12,'square',.2); },
+  coin(){ this.blip(850,1400,0.15,'sine',0.2); },
   finish(){ [523,659,784,1047].forEach((f,i)=>setTimeout(()=>this.blip(f,f,.2,'square',.2), i*130)); }
 };
 ['pointerdown','keydown','touchstart'].forEach(ev =>
@@ -559,10 +656,9 @@ const Audio8 = {
 <script>
 'use strict';
 /* ============================================================
-   МИР: Усложнённый блочный мир, новые блоки-конвейеры, 5 зон
+   МИР: Усложненная Terraria-style генерация, новые конвейеры
    ============================================================ */
 const TILE = 36, WW = 4800, WH = 70, WORLD_PX = WW * TILE, SEED = 20260717;
-// Добавлены типы T.CON_L и T.CON_R для конвейеров, толкающих игрока
 const T = { E:0, S:1, SPK:2, LAV:3, CP:4, SPR:5, ICE:6, CRU:7, SLM:8, CON_L:9, CON_R:10 };
 const world = new Uint8Array(WW * WH);
 const surf = new Int16Array(WW).fill(WH);
@@ -582,7 +678,8 @@ const saws = [];
 const enemies = [];  
 const cps = [];      
 const crystals = []; 
-const arrows = [];   // Вектор стрел Скелетов-лучников
+const arrows = [];   
+const mapCoins = []; // Процедурные монетки
 let FINISH_X = 0;
 const crumbles = new Map(); 
 
@@ -641,7 +738,20 @@ function genWorld(){
     });
   }
 
-  /* ------- Фичи генератора ------- */
+  // Генерация цепочек монеток 🪙
+  function spawnCoinChain(txStart, txEnd, tyGround) {
+    const cy = (tyGround - ri(2, 4)) * TILE + 18;
+    for (let tx = txStart + 1; tx < txEnd - 1; tx += 2) {
+      mapCoins.push({
+        id: mapCoins.length,
+        x: tx * TILE + 18,
+        y: cy,
+        collected: false
+      });
+    }
+  }
+
+  /* ------- Группы Фич генератора ------- */
   function fFlat(x, a, z, d){
     const len = ri(9, 20);
     let y = a;
@@ -652,13 +762,16 @@ function genWorld(){
     }
     setGround(x, x + len, a, topFor(z)); 
 
-    // Спавн Конвейеров (Уникальная механика движения в зонах 3 и 4)
+    // Спавн Конвейеров (в Ледяных и Огненных зонах)
     if (z >= 3 && R() < 0.4) {
       const beltType = R() < 0.5 ? T.CON_L : T.CON_R;
       for (let tx = x; tx < x + len; tx++) {
         world[a * WW + tx] = beltType;
       }
     }
+
+    // Раскидаем монетки на ровной поверхности
+    if (R() < 0.6) spawnCoinChain(x, x + len, a);
 
     // Спавн разнообразных врагов по зонам
     if (len >= 10) {
@@ -732,7 +845,6 @@ function genWorld(){
     return [x + steps * 3 + 5, na];
   }
 
-  // Слайм-батуты и пружины
   function fSpring(x, a, z, d){
     const h = ri(5, 7);
     setGround(x, x + 4, a, topFor(z));
@@ -752,6 +864,16 @@ function genWorld(){
     for (let i = 0; i < w; i++){ surf[x + i] = a; world[a * WW + x + i] = T.CRU; }
     const na = clamp(a + ri(-1, 2), 18, WH - 12);
     return [x + w, na];
+  }
+
+  function fCrumbleSparks(x, a, z) {
+    // Spawns coins inside dangerous crumbling platforms
+    mapCoins.push({
+      id: mapCoins.length,
+      x: (x + 2) * TILE + 18,
+      y: (a - 2) * TILE + 18,
+      collected: false
+    });
   }
 
   function fSaw(x, a, z, d){
@@ -777,7 +899,7 @@ function genWorld(){
     return [x + 7, a];
   }
 
-  /* ------- Стартовая поляна ------- */
+  /* ------- Стартовая зона ------- */
   setGround(0, 60, anchor, topFor(0));
   world[(anchor - 1) * WW + 25] = T.CP;
   cps.push({ tx: 25, ty: anchor - 1, id: 0, finish: false });
@@ -808,7 +930,10 @@ function genWorld(){
       case 'spike':  res = fSpikes(x, anchor, z, d); break;
       case 'stairs': res = fStairs(x, anchor, z, d); break;
       case 'spring': res = fSpring(x, anchor, z, d); break;
-      case 'crumble':res = fCrumble(x, anchor, z, d); break;
+      case 'crumble':
+        res = fCrumble(x, anchor, z, d); 
+        fCrumbleSparks(x, anchor, z);
+        break;
       case 'saw':    res = fSaw(x, anchor, z, d); break;
       case 'lava':   res = fLava(x, anchor, z, d); break;
       default:       res = fFlat(x, anchor, z, d);
@@ -817,7 +942,7 @@ function genWorld(){
     x = res[0]; anchor = clamp(res[1], 18, WH - 12);
   }
 
-  /* ------- Финал ------- */
+  /* ------- Финиш ------- */
   setGround(x, WW, anchor, T.S);
   FINISH_X = (WW - 45) * TILE;
   world[(anchor - 1) * WW + (WW - 45)] = T.CP;
@@ -833,7 +958,7 @@ genWorld();
 <script>
 'use strict';
 /* ============================================================
-   ИГРОК: Физика, усовершенствованные навыки, блинки, сохранение
+   ИГРОК: Физика, усовершенствованные навыки, монеты, скины
    ============================================================ */
 const keys = { left:false, right:false, jump:false, dash:false };
 let jumpBufFlag = false;
@@ -843,9 +968,20 @@ const P = {
   ground: false, coyote: 0, buf: 0, dj: 1, onWall: 0, plat: null,
   respawnX: 25 * TILE, respawnY: 42 * TILE, cpIdx: 0,
   deaths: 0, maxX: 0, deadT: 0, finished: false, squash: 0, runT: 0,
-  dashCooldown: 0, dashTime: 0 
+  dashCooldown: 0, dashTime: 0,
+  coins: 0,
+  activeSkin: 'default'
 };
-const dashTrail = []; // Шлейф силуэтов при Dash
+const dashTrail = []; 
+
+const SKINS = [
+  { id: 'default', name: 'Обычный Кубик', color: '#5cb8ff', price: 0, desc: 'Стандартный бегун БЛОКРАН.' },
+  { id: 'runner', name: 'Спринтер', color: '#ff5c5c', price: 15, desc: 'Ярко-алый гоночный костюм.' },
+  { id: 'ghost', name: 'Фантом', color: '#eaf1ff', price: 40, desc: 'Легкий и полупрозрачный.' },
+  { id: 'golden', name: 'Король Лидеров', color: '#ffd94f', price: 80, desc: 'Имеет красивую золотую корону.' },
+  { id: 'void', name: 'Вестник Бездны', color: '#c98bff', price: 150, desc: 'Аура фиолетового пламени.' }
+];
+let ownedSkins = ['default'];
 
 const cam = { x: 0, y: 0 };
 const DIE_LINES = ['💀 Ай! Попробуй ещё раз!', '😅 Это было близко! (нет)', '🪦 Тут твоя могилка №%d', '🔥 Поджарился!', '😵 Ловушка 1 : 0 ты', '🤸 Красивое падение!'];
@@ -861,18 +997,15 @@ const dust = (x, y, n=5) => { for (let i=0;i<n;i++) spawnP(x+(Math.random()-.5)*
 const burst = (x, y, color, n=22) => { for (let i=0;i<n;i++){ const a=Math.random()*6.283, s=1+Math.random()*4.5; spawnP(x, y, Math.cos(a)*s, Math.sin(a)*s-2, 30+Math.random()*25, color, 2+Math.random()*4, 0.3);} };
 const confetti = (x, y) => { const cs=['#ff5c7a','#ffd94f','#5cff9d','#5cb8ff','#c98bff']; for (let i=0;i<40;i++) spawnP(x+(Math.random()-.5)*30, y, (Math.random()-.5)*6, -2-Math.random()*6, 50+Math.random()*40, cs[i%5], 3+Math.random()*3, 0.18); };
 
-// Навык 35%: Парение (Птица бури)
 function isGlideAvailable() {
   return (P.maxX / FINISH_X) >= 0.35;
 }
 
-// Навык 70%: Квантовый блинк / телепорт
 function triggerBlink() {
   if (P.maxX / FINISH_X < 0.70 || P.deadT > 0 || document.activeElement === $('chatInput')) return;
   const dist = 92 * P.dir;
   const targetX = P.x + dist;
   
-  // Проверка коллизий перед телепортацией
   const checkTX = Math.floor((targetX + P.w/2) / TILE);
   const checkTY = Math.floor((P.y + P.h/2) / TILE);
   if (!solidAt(checkTX, checkTY)) {
@@ -880,7 +1013,6 @@ function triggerBlink() {
     P.x = clamp(targetX, 0, WORLD_PX - P.w);
     burst(P.x + P.w/2, P.y + P.h/2, '#7df0e8', 16);
     Audio8.blip(600, 1100, 0.14, 'triangle', 0.22);
-    // Визуальное сотрясение экрана
     screenShake = 12;
   } else {
     toast('🔮 Препятствие мешает телепортации!', 1000);
@@ -1060,7 +1192,6 @@ function collideY(){
     const ty = Math.floor((P.y + P.h) / TILE);
     for (let tx = tx0; tx <= tx1; tx++) if (solidAt(tx, ty)){
       P.y = ty * TILE - P.h; P.vy = 0; P.ground = true; 
-      // Навык 20%: Тройной прыжок (P.dj = 2 вместо 1)
       P.dj = (P.maxX / FINISH_X >= 0.20) ? 2 : 1; 
       break;
     }
@@ -1097,7 +1228,7 @@ function die(){
   P.deadT = 26;
   screenShake = 16;
   Audio8.die();
-  burst(P.x + P.w/2, P.y + P.h/2, MY_COLOR, 26);
+  burst(P.x + P.w/2, P.y + P.h/2, getSkinColor(P.activeSkin), 26);
   toast(DIE_LINES[Math.random() * DIE_LINES.length | 0].replace('%d', P.deaths), 1600);
   
   P.x = P.respawnX; P.y = P.respawnY; P.vx = 0; P.vy = 0; P.plat = null;
@@ -1108,8 +1239,29 @@ function die(){
   saveProgressExact(); 
 }
 
+// Проверка сбора монеток и взаимодействия с тайлами
+function checkCoins() {
+  const px = P.x + P.w / 2;
+  const py = P.y + P.h / 2;
+  for (const c of mapCoins) {
+    if (c.collected) continue;
+    if (Math.abs(c.x - px) < 22 && Math.abs(c.y - py) < 26) {
+      c.collected = true;
+      P.coins++;
+      $('coinsCount').textContent = P.coins;
+      Audio8.coin();
+      
+      // Монетные золотые брызги
+      for (let i = 0; i < 6; i++) {
+        spawnP(c.x, c.y, (Math.random() - 0.5) * 3, -1 - Math.random() * 3, 20, '#ffd94f', 3, 0.15);
+      }
+      
+      saveProgressExact();
+    }
+  }
+}
+
 function checkTiles(){
-  // Навык 50%: Огненный Щит (Абсолютный иммунитет к лаве/шипам во время рывка)
   const isShieldActive = (P.maxX / FINISH_X >= 0.50) && P.dashTime > 0;
 
   const x0 = Math.floor((P.x + 5) / TILE), x1 = Math.floor((P.x + P.w - 5) / TILE);
@@ -1120,7 +1272,6 @@ function checkTiles(){
     
     if ((v === T.SPK || v === T.LAV)) {
       if (isShieldActive) {
-        // Защита и огненные искры
         if (Math.random() < 0.4) spawnP(P.x + P.w/2, P.y + P.h/2, (Math.random()-0.5)*4, -2, 15, '#ff5a1e', 3, 0.1);
         continue; 
       }
@@ -1182,7 +1333,6 @@ function checkHazards(){
     const sizeH = isFlying ? 24 : 20;
 
     if (P.x + P.w > e.ex - 14 && P.x < e.ex + 14 && P.y + P.h > ey - 10 && P.y < ey + sizeH){
-      // Навык 50%: Огненный рывок убивает врагов при касании
       if (isShieldActive) {
         e.deadUntil = nowMs + 15000;
         Audio8.stomp();
@@ -1249,7 +1399,6 @@ function stepPlayer(now){
       if (Math.abs(P.vx) < 0.05) P.vx = 0;
     }
 
-    // Навык 10%: Скорость Бега повышена (🌿 Лесной спринт)
     const isSpeedBoosted = (P.maxX / FINISH_X >= 0.10);
     const maxSpeedLimit = isSpeedBoosted ? 6.2 : 5.0;
     P.vx = clamp(P.vx, -maxSpeedLimit, maxSpeedLimit);
@@ -1257,15 +1406,14 @@ function stepPlayer(now){
     const wd = wallDir();
     P.onWall = 0;
     
-    // Физика гравитации и навык 35% Парение (Hold Space в падении)
     let g = 0.55;
     if (P.vy < 0 && keys.jump && !inputActive) g = 0.36;
     
     P.vy += g;
 
-    // Парение (Glide) при падении
+    // Парение (Glide) при удержании Прыжка в воздухе (начиная с 35%)
     if (isGlideAvailable() && !P.ground && keys.jump && P.vy > 0 && !inputActive) {
-      P.vy = Math.min(P.vy, 1.25); // Значительно замедляет падение
+      P.vy = Math.min(P.vy, 1.25); 
       if (Math.random() < 0.25) {
         spawnP(P.x + P.w/2, P.y + P.h, (Math.random() - 0.5) * 1.5, 0.5, 15, 'rgba(168, 216, 240, 0.65)', 2, 0.05);
       }
@@ -1295,7 +1443,7 @@ function stepPlayer(now){
     if ((!keys.jump || inputActive) && P.vy < -4.5) P.vy = -4.5;
   }
 
-  // Взаимодействие с конвейерами (T.CON_L и T.CON_R)
+  // Конвейеры (T.CON_L и T.CON_R)
   if (P.ground) {
     const tx = Math.floor((P.x + P.w/2) / TILE);
     const ty = Math.floor((P.y + P.h + 2) / TILE);
@@ -1313,12 +1461,13 @@ function stepPlayer(now){
   updCrumbles();
   checkTiles();
   checkHazards();
+  checkCoins();
 
   P.maxX = Math.max(P.maxX, P.x);
   P.runT += Math.abs(P.vx);
   if (P.ground && Math.abs(P.vx) > 3 && Math.random() < 0.25) dust(P.x + P.w/2 - P.dir*8, P.y + P.h, 1);
 
-  // Камера с учётом тряски
+  // Камера
   const targetCamX = P.x + P.w/2 - vw * 0.42;
   const targetCamY = P.y - vh * 0.58;
   cam.x = clamp(lerp(cam.x, targetCamX, 0.14), 0, Math.max(0, WORLD_PX - vw));
@@ -1337,6 +1486,11 @@ function stepPlayer(now){
   }
 }
 
+function getSkinColor(skinId) {
+  const sk = SKINS.find(s => s.id === skinId);
+  return sk ? sk.color : '#5cb8ff';
+}
+
 /* ------- HUD ------- */
 let toastT = null;
 function toast(msg, ms = 2200){
@@ -1352,6 +1506,7 @@ function updHUD(now){
   $('progFill').style.width = pct + '%';
   $('progTxt').textContent = pct.toFixed(1) + '% пути пройдено';
   $('blocks').textContent = (P.maxX / TILE | 0);
+  $('coinsCount').textContent = P.coins;
 
   updateSkillsUI(pct);
 }
@@ -1363,22 +1518,20 @@ function updateSkillsUI(pct) {
   const s4 = pct >= 50;
   const s5 = pct >= 70;
 
-  // Показать/скрыть кнопку блинка
   const teleBtn = $('tTeleport');
   if (teleBtn) teleBtn.style.display = s5 ? 'flex' : 'none';
 
   $('skillsRow').innerHTML = `
-    <div class="skill-badge ${s1 ? '' : 'locked'}" title="Лесной бег (Скорость +25%)">🏃 10%</div>
+    <div class="skill-badge ${s1 ? '' : 'locked'}" title="Спринт бег (Скорость +25%)">🏃 10%</div>
     <div class="skill-badge ${s2 ? '' : 'locked'}" title="Тройной прыжок">💎 20%</div>
-    <div class="skill-badge ${s3 ? '' : 'locked'}" title="Зажмите Прыжок для планирования">❄️ 35%</div>
-    <div class="skill-badge ${s4 ? '' : 'locked'}" title="Огненный щит (Dash защищает и убивает)">🔥 50%</div>
+    <div class="skill-badge ${s3 ? '' : 'locked'}" title="Парение (Storm Bird)">❄️ 35%</div>
+    <div class="skill-badge ${s4 ? '' : 'locked'}" title="Огненный щит (Dash защищает)">🔥 50%</div>
     <div class="skill-badge ${s5 ? '' : 'locked'}" title="Блинк вперед (Кнопка E / 🔮)">🔮 70%</div>
   `;
 }
 
 function buildCpTicks(){
   const w = $('progWrap');
-  // Очистим старые тики перед билдом
   const oldTicks = w.querySelectorAll('.cpTick');
   oldTicks.forEach(t => t.remove());
 
@@ -1451,7 +1604,7 @@ if ('ontouchstart' in window) document.body.classList.add('touch');
 function checkOrient(){ document.body.classList.toggle('portrait', innerHeight > innerWidth); }
 window.addEventListener('resize', checkOrient); checkOrient();
 
-// Cam controls & UI Settings logic
+// Системные бинды
 $('muteBtn').onclick = () => { 
   const muted = Audio8.toggleSfx();
   $('muteBtn').textContent = muted ? '🔇' : '🔊';
@@ -1473,14 +1626,12 @@ $('chatToggleBtn').onclick = () => {
 <script>
 'use strict';
 /* ============================================================
-   СЕТЬ И РЕАЛТАЙМ СОХРАНЕНИЕ: Сохранение координат и прогресса
+   СЕТЬ И РЕАЛТАЙМ СОХРАНЕНИЕ: Синхронизация прогресса и скинов
    ============================================================ */
-let MY_UID = null, MY_NAME = '', MY_COLOR = '#5cb8ff', joined = false;
+let MY_UID = null, MY_NAME = '', joined = false;
 const remotes = {};   
 let meRef = null, lastSend = 0, lastSX = 0, lastSY = 0, lastSavedBlocks = -1;
 
-const COLORS = ['#ff5c7a','#ffd94f','#5cff9d','#5cb8ff','#c98bff','#ff9d5c','#7df0e8','#f06bff','#b8ff5c','#ff8a8a'];
-function colorFor(uid){ let h = 0; for (const ch of uid) h = (h * 31 + ch.charCodeAt(0)) | 0; return COLORS[Math.abs(h) % COLORS.length]; }
 const RIP_LINES = ['😂 %s только что умер!', '💀 %s разбился!', '🍿 %s упал(а) в пропасть!', '⚰️ Нажми F для %s', '😵 %s познакомился с ловушкой!'];
 
 function joinNet(){
@@ -1498,16 +1649,17 @@ function joinNet(){
       let r = remotes[ch.key];
       if (!r) r = remotes[ch.key] = { rx: v.x, ry: v.y, tx: v.x, ty: v.y, lastK: v.k || 0 };
       r.n = v.n; r.c = v.c; r.tx = v.x; r.ty = v.y; r.d = v.d || 1; r.s = v.s || 0; r.m = v.m || 0;
+      r.skin = v.skin || 'default'; // Получение скина другого игрока
       if ((v.k || 0) > r.lastK){
         r.lastK = v.k;
         if (Math.abs(v.x - P.x) < 3200){
-          burst(v.x + 11, v.y + 13, v.c, 18);
+          burst(v.x + 11, v.y + 13, getSkinColor(r.skin), 18);
           toast(RIP_LINES[Math.random() * RIP_LINES.length | 0].replace('%s', esc(r.n || '???')), 1500);
         }
       }
     });
     for (const k in remotes) if (!seen.has(k)) delete remotes[k];
-    $('online').textContent = seen.size + 1;
+    $('online').textContent = seen.size + 1; // Точный онлайн игроков
   });
 
   // ЧАТ в реальном времени
@@ -1515,7 +1667,8 @@ function joinNet(){
     const data = snap.val();
     if (!data) return;
     const msgEl = document.createElement('div');
-    msgEl.innerHTML = `<span style="color:${esc(data.color)};font-weight:800;">${esc(data.name)}:</span> <span style="color:#fff;">${esc(data.text)}</span>`;
+    const color = getSkinColor(data.skin || 'default');
+    msgEl.innerHTML = `<span style="color:${color};font-weight:800;">${esc(data.name)}:</span> <span style="color:#fff;">${esc(data.text)}</span>`;
     const box = $('chatMsgs');
     box.appendChild(msgEl);
     box.scrollTop = box.scrollHeight;
@@ -1524,7 +1677,7 @@ function joinNet(){
   // Быстрая отправка координат
   setInterval(() => { if (Date.now() - lastSend > 90) sendNow(); }, 90);
   
-  // Авто-сохранение рекордов в таблицу лидеров каждые 25 сек
+  // Авто-сохранение рекордов
   setInterval(() => { saveLeaderboardScore(false); loadBoard(); }, 25000); 
   window.addEventListener('beforeunload', () => { try { meRef.remove(); } catch(e){} });
 }
@@ -1535,7 +1688,7 @@ function sendChatMessage() {
   if (txt.length === 0) return;
   db.ref('chat').push({
     name: MY_NAME,
-    color: MY_COLOR,
+    skin: P.activeSkin,
     text: txt,
     t: firebase.database.ServerValue.TIMESTAMP
   });
@@ -1548,7 +1701,7 @@ function sendNow(){
   if (!moved && Date.now() - lastSend < 800) return;
   lastSend = Date.now(); lastSX = P.x; lastSY = P.y;
   meRef.update({
-    n: MY_NAME, c: MY_COLOR,
+    n: MY_NAME, skin: P.activeSkin,
     x: Math.round(P.x), y: Math.round(P.y), d: P.dir,
     s: P.ground ? (Math.abs(P.vx) > 0.5 ? 1 : 0) : 2,
     k: P.deaths, m: P.maxX / TILE | 0,
@@ -1556,7 +1709,7 @@ function sendNow(){
   });
 }
 
-// УЛУЧШЕННОЕ РЕАЛТАЙМ СОХРАНЕНИЕ: Сохранение точных координат, прогресса и смертей
+// УЛУЧШЕННОЕ РЕАЛТАЙМ СОХРАНЕНИЕ: Координаты, Прогресс, Монеты, Скины
 function saveProgressExact() {
   if (!joined || !MY_UID) return;
   const saveState = {
@@ -1564,19 +1717,21 @@ function saveProgressExact() {
     y: Math.round(P.y),
     cp: P.cpIdx,
     deaths: P.deaths,
+    coins: P.coins,
+    activeSkin: P.activeSkin,
+    ownedSkins: ownedSkins,
     maxX: Math.round(P.maxX),
     finished: P.finished,
     t: Date.now()
   };
   
-  // Локальное резервное копирование
-  localStorage.setItem('blockran_exact_save_v2', JSON.stringify(saveState));
+  // Локальное бэкапирование
+  localStorage.setItem('blockran_exact_save_v3', JSON.stringify(saveState));
   
-  // Облачное копирование
+  // Облачное копирование в Firebase Realtime Database
   db.ref('saves/' + MY_UID).set(saveState).catch(e => console.log("Firebase Save Error:", e));
 }
 
-// Сохранение в таблицу лидеров
 function saveLeaderboardScore(force){
   const blocks = P.maxX / TILE | 0;
   if (!force && blocks <= lastSavedBlocks) return;
@@ -1604,7 +1759,6 @@ function loadBoard(){
   });
 }
 
-/* плавное движение других игроков */
 function smoothRemotes(){
   for (const k in remotes){
     const r = remotes[k];
@@ -1613,12 +1767,10 @@ function smoothRemotes(){
   }
 }
 
-/* ------- вход / старт игры ------- */
 auth.onAuthStateChanged(async user => {
   if (user && !joined){
     joined = true;
     MY_UID = user.uid;
-    MY_COLOR = colorFor(user.uid);
     try {
       const s = await db.ref('users/' + user.uid + '/name').once('value');
       MY_NAME = s.val() || user.email.split('@')[0].slice(0, 14);
@@ -1635,9 +1787,9 @@ async function startGame(){
   $('loading').classList.add('hidden');
   $('hud').classList.add('on');
 
-  // Восстановление точных сохраненных координат
+  // Восстановление сохраненного прогресса
   let restored = false;
-  const localData = localStorage.getItem('blockran_exact_save_v2');
+  const localData = localStorage.getItem('blockran_exact_save_v3');
   if (localData) {
     try {
       const d = JSON.parse(localData);
@@ -1645,6 +1797,9 @@ async function startGame(){
         P.x = d.x; P.y = d.y;
         P.cpIdx = d.cp || 0;
         P.deaths = d.deaths || 0;
+        P.coins = d.coins || 0;
+        P.activeSkin = d.activeSkin || 'default';
+        ownedSkins = d.ownedSkins || ['default'];
         P.maxX = d.maxX || d.x;
         P.finished = d.finished || false;
         restored = true;
@@ -1652,7 +1807,6 @@ async function startGame(){
     } catch(e){}
   }
 
-  // Облачный бэкап при отсутствии локального
   if (!restored) {
     try {
       const snap = await db.ref('saves/' + MY_UID).once('value');
@@ -1661,6 +1815,9 @@ async function startGame(){
         P.x = d.x; P.y = d.y;
         P.cpIdx = d.cp || 0;
         P.deaths = d.deaths || 0;
+        P.coins = d.coins || 0;
+        P.activeSkin = d.activeSkin || 'default';
+        ownedSkins = d.ownedSkins || ['default'];
         P.maxX = d.maxX || d.x;
         P.finished = d.finished || false;
       }
@@ -1669,8 +1826,8 @@ async function startGame(){
 
   $('deaths').textContent = P.deaths;
   $('cps').textContent = P.cpIdx;
+  $('coinsCount').textContent = P.coins;
 
-  // Рассчитываем спавн для смерти
   const cp = cps.find(c => c.id === P.cpIdx);
   if (cp) {
     P.respawnX = cp.tx * TILE + 7;
@@ -1688,14 +1845,224 @@ async function startGame(){
   toast('🎮 Привет, <b>' + esc(MY_NAME) + '</b>! Беги вправо — там слава! Удачи! 🍀', 4200);
   
   Audio8.init();
-  Audio8.playTrack(-1); // По умолчанию - Автоматический плейлист зон
+  Audio8.playTrack(-1); 
+  
+  renderSkinsShop();
+  updateGuideBookContent();
+  
   requestAnimationFrame(loop);
 }
 </script>
 <script>
 'use strict';
 /* ============================================================
-   РЕНДЕР: canvas, параллакс, погода, конвейеры, освещение
+   СМЕНА СЕЗОНОВ И УЮТНАЯ СИСТЕМА ПОГОДЫ
+   ============================================================ */
+const SEASONS = ['ЛЕТО', 'ОСЕНЬ', 'ЗИМА', 'ВЕСНА'];
+const SEASON_COLORS = {
+  'ЛЕТО': { top: '#55c34d', topL: '#7de06f', ambient: 'leaf' },
+  'ОСЕНЬ': { top: '#d97706', topL: '#f59e0b', ambient: 'autumn_leaf' },
+  'ЗИМА': { top: '#e2e8f0', topL: '#ffffff', ambient: 'snow' },
+  'ВЕСНА': { top: '#f472b6', topL: '#f472b6', ambient: 'sakura' }
+};
+
+let weather = {
+  rainIntensity: 0.0,
+  isRaining: false,
+  timeOfDay: 0.1,
+  season: 'ЛЕТО',
+  lastSeasonSwitch: 0
+};
+
+function updateDynamicWeather(now) {
+  // Динамическая смена времени суток
+  weather.timeOfDay = (Date.now() % 240000) / 240000;
+
+  // Динамическая погода: идет сильный дождь/снегопад каждые 3 минуты по 45 секунд
+  const weatherPeriod = 180000; 
+  const rainDuration = 45000;
+  const cycleTime = Date.now() % weatherPeriod;
+  weather.isRaining = cycleTime < rainDuration;
+
+  if (weather.isRaining) {
+    weather.rainIntensity = lerp(weather.rainIntensity, 1.0, 0.005);
+  } else {
+    weather.rainIntensity = lerp(weather.rainIntensity, 0.0, 0.005);
+  }
+
+  // Обновление шума дождя (эффекты зависят от интенсивности)
+  Audio8.updateRainSound(weather.rainIntensity);
+
+  // Смена времени года каждые 50 секунд для красоты и разнообразия геймплея
+  if (now - weather.lastSeasonSwitch > 50000) {
+    weather.lastSeasonSwitch = now;
+    const curIdx = SEASONS.indexOf(weather.season);
+    const nextIdx = (curIdx + 1) % SEASONS.length;
+    weather.season = SEASONS[nextIdx];
+    $('seasonLabel').textContent = weather.season;
+    toast(`🍁 Вступило в силу новое время года: ${weather.season}!`, 2000);
+  }
+}
+</script>
+<script>
+'use strict';
+/* ============================================================
+   📖 ИНТЕРАКТИВНАЯ КНИГА И ГАРДЕРОБ СКИНОВ
+   ============================================================ */
+let currentGuidePage = 0;
+const GUIDE_PAGES = [
+  {
+    title: '🌿 Глава 1: Начало пути (0%)',
+    content: `Добро пожаловать в БЛОКРАН!<br><br>
+    Основное управление:<br>
+    • <b>A/D</b> или стрелки — бег.<br>
+    • <b>Пробел</b> — прыжок (можно сделать двойной прыжок!).<br>
+    • <b>Shift</b> или кнопка <b>[⚡]</b> — стремительный рывок (Dash).<br><br>
+    <i>Твоя цель — добежать до отметки 100%. На пути расставлены флаги чекпоинтов. Удачи!</i>`
+  },
+  {
+    title: '🏃 Глава 2: Лесной спринт (10%)',
+    content: `<b>Поздравляем! На отметке 10% ты разблокировал навык "Лесной бег".</b><br><br>
+    Твоя базовая скорость бега увеличена на 25%!<br>
+    Это поможет тебе разгоняться перед прыжками на широкие дистанции.<br><br>
+    На карте начали попадаться золотые монетки 🪙. Собирай их для покупки крутых скинов!`
+  },
+  {
+    title: '💎 Глава 3: Тройной прыжок (20%)',
+    content: `<b>Достигнув 20% пути, ты получаешь силу Кристальных пещер!</b><br><br>
+    Теперь тебе доступен <b>Тройной прыжок</b> в воздухе!<br>
+    Просто нажми прыжок три раза подряд без касания земли. Это откроет доступ к высоким платформам и позволит уворачиваться от летучих мышей.`
+  },
+  {
+    title: '❄️ Глава 4: Птица бури (35%)',
+    content: `<b>Прогресс 35%! Разблокировано искусство планирования.</b><br><br>
+    Когда ты падаешь в воздухе, <b>удерживай кнопку Прыжка</b>, чтобы раскрыть ледяной планер.<br>
+    Ты начнешь медленно парить над пропастями, оставляя за собой морозный шлейф. Идеально сочетается с тройным прыжком!`
+  },
+  {
+    title: '🔥 Глава 5: Огненный рывок (50%)',
+    content: `<b>Великое испытание на 50% пройдено. Твой рывок заряжен пламенем!</b><br><br>
+    Во время активации рывка (Dash) твой персонаж получает **абсолютную неуязвимость** к шипам, лаве, пилам и летящим стрелам.<br><br>
+    Более того, огненный рывок теперь мгновенно уничтожает любых врагов, к которым ты прикоснешься!`
+  },
+  {
+    title: '🔮 Глава 6: Квантовый блинк (70%)',
+    content: `<b>Уровень 70% пройден. Ты овладел пространством!</b><br><br>
+    Используй клавишу <b>E</b> или кнопку <b>[🔮]</b> на экране телефона для мгновенной телепортации вперед по направлению взгляда!<br><br>
+    Блинк игнорирует препятствия и позволяет мгновенно спасаться от смертоносных стрел скелетов-лучников.`
+  }
+];
+
+function updateGuideBookContent() {
+  const currentPct = clamp(P.maxX / FINISH_X * 100, 0, 100);
+  $('bookProgress').textContent = currentPct.toFixed(1) + '% пройденного пути';
+
+  const page = GUIDE_PAGES[currentGuidePage];
+  const reqPct = [0, 10, 20, 35, 50, 70][currentGuidePage];
+
+  if (currentPct >= reqPct) {
+    $('bookLeftPage').innerHTML = `
+      <h3>${page.title}</h3>
+      <p>${page.content}</p>
+    `;
+  } else {
+    $('bookLeftPage').innerHTML = `
+      <h3>🔒 Страница заблокирована</h3>
+      <p style="text-align:center; padding-top:40px;">
+        <span style="font-size:48px;">🔒</span><br><br>
+        Достигните <b>${reqPct}%</b> пути, чтобы открыть эту главу руководства и разблокировать новые навыки персонажа.
+      </p>
+    `;
+  }
+
+  $('bookPrevBtn').disabled = currentGuidePage === 0;
+  $('bookNextBtn').disabled = currentGuidePage === GUIDE_PAGES.length - 1;
+}
+
+function renderSkinsShop() {
+  const container = $('skinsShopContainer');
+  container.innerHTML = SKINS.map(s => {
+    const isOwned = ownedSkins.includes(s.id);
+    const isEquipped = P.activeSkin === s.id;
+    
+    let btnHtml = '';
+    if (isEquipped) {
+      btnHtml = `<button class="skin-btn active">Экипирован</button>`;
+    } else if (isOwned) {
+      btnHtml = `<button class="skin-btn equip" onclick="equipSkin('${s.id}')">Надеть</button>`;
+    } else {
+      btnHtml = `<button class="skin-btn buy" onclick="buySkin('${s.id}', ${s.price})">Купить</button>`;
+    }
+
+    return `
+      <div class="skin-card ${isEquipped ? 'equipped' : ''}">
+        <div class="skin-info">
+          <div class="skin-preview-box" style="background:${s.color};"></div>
+          <div>
+            <div class="skin-name">${esc(s.name)}</div>
+            <div style="font-size:10px; color:#5d4037;">${esc(s.desc)}</div>
+          </div>
+        </div>
+        <div>
+          ${!isOwned ? `<div class="skin-price">🪙 ${s.price}</div>` : ''}
+          ${btnHtml}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+window.buySkin = function(skinId, price) {
+  if (P.coins >= price) {
+    P.coins -= price;
+    ownedSkins.push(skinId);
+    P.activeSkin = skinId;
+    $('coinsCount').textContent = P.coins;
+    toast('👗 Скин успешно куплен и экипирован!', 1800);
+    Audio8.checkpoint();
+    renderSkinsShop();
+    saveProgressExact();
+  } else {
+    toast('🪙 Недостаточно монет для покупки этого скина!', 1500);
+  }
+};
+
+window.equipSkin = function(skinId) {
+  if (ownedSkins.includes(skinId)) {
+    P.activeSkin = skinId;
+    toast('👗 Скин успешно изменен в реальном времени!', 1500);
+    Audio8.coin();
+    renderSkinsShop();
+    saveProgressExact();
+  }
+};
+
+// События кнопок гайдбука
+$('guideBookBtn').onclick = () => {
+  $('bookOverlay').classList.add('open');
+  updateGuideBookContent();
+  renderSkinsShop();
+};
+$('bookCloseBtn').onclick = () => {
+  $('bookOverlay').classList.remove('open');
+};
+$('bookPrevBtn').onclick = () => {
+  if (currentGuidePage > 0) {
+    currentGuidePage--;
+    updateGuideBookContent();
+  }
+};
+$('bookNextBtn').onclick = () => {
+  if (currentGuidePage < GUIDE_PAGES.length - 1) {
+    currentGuidePage++;
+    updateGuideBookContent();
+  }
+};
+</script>
+<script>
+'use strict';
+/* ============================================================
+   РЕНДЕР: canvas, параллакс, погода, времена года, освещение
    ============================================================ */
 const cv = $('game'), ctx = cv.getContext('2d');
 
@@ -1707,13 +2074,7 @@ skyCv.width = 1; skyCv.height = 128;
 
 let vw = 0, vh = 0, dpr = 1, nowMs = 0;
 let ZOOM = 1.4; 
-let screenShake = 0; // Величина тряски камеры при эффектах
-
-let weather = {
-  rainIntensity: 0.0,
-  isRaining: false,
-  timeOfDay: 0.1 
-};
+let screenShake = 0; 
 
 function resize(){
   dpr = Math.min(1.8, window.devicePixelRatio || 1);
@@ -1860,49 +2221,70 @@ function drawHills(zb){
   }
 }
 
-/* ---------- погодные частицы, брызги дождя ---------- */
+/* ---------- Погодные частицы по сезонам ---------- */
 const ambient = [];
 function drawAmbientAndWeather(zb, now){
-  const kind = ZONES[zb.i].ambient;
+  let kind = ZONES[zb.i].ambient;
   
-  if (ambient.length < 35 && Math.random() < 0.4)
+  // Локальные сезоны переопределяют фоновые эффекты в Зеленых холмах
+  if (zb.i === 0) {
+    kind = SEASON_COLORS[weather.season].ambient;
+  }
+  
+  if (ambient.length < 40 && Math.random() < 0.45)
     ambient.push({ x: cam.x + Math.random() * vw, y: cam.y - 20 + Math.random() * vh, ph: Math.random() * 7, sp: 0.5 + Math.random() });
   
   for (let i = ambient.length - 1; i >= 0; i--){
     const a = ambient[i];
-    if (kind === 'snow'){ a.y += 1.1 * a.sp; a.x += Math.sin(now/900 + a.ph) * 0.7; }
+    if (kind === 'snow'){ a.y += 1.2 * a.sp; a.x += Math.sin(now/900 + a.ph) * 0.8; }
     else if (kind === 'ember'){ a.y -= 0.9 * a.sp; a.x += Math.sin(now/700 + a.ph) * 0.5; }
-    else if (kind === 'leaf'){ a.y += 0.7 * a.sp; a.x += Math.sin(now/800 + a.ph) * 1.1; }
+    else if (kind === 'leaf' || kind === 'autumn_leaf'){ a.y += 0.8 * a.sp; a.x += Math.sin(now/800 + a.ph) * 1.1; }
+    else if (kind === 'sakura'){ a.y += 0.6 * a.sp; a.x += Math.sin(now/1000 + a.ph) * 1.3; }
     else { a.y += Math.sin(now/1200 + a.ph) * 0.3; a.x += 0.2 * a.sp; }
     const sx = a.x - cam.x, sy = a.y - cam.y;
     if (sy > vh + 30 || sy < -40 || sx < -40 || sx > vw + 40){ ambient.splice(i, 1); continue; }
+    
     if (kind === 'snow'){ ctx.fillStyle = 'rgba(255,255,255,.85)'; ctx.beginPath(); ctx.arc(sx, sy, 2, 0, 7); ctx.fill(); }
     else if (kind === 'ember'){ ctx.fillStyle = 'rgba(255,' + (120 + (a.ph*20|0)) + ',40,.8)'; ctx.fillRect(sx, sy, 3, 3); }
     else if (kind === 'leaf'){ ctx.fillStyle = 'rgba(120,200,90,.7)'; ctx.fillRect(sx, sy, 4, 3); }
+    else if (kind === 'autumn_leaf'){ ctx.fillStyle = 'rgba(217,119,6,.75)'; ctx.fillRect(sx, sy, 4, 3); }
+    else if (kind === 'sakura'){ ctx.fillStyle = 'rgba(244,114,182,.8)'; ctx.beginPath(); ctx.arc(sx, sy, 2.5, 0, 7); ctx.fill(); }
     else if (kind === 'mote'){ ctx.fillStyle = 'rgba(140,230,255,' + (0.3 + 0.4 * Math.abs(Math.sin(now/600 + a.ph))) + ')'; ctx.fillRect(sx, sy, 2.5, 2.5); }
   }
 
-  // Эффект дождя
+  // Отрисовка капель дождя
   if (weather.rainIntensity > 0.02) {
     ctx.save();
-    ctx.strokeStyle = 'rgba(174, 219, 255, ' + (weather.rainIntensity * 0.38) + ')';
-    ctx.lineWidth = 1.2;
-    const dropCount = Math.floor(weather.rainIntensity * 50);
-    for (let i = 0; i < dropCount; i++) {
-      const rx = (i * 37 + now * 0.9) % (vw + 40) - 20;
-      const ry = (i * 17 + now * 1.8) % (vh + 40) - 20;
-      ctx.beginPath();
-      ctx.moveTo(rx, ry);
-      ctx.lineTo(rx - 4, ry + 16);
-      ctx.stroke();
+    
+    // В зимний сезон дождь заменяется метелью
+    if (weather.season === 'ЗИМА' && zb.i === 0) {
+      ctx.fillStyle = 'rgba(255, 255, 255, ' + (weather.rainIntensity * 0.85) + ')';
+      const dropCount = Math.floor(weather.rainIntensity * 60);
+      for (let i = 0; i < dropCount; i++) {
+        const rx = (i * 31 + now * 0.7) % (vw + 40) - 20;
+        const ry = (i * 23 + now * 1.2) % (vh + 40) - 20;
+        ctx.beginPath(); ctx.arc(rx, ry, 2.5, 0, 7); ctx.fill();
+      }
+    } else {
+      ctx.strokeStyle = 'rgba(174, 219, 255, ' + (weather.rainIntensity * 0.42) + ')';
+      ctx.lineWidth = 1.3;
+      const dropCount = Math.floor(weather.rainIntensity * 65);
+      for (let i = 0; i < dropCount; i++) {
+        const rx = (i * 37 + now * 0.9) % (vw + 40) - 20;
+        const ry = (i * 17 + now * 1.8) % (vh + 40) - 20;
+        ctx.beginPath();
+        ctx.moveTo(rx, ry);
+        ctx.lineTo(rx - 4, ry + 16);
+        ctx.stroke();
 
-      if (Math.random() < 0.08) {
-        const globalX = rx + cam.x;
-        const tx = Math.floor(globalX / TILE);
-        if (tx >= 0 && tx < WW) {
-          const groundY = surf[tx] * TILE - cam.y;
-          if (Math.abs(ry - groundY) < 16) {
-            spawnP(globalX, surf[tx] * TILE, (Math.random() - 0.5) * 1.2, -Math.random() * 1.5, 8, 'rgba(174, 219, 255, 0.65)', 1.5, 0.2);
+        if (Math.random() < 0.08) {
+          const globalX = rx + cam.x;
+          const tx = Math.floor(globalX / TILE);
+          if (tx >= 0 && tx < WW) {
+            const groundY = surf[tx] * TILE - cam.y;
+            if (Math.abs(ry - groundY) < 16) {
+              spawnP(globalX, surf[tx] * TILE, (Math.random() - 0.5) * 1.2, -Math.random() * 1.5, 8, 'rgba(174, 219, 255, 0.65)', 1.5, 0.2);
+            }
           }
         }
       }
@@ -1911,12 +2293,20 @@ function drawAmbientAndWeather(zb, now){
   }
 }
 
-/* ---------- отрисовка тайлов ---------- */
+/* ---------- Отрисовка тайлов ---------- */
 function drawTiles(zb, now){
   const tx0 = Math.max(0, (cam.x / TILE | 0) - 1), tx1 = Math.min(WW - 1, ((cam.x + vw) / TILE | 0) + 1);
   const ty0 = Math.max(0, (cam.y / TILE | 0) - 1), ty1 = Math.min(WH - 1, ((cam.y + vh) / TILE | 0) + 1);
-  const dirt = zcol('dirt', zb), dirtD = zcol('dirtD', zb), top = zcol('top', zb), topL = zcol('topL', zb);
+  const dirt = zcol('dirt', zb), dirtD = zcol('dirtD', zb);
   const lavaGlow = [];
+
+  // Сезонные изменения блоков первой зоны
+  let top = zcol('top', zb);
+  let topL = zcol('topL', zb);
+  if (zb.i === 0) {
+    top = SEASON_COLORS[weather.season].top;
+    topL = SEASON_COLORS[weather.season].topL;
+  }
 
   for (let ty = ty0; ty <= ty1; ty++){
     for (let tx = tx0; tx <= tx1; tx++){
@@ -1966,7 +2356,7 @@ function drawTiles(zb, now){
           ctx.fillRect(x, y, TILE, 2.5);
         }
       } 
-      // ОТРИСОВКА НОВЫХ БЛОКОВ-КОНВЕЙЕРОВ (T.CON_L, T.CON_R)
+      // ОТРИСОВКА БЛОКОВ-КОНВЕЙЕРОВ (T.CON_L, T.CON_R)
       else if (v === T.CON_L || v === T.CON_R) {
         ctx.fillStyle = '#475569'; ctx.fillRect(x, y, TILE, TILE);
         ctx.fillStyle = '#1e293b'; ctx.fillRect(x, y + 3, TILE, 9);
@@ -2055,8 +2445,36 @@ function drawTiles(zb, now){
   }
 }
 
-/* ---------- сущности ---------- */
+/* ---------- сущности и монеты ---------- */
 function drawEntities(now){
+  // Монетки 🪙
+  for (const c of mapCoins) {
+    if (c.collected) continue;
+    const x = c.x - cam.x, y = c.y - cam.y;
+    if (x < -20 || x > vw + 20 || y < -20 || y > vh + 20) continue;
+    
+    // Анимация левитации и вращения монетки
+    const hover = Math.sin(now / 180 + c.id) * 3.5;
+    const rotateWidth = Math.abs(Math.sin(now / 200 + c.id));
+    
+    ctx.save();
+    ctx.translate(x, y + hover);
+    ctx.scale(rotateWidth, 1);
+    
+    // Внутренний свет монеты
+    const goldG = ctx.createRadialGradient(0, 0, 1, 0, 0, 9);
+    goldG.addColorStop(0, '#fff3a8');
+    goldG.addColorStop(0.5, '#ffd94f');
+    goldG.addColorStop(1, '#d97706');
+    ctx.fillStyle = goldG;
+    ctx.beginPath(); ctx.arc(0, 0, 9, 0, 7); ctx.fill();
+    
+    // Каемка
+    ctx.strokeStyle = '#b45309'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(0, 0, 9, 0, 7); ctx.stroke();
+    ctx.restore();
+  }
+
   for (const c of crystals){
     const x = c.x - cam.x, y = c.y - cam.y;
     if (x < -60 || x > vw + 60 || y < -60 || y > vh + 60) continue;
@@ -2131,7 +2549,7 @@ function drawEntities(now){
   }
   ctx.restore();
   
-  // Враги
+  // Отрисовка ВРАГОВ
   for (const e of enemies){
     if (e.deadUntil && e.deadUntil > nowMs) continue;
     const x = e.ex - cam.x, y = e.y - cam.y;
@@ -2236,38 +2654,74 @@ function rr(x, y, w, h, r){
   ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
 }
 
-/* ---------- игроки ---------- */
-function drawPlayer(x, y, dir, color, name, st, squash, me, runPh, alpha){
+/* ---------- Отрисовка персонажей со скинами ---------- */
+function drawPlayer(x, y, dir, color, name, st, squash, me, runPh, alpha, skinId='default'){
   ctx.save();
   ctx.globalAlpha = alpha == null ? 1 : alpha;
   const sq = squash > 0 ? 1 - squash * 0.02 : 1;
   ctx.translate(x + 11, y + 26);
   ctx.scale(1, sq);
 
+  const skinColor = getSkinColor(skinId);
+
   // Световая аура (Glow-эффект RTX)
   ctx.save();
   const aura = ctx.createRadialGradient(0, -12, 4, 0, -12, 46);
-  aura.addColorStop(0, hexToRGBA(color, 0.42));
+  aura.addColorStop(0, hexToRGBA(skinColor, 0.42));
   aura.addColorStop(1, 'rgba(0,0,0,0)');
   ctx.fillStyle = aura;
   ctx.beginPath(); ctx.arc(0, -12, 46, 0, 7); ctx.fill();
   ctx.restore();
 
-  // тень
+  // Тень
   ctx.fillStyle = 'rgba(0,0,0,.25)';
   ctx.beginPath(); ctx.ellipse(0, 2, 12, 4, 0, 0, 7); ctx.fill();
-  // ноги
+  
+  // Ноги
   const run = st === 1 ? Math.sin(runPh * 0.06) * 5 : 0;
   ctx.fillStyle = 'rgba(0,0,0,.35)';
   ctx.fillRect(-8 + run, -6, 6, 6); ctx.fillRect(2 - run, -6, 6, 6);
-  // тело
-  ctx.fillStyle = color;
-  ctx.shadowColor = color; ctx.shadowBlur = me ? 14 : 8;
+  
+  // Тело
+  ctx.fillStyle = skinColor;
+  ctx.shadowColor = skinColor; ctx.shadowBlur = me ? 14 : 8;
+  
+  // Особый рендеринг у скина фантома (полупрозрачный)
+  if (skinId === 'ghost') ctx.globalAlpha = 0.55;
+
   rr(-11, -26, 22, 21, 7); ctx.fill();
   ctx.shadowBlur = 0;
+  
   ctx.fillStyle = 'rgba(255,255,255,.28)';
   rr(-11, -26, 22, 8, 7); ctx.fill();
-  // глаза
+  
+  // Отрисовка ЗОЛОТОЙ КОРОНЫ для скина "golden" 👑
+  if (skinId === 'golden') {
+    ctx.fillStyle = '#ffb300';
+    ctx.beginPath();
+    ctx.moveTo(-11, -26);
+    ctx.lineTo(-11, -33);
+    ctx.lineTo(-6, -29);
+    ctx.lineTo(0, -35);
+    ctx.lineTo(6, -29);
+    ctx.lineTo(11, -33);
+    ctx.lineTo(11, -26);
+    ctx.closePath();
+    ctx.fill();
+    // Рубин на короне
+    ctx.fillStyle = '#ff1744';
+    ctx.fillRect(-1.5, -31, 3, 3);
+  }
+
+  // Отрисовка неонового пламени для бездны "void"
+  if (skinId === 'void') {
+    ctx.fillStyle = 'rgba(162, 92, 255, 0.6)';
+    ctx.fillRect(-14, -22, 3, 14);
+    ctx.fillRect(11, -22, 3, 14);
+  }
+
+  // Глаза
+  ctx.globalAlpha = 1; // Возвращаем непрозрачность глазам
   const eo = dir * 2.5, wide = st === 2 ? 1.3 : 1;
   ctx.fillStyle = '#fff';
   ctx.beginPath(); ctx.arc(-4.5 + eo, -18, 3.4 * wide, 0, 7); ctx.arc(3.5 + eo, -18, 3.4 * wide, 0, 7); ctx.fill();
@@ -2288,7 +2742,7 @@ function drawPlayer(x, y, dir, color, name, st, squash, me, runPh, alpha){
   ctx.restore();
 }
 
-/* ---------- освещение тёмных зон ---------- */
+/* ---------- Освещение тёмных зон ---------- */
 function drawLighting(zb){
   const dark = zdark(zb);
   if (dark < 0.03) return;
@@ -2324,7 +2778,6 @@ function drawLighting(zb){
   ctx.restore();
 }
 
-/* ---------- частицы ---------- */
 function drawParticles(){
   for (const p of particles){
     ctx.globalAlpha = p.life / p.maxLife;
@@ -2334,27 +2787,12 @@ function drawParticles(){
   ctx.globalAlpha = 1;
 }
 
-/* ---------- главный игровой цикл ---------- */
+/* ---------- Главный игровой цикл ---------- */
 let lastTs = 0, acc = 0;
 function stepGame(){
   nowMs = performance.now();
   
-  // 1. Динамическое время суток (Полный цикл 4 минуты)
-  weather.timeOfDay = (Date.now() % 240000) / 240000;
-
-  // 2. Симуляция дождя (Каждые 8 минут идет дождь в течение 1.5 минут)
-  const weatherPeriod = 480000; 
-  const rainDuration = 90000;
-  const cycleTime = Date.now() % weatherPeriod;
-  weather.isRaining = cycleTime < rainDuration;
-
-  if (weather.isRaining) {
-    weather.rainIntensity = lerp(weather.rainIntensity, 1.0, 0.003);
-  } else {
-    weather.rainIntensity = lerp(weather.rainIntensity, 0.0, 0.003);
-  }
-
-  Audio8.updateRainSound(weather.rainIntensity);
+  updateDynamicWeather(nowMs);
 
   updEntities(nowMs);
   stepPlayer(nowMs);
@@ -2362,7 +2800,7 @@ function stepGame(){
   smoothRemotes();
   updHUD(nowMs);
   
-  // Автоматический переключатель треков по зонам
+  // Автоматическая музыка по зонам, если не выбран ручной режим
   if (!Audio8.manualRadio) {
     Audio8.playTrack(zoneAt(P.x / TILE | 0));
   }
@@ -2382,18 +2820,19 @@ function loop(ts){
   drawTiles(zb, ts);
   drawEntities(ts);
   
-  // Рисуем шлейф от рывка (Dash)
+  // Рисуем шлейф Dash
   for (const t of dashTrail) {
-    drawPlayer(t.x - cam.x, t.y - cam.y, t.dir, MY_COLOR, null, 2, 0, false, 0, (t.life / 12) * 0.35);
+    drawPlayer(t.x - cam.x, t.y - cam.y, t.dir, '#ffffff', null, 2, 0, false, 0, (t.life / 12) * 0.35, P.activeSkin);
   }
 
+  // Рисуем мультиплеерных игроков
   for (const k in remotes){
     const r = remotes[k];
     if (r.rx + 30 < cam.x || r.rx - 30 > cam.x + vw || r.ry + 30 < cam.y || r.ry - 30 > cam.y + vh) continue;
-    drawPlayer(r.rx - cam.x, r.ry - cam.y, r.d, r.c, r.n || '???', r.s, 0, false, ts + k.length * 99, 0.95);
+    drawPlayer(r.rx - cam.x, r.ry - cam.y, r.d, '#ffffff', r.n || '???', r.s, 0, false, ts + k.length * 99, 0.95, r.skin);
   }
   if (!(P.deadT > 0 && (P.deadT / 3 | 0) % 2))
-    drawPlayer(P.x - cam.x, P.y - cam.y, P.dir, MY_COLOR, MY_NAME, P.ground ? (Math.abs(P.vx) > 0.5 ? 1 : 0) : 2, P.squash, true, P.runT, 1);
+    drawPlayer(P.x - cam.x, P.y - cam.y, P.dir, '#ffffff', MY_NAME, P.ground ? (Math.abs(P.vx) > 0.5 ? 1 : 0) : 2, P.squash, true, P.runT, 1, P.activeSkin);
   
   drawParticles();
   drawLighting(zb);
