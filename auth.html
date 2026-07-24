@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Meow Messenger - Вход</title>
+  <link rel="stylesheet" href="design.css">
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+  <script src="firebase-config.js"></script>
+</head>
+<body>
+  <div class="auth-container">
+    <div class="auth-box">
+      <div class="auth-logo">
+        <h1>🐱 Meow</h1>
+        <p>Мессенджер нового поколения</p>
+      </div>
+
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="loginTab">Вход</button>
+        <button class="auth-tab" id="registerTab">Регистрация</button>
+      </div>
+
+      <!-- Форма входа -->
+      <div class="auth-form active" id="loginForm">
+        <div class="input-group">
+          <label>Email</label>
+          <input type="email" id="loginEmail" placeholder="your@email.com">
+        </div>
+        <div class="input-group">
+          <label>Пароль</label>
+          <input type="password" id="loginPassword" placeholder="Минимум 6 символов">
+        </div>
+        <button class="btn-primary" id="loginBtn">Войти</button>
+      </div>
+
+      <!-- Форма регистрации -->
+      <div class="auth-form" id="registerForm">
+        <div class="avatar-upload">
+          <img class="avatar-preview" id="avatarPreview" src="" alt="Аватарка" onerror="this.style.display='none'">
+          <input type="file" id="avatarInput" accept="image/*">
+          <label for="avatarInput">📷 Выбрать аватарку</label>
+        </div>
+        <div class="input-group">
+          <label>Имя</label>
+          <input type="text" id="regName" placeholder="Ваше имя">
+        </div>
+        <div class="input-group">
+          <label>Email</label>
+          <input type="email" id="regEmail" placeholder="your@email.com">
+        </div>
+        <div class="input-group">
+          <label>Пароль</label>
+          <input type="password" id="regPassword" placeholder="Минимум 6 символов">
+        </div>
+        <button class="btn-primary" id="registerBtn">Зарегистрироваться</button>
+      </div>
+
+      <!-- Логи -->
+      <div class="log-box" id="logBox"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="auth.js"></script>
+</body>
+</html>
+
