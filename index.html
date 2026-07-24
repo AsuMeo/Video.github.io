@@ -1,21 +1,109 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#0e0e10">
-    <title>VK Meow</title>
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Meow Messenger</title>
+  <link rel="stylesheet" href="design.css">
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+  <script src="firebase-config.js"></script>
 </head>
 <body>
-    <div id="root"></div>
-    <script type="text/babel" src="Auth.jsx"></script>
-    <script type="text/babel" src="App.jsx"></script>
+  <!-- Loading -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    <p>Загрузка...</p>
+  </div>
+
+  <!-- Main App -->
+  <div class="app-container" id="appContainer">
+    <!-- Header -->
+    <div class="app-header">
+      <div class="left">
+        <img class="avatar" id="headerAvatar" src="" alt="" onerror="this.style.display='none'">
+        <div>
+          <div class="title" id="headerName">Meow</div>
+          <div class="subtitle">Мессенджер</div>
+        </div>
+      </div>
+      <div class="right">
+        <button class="icon-btn" id="searchBtn">🔍</button>
+        <button class="icon-btn" id="profileBtn">⚙️</button>
+      </div>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Поиск по чатам...">
+    </div>
+
+    <!-- Chat List -->
+    <div class="chat-list" id="chatList">
+      <div class="empty-state">
+        <div class="icon">💬</div>
+        <h3>Загрузка чатов...</h3>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chat Screen -->
+  <div class="chat-screen" id="chatScreen">
+    <div class="chat-header">
+      <button class="back-btn" id="closeChatBtn">←</button>
+      <img class="avatar" id="chatAvatar" src="" alt="" onerror="this.style.display='none'">
+      <div class="info">
+        <div class="name" id="chatName">Пользователь</div>
+        <div class="status" id="chatStatus">офлайн</div>
+      </div>
+    </div>
+
+    <div class="messages-container" id="messagesContainer"></div>
+
+    <div class="typing-indicator" id="typingIndicator">
+      <span></span><span></span><span></span>
+    </div>
+
+    <div class="input-area">
+      <input type="text" id="messageInput" placeholder="Сообщение...">
+      <button class="send-btn" id="sendBtn">➤</button>
+    </div>
+  </div>
+
+  <!-- Users Modal -->
+  <div class="modal-overlay" id="usersModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Пользователи</h2>
+        <button class="close-btn" id="closeUsersModal">✕</button>
+      </div>
+      <div class="users-list" id="usersList"></div>
+    </div>
+  </div>
+
+  <!-- Profile Modal -->
+  <div class="modal-overlay" id="profileModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Профиль</h2>
+        <button class="close-btn" id="closeProfileModal">✕</button>
+      </div>
+      <img class="profile-avatar" id="profileAvatar" src="" alt="" onerror="this.style.display='none'">
+      <div class="profile-info">
+        <h3 id="profileName">Имя</h3>
+        <p id="profileEmail">email@example.com</p>
+      </div>
+      <div class="profile-actions">
+        <button class="btn-secondary" id="logoutBtn">🚪 Выйти</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script src="app.js"></script>
 </body>
 </html>
