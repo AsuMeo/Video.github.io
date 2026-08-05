@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Code Analyzer + AutoFix</title>
+<style>
+  :root { --bg:#0d1117; --panel:#161b22; --border:#30363d; --text:#c9d1d9; --accent:#58a6ff; --ok:#238636; --err:#f85149; --warn:#d29922; --info:#58a6ff; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:ui-monospace,SFMono-Regular,monospace;display:flex;flex-direction:column;height:100vh}
+  header{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  header h1{font-size:15px;color:var(--accent)}
+  .ctrl{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+  .ctrl button{background:var(--ok);border:none;color:#fff;padding:7px 14px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:bold}
+  .ctrl button.secondary{background:var(--panel);border:1px solid var(--border);color:var(--text)}
+  .ctrl button.danger{background:var(--err)}
+  .ctrl button.fix{background:#8957e5}
+  .main{display:flex;flex:1;min-height:0}
+  .col{flex:1;display:flex;flex-direction:column;border-right:1px solid var(--border);min-width:0}
+  .col:last-child{border-right:none}
+  .col-header{padding:6px 10px;border-bottom:1px solid var(--border);font-size:11px;color:#8b949e;display:flex;justify-content:space-between;align-items:center}
+  textarea{flex:1;background:var(--bg);color:var(--text);border:none;padding:10px;font-size:12px;resize:none;outline:none;font-family:inherit;line-height:1.5}
+  .output{flex:1;padding:10px;overflow-y:auto;font-size:12px;line-height:1.5}
+  .msg{padding:6px 10px;border-radius:5px;margin-bottom:5px;border-left:3px solid;font-size:11px}
+  .msg.err{background:rgba(248,81,73,0.1);border-color:var(--err)}
+  .msg.warn{background:rgba(210,153,34,0.1);border-color:var(--warn)}
+  .msg.info{background:rgba(88,166,255,0.1);border-color:var(--info)}
+  .msg.ok{background:rgba(35,134,54,0.1);border-color:var(--ok)}
+  .msg .line{color:#8b949e;font-size:10px;margin-bottom:1px}
+  .msg .text{color:var(--text)}
+  .msg .code{background:var(--bg);padding:3px 6px;border-radius:3px;font-size:10px;margin-top:3px;overflow-x:auto}
+  .stats{display:flex;gap:14px;padding:6px 10px;border-bottom:1px solid var(--border);font-size:11px}
+  .stats span{display:flex;align-items:center;gap:4px}
+  .dot{width:7px;height:7px;border-radius:50%;display:inline-block}
+  .dot.err{background:var(--err)}.dot.warn{background:var(--warn)}.dot.ok{background:var(--ok)}
+  .empty{color:#8b949e;padding:20px;text-align:center;font-size:12px}
+  .fix-section{margin-top:8px;padding-top:8px;border-top:1px solid var(--border)}
+  .fix-section h4{color:var(--accent);font-size:11px;margin-bottom:6px}
+  .fix-btn{background:var(--panel);border:1px solid var(--border);color:var(--text);padding:3px 8px;border-radius:4px;cursor:pointer;font-size:10px;margin-right:4px;margin-bottom:4px}
+  .fix-btn:hover{border-color:var(--accent)}
+  .fixed-code{background:var(--bg);padding:8px;border-radius:5px;font-size:11px;white-space:pre-wrap;word-break:break-all;max-height:300px;overflow-y:auto;border:1px solid var(--border);margin-top:6px}
+</style>
+</head>
+<body>
+<header>
+  <h1>🔍 Code Analyzer + AutoFix</h1>
+  <div class="ctrl">
+    <button onclick="analyze()">🔎 Анализ</button>
+    <button class="fix" onclick="autoFix()">✨ Автоисправление</button>
+    <button class="secondary" onclick="clearAll()">Очистить</button>
+    <button class="secondary" onclick="loadExample()">Пример</button>
+    <button class="danger" onclick="liveTest()">▶ Запустить</button>
+  </div>
+</header>
+<div class="stats" id="stats">
+  <span><span class="dot err"></span> Ошибок: <b id="errCount">0</b></span>
+  <span><span class="dot warn"></span> Предупреждений: <b id="warnCount">0</b></span>
+  <span><span class="dot ok"></span> Ок: <b id="okCount">0</b></span>
+</div>
+
+<div class="main">
+  <div class="col">
+    <div class="col-header">Исходный код</div>
+    <textarea id="source" placeholder="Весь твой HTML/CSS/JS здесь..."></textarea>
+  </div>
+  <div class="col">
+    <div class="col-header">Результат анализа</div>
+    <div class="output" id="output"><div class="empty">Нажми «Анализ» или «Автоисправление»</div></div>
+  </div>
+</div>
+
+<script>
+window.analyze = function() {
+  const src = document.getElementById("source").value;
+  const out = document.getElementById("output");
+  out.innerHTML = "";
+  if (!src.trim()) { out.innerHTML = "<div class=\"empty\">Вставь код сначала</div>"; updateStats(0,0,0); return; }
+  const result = runAnalysis(src);
+  renderMsgs(result.msgs, out);
+  updateStats(result.errC, result.warnC, result.okC);
+};
+
+window.autoFix = function() {
+  let src = document.getElementById("source").value;
+  const out = document.getElementById("output");
+  out.innerHTML = "";
+  if (!src.trim()) { out.innerHTML = "<div class=\"empty\">Вставь код сначала</div>"; updateStats(0,0,0); return; }
+
+  const fixes = [];
+  let fixed = src;
+
+  // 1. Add DOCTYPE if missing
+  if (!fixed.trim().toLowerCase().startsWith("<!doctype")) {
+    fixed = "<!DOCTYPE html>\n" + fixed;
+    fixes.push("Добавлен <!DOCTYPE html>");
+  }
+
+  // 2. Add lang to <html>
+  if (!/<html[^>]*lang=/.test(fixed)) {
+    fixed = fixed.replace(/<html([^>]*)>/i, '<html$1 lang="ru">');
+    fixes.push("Добавлен lang=\"ru\" в <html>");
+  }
+
+  // 3. Add meta charset/viewport/title in <head>
+  if (!fixed.toLowerCase().includes("charset")) {
+    fixed = fixed.replace(/<head([^>]*)>/i, '<head$1>\n<meta charset="UTF-8">');
+    fixes.push("Добавлен <meta charset=\"UTF-8\">");
+  }
+  if (!fixed.toLowerCase().includes("viewport")) {
+    fixed = fixed.replace(/<head([^>]*)>/i, '<head$1>\n<meta name="viewport" content="width=device-width, initial-scale=1.0">');
+    fixes.push("Добавлен viewport");
+  }
+  if (!/<title>/.test(fixed)) {
+    fixed = fixed.replace(/<head([^>]*)>/i, '<head$1>\n<title>Page</title>');
+    fixes.push("Добавлен <title>");
+  }
+
+  // 4. Replace deprecated tags with div/span + CSS
+  const deprecatedMap = {
+    "<center": '<div style="text-align:center"',
+    "</center>": "</div>",
+    "<font": '<span',
+    "</font>": "</span>",
+    "<big": '<span style="font-size:larger"',
+    "</big>": "</span>",
+    "<strike": '<span style="text-decoration:line-through"',
+    "</strike>": "</span>"
+  };
+  Object.entries(deprecatedMap).forEach(([old, neu]) => {
+    if (fixed.toLowerCase().includes(old.toLowerCase())) {
+      const re = new RegExp(old.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi");
+      fixed = fixed.replace(re, neu);
+      fixes.push(`Заменён устаревший тег ${old} → ${neu}`);
+    }
+  });
+
+  // 5. Replace var with let
+  const varCount = (fixed.match(/\bvar\b/g) || []).length;
+  if (varCount > 0) {
+    fixed = fixed.replace(/\bvar\b/g, "let");
+    fixes.push(`Заменено ${varCount} var → let`);
+  }
+
+  // 6. Replace == with === (but not === already)
+  const eqCount = (fixed.match(/[^=!]==[^=]/g) || []).length;
+  if (eqCount > 0) {
+    fixed = fixed.replace(/([^=!])==([^=])/g, "$1===$2");
+    fixes.push(`Заменено ${eqCount} == → ===`);
+  }
+
+  // 7. Remove console.log
+  const logCount = (fixed.match(/console\.log\s*\([^)]*\)\s*;?/g) || []).length;
+  if (logCount > 0) {
+    fixed = fixed.replace(/console\.log\s*\([^)]*\)\s*;?/g, "");
+    fixes.push(`Удалено ${logCount} console.log`);
+  }
+
+  // 8. Replace alert/confirm/prompt with comments
+  const alertCount = (fixed.match(/\b(alert|confirm|prompt)\s*\(/g) || []).length;
+  if (alertCount > 0) {
+    fixed = fixed.replace(/\b(alert|confirm|prompt)\s*\([^)]*\)\s*;?/g, "/* $& — замени на модальное окно */");
+    fixes.push(`Закомментировано ${alertCount} alert/confirm/prompt`);
+  }
+
+  // 9. Replace innerHTML with textContent where safe
+  const innerCount = (fixed.match(/\.innerHTML\s*=/g) || []).length;
+  if (innerCount > 0) {
+    // Only replace simple string assignments
+    fixed = fixed.replace(/(\w+)\.innerHTML\s*=\s*["']([^"']*)["']/g, "$1.textContent = "$2"");
+    fixes.push(`Заменено innerHTML → textContent (где безопасно)`);
+  }
+
+  // 10. Add semicolons where missing (basic)
+  const lines = fixed.split("\n");
+  const newLines = lines.map(line => {
+    const t = line.trim();
+    if (!t) return line;
+    if (t.endsWith(";") || t.endsWith("{") || t.endsWith("}") || t.endsWith(",") || t.startsWith("//") || t.startsWith("/*") || t.startsWith("*") || t.startsWith("<") || t.startsWith("</") || t.endsWith(">") || /\b(if|for|while|function|class|try|catch|else|do|switch)\b/.test(t)) return line;
+    if (/\b(const|let|var)\b/.test(t) && !t.includes("=")) return line;
+    if (t.startsWith(".") || t.startsWith("+")) return line;
+    return line + ";";
+  });
+  const addedSemi = newLines.filter((l, i) => l !== lines[i]).length;
+  if (addedSemi > 0) {
+    fixed = newLines.join("\n");
+    fixes.push(`Добавлено ${addedSemi} точек с запятой`);
+  }
+
+  // 11. Add alt to img without alt
+  const imgNoAlt = fixed.match(/<img(?![^>]*alt)[^>]*>/gi) || [];
+  imgNoAlt.forEach(img => {
+    fixed = fixed.replace(img, img.replace(">", ' alt="">'));
+  });
+  if (imgNoAlt.length > 0) fixes.push(`Добавлен alt к ${imgNoAlt.length} <img>`);
+
+  // 12. Add rel="noopener noreferrer" to target="_blank" links
+  const extLinks = fixed.match(/<a[^>]*href=["']https?:\/\/[^"']*["'][^>]*target=["']_blank["'][^>]*>/gi) || [];
+  extLinks.forEach(link => {
+    if (!/rel=/.test(link)) {
+      fixed = fixed.replace(link, link.replace(">", ' rel="noopener noreferrer">'));
+    }
+  });
+  if (extLinks.length > 0) fixes.push(`Добавлен rel к ${extLinks.length} внешним ссылкам`);
+
+  // 13. Change http to https in links
+  const httpCount = (fixed.match(/href=["']http:\/\//gi) || []).length;
+  if (httpCount > 0) {
+    fixed = fixed.replace(/href=["']http:\/\//gi, 'href="https://');
+    fixes.push(`Заменено ${httpCount} http → https`);
+  }
+
+  // 14. Add method="POST" to forms without method
+  const formsNoMethod = fixed.match(/<form(?![^>]*method)[^>]*>/gi) || [];
+  formsNoMethod.forEach(form => {
+    fixed = fixed.replace(form, form.replace(">", ' method="POST">'));
+  });
+  if (formsNoMethod.length > 0) fixes.push(`Добавлен method=POST к ${formsNoMethod.length} <form>`);
+
+  // 15. Add type="text" to inputs without type
+  const inputsNoType = fixed.match(/<input(?![^>]*type)[^>]*>/gi) || [];
+  inputsNoType.forEach(inp => {
+    fixed = fixed.replace(inp, inp.replace(">", ' type="text">'));
+  });
+  if (inputsNoType.length > 0) fixes.push(`Добавлен type=text к ${inputsNoType.length} <input>`);
+
+  // 16. Remove empty CSS rules
+  const emptyRules = fixed.match(/[^{}]+\{\s*\}/g) || [];
+  emptyRules.forEach(rule => {
+    fixed = fixed.replace(rule, "");
+  });
+  if (emptyRules.length > 0) fixes.push(`Удалено ${emptyRules.length} пустых CSS-правил`);
+
+  // 17. Remove inline style duplicates (move to class if repeated)
+  // Basic: just warn about many inline styles
+  const inlineCount = (fixed.match(/style=["']/gi) || []).length;
+  if (inlineCount > 5) {
+    fixes.push(`⚠ ${inlineCount} inline style — вынеси в <style> вручную`);
+  }
+
+  // Show result
+  const result = runAnalysis(fixed);
+  renderMsgs(result.msgs, out);
+  updateStats(result.errC, result.warnC, result.okC);
+
+  // Show fixes applied
+  const fixDiv = document.createElement("div");
+  fixDiv.className = "fix-section";
+  fixDiv.innerHTML = `<h4>✨ Применено исправлений (${fixes.length}):</h4>` + fixes.map(f => `<button class="fix-btn">${f}</button>`).join("");
+  out.appendChild(fixDiv);
+
+  // Show fixed code
+  const codeDiv = document.createElement("div");
+  codeDiv.className = "fix-section";
+  codeDiv.innerHTML = `<h4>📄 Исправленный код:</h4><div class="fixed-code">${fixed.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}</div>`;
+  out.appendChild(codeDiv);
+
+  // Copy button
+  const copyBtn = document.createElement("button");
+  copyBtn.className = "fix-btn";
+  copyBtn.style.cssText = "margin-top:8px;background:var(--ok);color:#fff;border:none;padding:6px 14px;";
+  copyBtn.textContent = "📋 Копировать исправленный код";
+  copyBtn.onclick = () => navigator.clipboard.writeText(fixed);
+  out.appendChild(copyBtn);
+
+  // Replace source button
+  const replaceBtn = document.createElement("button");
+  replaceBtn.className = "fix-btn";
+  replaceBtn.style.cssText = "margin-top:8px;background:var(--accent);color:#fff;border:none;padding:6px 14px;";
+  replaceBtn.textContent = "🔄 Заменить исходный код";
+  replaceBtn.onclick = () => { document.getElementById("source").value = fixed; analyze(); };
+  out.appendChild(replaceBtn);
+};
+
+function runAnalysis(src) {
+  const lines = src.split("\n");
+  const msgs = [];
+
+  // HTML tags
+  const htmlTags = [];
+  const tagRegex = /<\/?([a-zA-Z][a-zA-Z0-9]*)[^>]*>/g;
+  let m;
+  while ((m = tagRegex.exec(src)) !== null) {
+    const tag = m[1].toLowerCase();
+    const isClose = m[0].startsWith("</");
+    const isSelfClose = m[0].endsWith("/>") || ["img","br","hr","input","meta","link","area","base","col","embed","param","source","track","wbr"].includes(tag);
+    const lineNum = src.slice(0, m.index).split("\n").length;
+    htmlTags.push({tag, isClose, isSelfClose, line: lineNum, raw: m[0]});
+  }
+  const stack = [];
+  htmlTags.forEach(t => {
+    if (t.isSelfClose) return;
+    if (!t.isClose) { stack.push(t); }
+    else {
+      const last = stack.pop();
+      if (!last || last.tag !== t.tag) {
+        msgs.push({type:"err",line:t.line,text:`Закрывающий тег </${t.tag}> не имеет пары`,code:t.raw});
+      }
+    }
+  });
+  stack.forEach(t => { msgs.push({type:"err",line:t.line,text:`Тег <${t.tag}> не закрыт`,code:t.raw}); });
+
+  if (!src.trim().toLowerCase().startsWith("<!doctype")) msgs.push({type:"warn",line:1,text:"Отсутствует <!DOCTYPE html>",code:""});
+  if (!src.toLowerCase().includes("charset")) msgs.push({type:"warn",line:1,text:"Отсутствует charset",code:""});
+  if (!src.toLowerCase().includes("viewport")) msgs.push({type:"warn",line:1,text:"Отсутствует viewport",code:""});
+
+  const deprecated = ["center","font","marquee","blink","big","strike","tt","dir","frame","frameset","noframes","applet","basefont"];
+  deprecated.forEach(d => {
+    const re = new RegExp("<" + d + "[\\s>]","gi");
+    if (re.test(src)) {
+      const line = src.slice(0, src.toLowerCase().indexOf("<" + d)).split("\n").length;
+      msgs.push({type:"warn",line:line,text:`Устаревший тег <${d}>`,code:`<${d}>`});
+    }
+  });
+
+  // CSS
+  const styleBlocks = src.match(/<style[^>]*>([\s\S]*?)<\/style>/gi) || [];
+  styleBlocks.forEach(block => {
+    const css = block.replace(/<\/?style[^>]*>/gi, "");
+    const openCount = (css.match(/\{/g) || []).length;
+    const closeCount = (css.match(/\}/g) || []).length;
+    if (openCount !== closeCount) msgs.push({type:"err",line:findLine(src,block),text:`CSS: несовпадение скобок`,code:""});
+    const emptyRule = /[^{}]+\{\s*\}/g;
+    let em;
+    while ((em = emptyRule.exec(css)) !== null) {
+      const lineOffset = css.slice(0, em.index).split("\n").length;
+      msgs.push({type:"warn",line:findLine(src,block)+lineOffset-1,text:"CSS: пустое правило",code:em[0]});
+    }
+    const importantCount = (css.match(/!important/gi) || []).length;
+    if (importantCount > 3) msgs.push({type:"warn",line:findLine(src,block),text:`CSS: ${importantCount} !important`,code:"!important"});
+    const colorVals = css.match(/#[0-9a-fA-F]{3,8}/g) || [];
+    colorVals.forEach(c => {
+      if (c.length !== 4 && c.length !== 7 && c.length !== 9) {
+        const lineOffset = css.slice(0, css.indexOf(c)).split("\n").length;
+        msgs.push({type:"err",line:findLine(src,block)+lineOffset-1,text:`CSS: невалидный цвет ${c}`,code:c});
+      }
+    });
+  });
+
+  // JS
+  const scriptBlocks = src.match(/<script[^>]*>([\s\S]*?)<\/script>/gi) || [];
+  scriptBlocks.forEach(block => {
+    const js = block.replace(/<\/?script[^>]*>/gi, "");
+    const baseLine = findLine(src, block);
+    const jsLines = js.split("\n");
+    jsLines.forEach((line, i) => {
+      if (/\bvar\b/.test(line) && !/\/\//.test(line.split("var")[0])) msgs.push({type:"warn",line:baseLine+i,text:"JS: используй let/const",code:line.trim()});
+      if (/[^=!]==[^=]/.test(line) && !line.trim().startsWith("//")) msgs.push({type:"warn",line:baseLine+i,text:"JS: используй ===",code:line.trim()});
+      if (/console\.log/.test(line) && !line.trim().startsWith("//")) msgs.push({type:"warn",line:baseLine+i,text:"JS: console.log в продакшене",code:line.trim()});
+      if (/\b(alert|confirm|prompt)\s*\(/.test(line) && !line.trim().startsWith("//")) msgs.push({type:"warn",line:baseLine+i,text:"JS: alert/confirm/prompt устарело",code:line.trim()});
+      if (/\.innerHTML\s*=/.test(line) && !line.trim().startsWith("//")) msgs.push({type:"warn",line:baseLine+i,text:"JS: innerHTML — риск XSS",code:line.trim()});
+    });
+    jsLines.forEach((line, i) => {
+      const idMatch = line.match(/getElementById\s*\(\s*["']([^"']+)["']\s*\)/);
+      if (idMatch) {
+        const id = idMatch[1];
+        if (!src.includes('id="' + id + '"') && !src.includes("id='" + id + "'")) msgs.push({type:"err",line:baseLine+i,text:`JS: элемент #${id} не найден`,code:line.trim()});
+      }
+      const qMatch = line.match(/querySelector\s*\(\s*["']([^"']+)["']\s*\)/);
+      if (qMatch) {
+        const sel = qMatch[1];
+        if (sel.startsWith("#")) {
+          const id = sel.slice(1);
+          if (!src.includes('id="' + id + '"') && !src.includes("id='" + id + "'")) msgs.push({type:"warn",line:baseLine+i,text:`JS: элемент ${sel} не найден`,code:line.trim()});
+        }
+      }
+    });
+  });
+
+  const httpLinks = src.match(/href=["']http:\/\//gi) || [];
+  httpLinks.forEach(() => msgs.push({type:"warn",line:1,text:"Небезопасный HTTP",code:"http://"}));
+
+  const base64Imgs = src.match(/data:image\/[^;]+;base64,[A-Za-z0-9+/=]+/g) || [];
+  base64Imgs.forEach(img => {
+    if (img.length > 50000) {
+      const line = src.slice(0, src.indexOf(img)).split("\n").length;
+      msgs.push({type:"warn",line:line,text:`Большая base64 (${(img.length/1024).toFixed(1)}KB)`,code:img.slice(0,50)+"..."});
+    }
+  });
+
+  const ids = [];
+  const idRegex = /id=["']([^"']+)["']/gi;
+  while ((m = idRegex.exec(src)) !== null) ids.push({id: m[1], line: src.slice(0, m.index).split("\n").length});
+  const idCounts = {};
+  ids.forEach(x => { idCounts[x.id] = (idCounts[x.id] || 0) + 1; });
+  Object.entries(idCounts).forEach(([id, count]) => {
+    if (count > 1) { const first = ids.find(x => x.id === id); msgs.push({type:"err",line:first.line,text:`Дублирующийся id="${id}"`,code:`id="${id}"`}); }
+  });
+
+  const inlineStyles = (src.match(/style=["']/gi) || []).length;
+  if (inlineStyles > 5) msgs.push({type:"warn",line:1,text:`${inlineStyles} inline style`,code:"style=\"...\""});
+
+  const imgTags = src.match(/<img[^>]*>/gi) || [];
+  imgTags.forEach(img => {
+    if (!/alt=/.test(img)) { const line = src.slice(0, src.indexOf(img)).split("\n").length; msgs.push({type:"warn",line:line,text:"<img> без alt",code:img}); }
+  });
+
+  const forms = src.match(/<form[^>]*>/gi) || [];
+  forms.forEach(form => {
+    if (!/method=/.test(form)) { const line = src.slice(0, src.indexOf(form)).split("\n").length; msgs.push({type:"warn",line:line,text:"<form> без method",code:form}); }
+  });
+
+  const inputs = src.match(/<input[^>]*>/gi) || [];
+  inputs.forEach(inp => {
+    if (!/type=/.test(inp)) { const line = src.slice(0, src.indexOf(inp)).split("\n").length; msgs.push({type:"warn",line:line,text:"<input> без type",code:inp}); }
+  });
+
+  const extLinks = src.match(/<a[^>]*href=["']https?:\/\//gi) || [];
+  extLinks.forEach((link, idx) => {
+    const fullTag = src.slice(src.indexOf(link), src.indexOf(">", src.indexOf(link)) + 1);
+    if (!/rel=/.test(fullTag) || !/noopener/.test(fullTag)) {
+      const line = src.slice(0, src.indexOf(link)).split("\n").length;
+      msgs.push({type:"warn",line:line,text:"Внешняя ссылка без noopener",code:fullTag});
+    }
+  });
+
+  if (!/<html[^>]*lang=/.test(src)) msgs.push({type:"warn",line:1,text:"<html> без lang",code:"<html>"});
+  if (!/<title>/.test(src)) msgs.push({type:"warn",line:1,text:"Отсутствует <title>",code:""});
+  if (src.length > 500000) msgs.push({type:"warn",line:1,text:`Файл ${(src.length/1024).toFixed(0)}KB`,code:""});
+
+  msgs.sort((a, b) => a.line - b.line);
+  let errC = 0, warnC = 0, okC = 0;
+  msgs.forEach(msg => { if (msg.type === "err") errC++; else if (msg.type === "warn") warnC++; else okC++; });
+  if (msgs.length === 0) okC = 1;
+  return { msgs, errC, warnC, okC };
+}
+
+function renderMsgs(msgs, container) {
+  if (msgs.length === 0) {
+    container.innerHTML = '<div class="msg ok"><div class="text">✅ Код чистый! Ошибок не найдено.</div></div>';
+  } else {
+    msgs.forEach(msg => {
+      const div = document.createElement("div");
+      div.className = "msg " + msg.type;
+      div.innerHTML = `<div class="line">Строка ${msg.line}</div><div class="text">${msg.text}</div>${msg.code ? `<div class="code">${msg.code.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}</div>` : ""}`;
+      container.appendChild(div);
+    });
+  }
+}
+
+function updateStats(err, warn, ok) {
+  document.getElementById("errCount").textContent = err;
+  document.getElementById("warnCount").textContent = warn;
+  document.getElementById("okCount").textContent = ok;
+}
+
+function findLine(fullText, substring) {
+  const idx = fullText.indexOf(substring);
+  if (idx === -1) return 1;
+  return fullText.slice(0, idx).split("\n").length;
+}
+
+window.clearAll = function() {
+  document.getElementById("source").value = "";
+  document.getElementById("output").innerHTML = '<div class="empty">Нажми «Анализ» или «Автоисправление»</div>';
+  updateStats(0,0,0);
+};
+
+window.loadExample = function() {
+  document.getElementById("source").value = `<html>
+<head>
+<style>
+.test { color: red }
+.empty {}
+</style>
+</head>
+<body>
+<div id="box">Test</div>
+<img src="pic.jpg">
+<a href="http://evil.com" target="_blank">Link</a>
+<script>
+var x = 10
+if (x == 10) {
+  console.log("ok")
+  document.getElementById("boxx").innerHTML = "hi"
+  alert("hello")
+}
+</script>
+</body>
+</html>`;
+};
+
+window.liveTest = function() {
+  const src = document.getElementById("source").value;
+  if (!src.trim()) return;
+  const w = window.open("", "_blank");
+  w.document.write(src);
+  w.document.close();
+};
+</script>
+</body>
+</html>
